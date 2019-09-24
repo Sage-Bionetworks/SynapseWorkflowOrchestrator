@@ -1,4 +1,4 @@
-**Synapse Workflow Hook Build**
+**Synapse Workflow Orchestrator Build**
 
 ![Docker Automated](https://img.shields.io/docker/automated/sagebionetworks/synapseworkflowhook.svg) ![Docker Build](https://img.shields.io/docker/build/sagebionetworks/synapseworkflowhook.svg)
 
