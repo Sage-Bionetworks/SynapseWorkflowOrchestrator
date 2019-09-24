@@ -1,21 +1,16 @@
 **Synapse Workflow Orchestrator Build**
 
-![Docker Automated](https://img.shields.io/docker/automated/sagebionetworks/synapseworkflowhook.svg) ![Docker Build](https://img.shields.io/docker/build/sagebionetworks/synapseworkflowhook.svg)
+![Docker Automated](https://img.shields.io/docker/automated/sagebionetworks/synapseworkfloworchestrator.svg) ![Docker Build](https://img.shields.io/docker/build/sagebionetworks/synapseworkfloworchestrator.svg)
 
-**Toil Image Build**
-
-![Docker Automated](https://img.shields.io/docker/automated/sagebionetworks/synapseworkflowhook-toil.svg) ![Docker Build](https://img.shields.io/docker/build/sagebionetworks/synapseworkflowhook-toil.svg)
-
-
-## Synapse Workflow Hook
-Links one or more Synapse Evaluation queues to a workflow engine.  Each Evaluation queue is associated with a workflow template.  Each submission is a workflow job, an instance of the workflow template.  Upon submission to the Evaluation queue the Workflow Hook initiates and tracks the workflow job, sending progress notifications and uploading log files.
+## Synapse Workflow Orchestrator
+Links one or more Synapse Evaluation queues to a workflow engine.  Each Evaluation queue is associated with a workflow template.  Each submission is a workflow job, an instance of the workflow template.  Upon submission to the Evaluation queue the Workflow Orchestrator initiates and tracks the workflow job, sending progress notifications and uploading log files.
 
 
 ### Features:
 - Services one or more Synapse submission queues.
 - Enforces time quota (signaled by separate process).
 - Reconciles running submissions listed in Synapse with those listed by the workflow engine.  Notifies admin' if there is a workflow job without a running submission listed in Synapse.
-- Respects keyboard interrupt and ensures Workflow Hook stops at the end of a monitoring cycle.
+- Respects keyboard interrupt and ensures Workflow Orchestrator stops at the end of a monitoring cycle.
 - Implements submission cancellation.
 - Tracks in Synapse when the job was started and ended (last updated).
 - Notifies submitter about invalid submissions, notifies queue administrator about problems with the queue itself.
@@ -43,7 +38,7 @@ To run:
 
 ```
 docker run --rm -it -e SYNAPSE_USERNAME=xxxxx -e SYNAPSE_PASSWORD=xxxxx \
--e WORKFLOW_TEMPLATE_URL=http://xxxxxx -e ROOT_TEMPLATE=xxxxx sagebionetworks/synapseworkflowhook /set_up.sh
+-e WORKFLOW_TEMPLATE_URL=http://xxxxxx -e ROOT_TEMPLATE=xxxxx sagebionetworks/synapseworkfloworchestrator /set_up.sh
 ```
 
 where `WORKFLOW_TEMPLATE_URL` is a link to a zip file and `ROOT_TEMPLATE` is a path within the zip where a workflow file can be found.  To use a workflow in Dockstore:
@@ -51,7 +46,7 @@ where `WORKFLOW_TEMPLATE_URL` is a link to a zip file and `ROOT_TEMPLATE` is a p
 ```
 docker run --rm -it -e SYNAPSE_USERNAME=xxxxx -e SYNAPSE_PASSWORD=xxxxx \
 -e WORKFLOW_TEMPLATE_URL=https://dockstore.org:8443/api/ga4gh/v2/tools/{id}/versions/{version_id}/CWL \
--e ROOT_TEMPLATE=xxxxx sagebionetworks/synapseworkflowhook /set_up.sh
+-e ROOT_TEMPLATE=xxxxx sagebionetworks/synapseworkfloworchestrator /set_up.sh
 ```
 TODO:  Automatically lookup ROOT_TEMPLATE in Dockstore
 
@@ -74,7 +69,7 @@ If you already have an existing project and do not want to follow the `Create a 
 
 Set the following as properties in a .env file to use with Docker Compose. Please carefully read through these properties and fill out the .envTemplate, but make sure you rename the template to .env. 
 
-- `DOCKER_ENGINE_URL` - address of the Docker engine.   Along with `DOCKER_CERT_PATH_HOST` this is needed since the Workflow Hook will manage containers.  Examples:
+- `DOCKER_ENGINE_URL` - address of the Docker engine.   Along with `DOCKER_CERT_PATH_HOST` this is needed since the Workflow Orchestrator will manage containers.  Examples:
 
 ```
 DOCKER_ENGINE_URL=unix:///var/run/docker.sock
@@ -94,7 +89,7 @@ When using `DOCKER_CERT_PATH_HOST` you must also add the following under `volume
 ```
     - ${DOCKER_CERT_PATH_HOST}:/certs:ro
 ```
-- `SYNAPSE_USERNAME` - Synapse credentials under which the Workflow Hook will run.  Must have access to evaluation queue(s) being serviced
+- `SYNAPSE_USERNAME` - Synapse credentials under which the Workflow Orchestrator will run.  Must have access to evaluation queue(s) being serviced
 - `SYNAPSE_PASSWORD` - password for `SYNAPSE_USERNAME`
 - `WORKFLOW_OUTPUT_ROOT_ENTITY_ID` - root (Project or Folder) for uploaded doc's, like log files.  Hierarchy is root/submitterId/submissionId/files. May be the ID of the project generated in the set-up step, above.
 - `EVALUATION_TEMPLATES` - JSON mapping evaluation ID(s) to URL(s) for workflow template archive.  Returned by the set up step, above.  Example:
