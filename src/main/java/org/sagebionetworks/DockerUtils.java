@@ -5,15 +5,15 @@ import static org.sagebionetworks.Constants.DOCKER_ENGINE_URL_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
 import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
 import static org.sagebionetworks.Constants.UNIX_SOCKET_PREFIX;
+import static org.sagebionetworks.Utils.checkHttpResponseCode;
+import static org.sagebionetworks.Utils.getHttpClient;
 import static org.sagebionetworks.Utils.getProperty;
+import static org.sagebionetworks.Utils.getResponseBodyAsJson;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -511,12 +511,6 @@ public class DockerUtils {
 		return os.toString();
 	}
 
-	private static void checkHttpResponseCode(HttpResponse response, int expected) {
-		if (expected!=response.getStatusLine().getStatusCode()) 
-			throw new RuntimeException("Expected "+expected+" but received "+
-					response.getStatusLine().getStatusCode());		
-	}
-
 	private static String getBearerTokenUrl(HttpResponse response) {
 		String bearerRealm = null;
 		String service = null;
@@ -535,27 +529,6 @@ public class DockerUtils {
 		if (scope==null) throw new RuntimeException("No 'scope'.");
 
 		return bearerRealm+"?service="+service+"&scope="+scope;
-	}
-
-	private static JSONObject getResponseBodyAsJson(HttpResponse response) throws UnsupportedOperationException, IOException, JSONException {
-		InputStream inputStream = response.getEntity().getContent();
-		StringBuffer result = new StringBuffer();
-		try {
-			BufferedReader rd = new BufferedReader(
-					new InputStreamReader(inputStream));
-
-			String line = "";
-			while ((line = rd.readLine()) != null) {
-				result.append(line);
-			}
-		} finally {
-			inputStream.close();
-		}
-		return new JSONObject(result.toString());
-	}
-
-	private static HttpClient getHttpClient() {
-		return HttpClientBuilder.create().build();
 	}
 
 	private static String  getAuthToken(final HttpRequestBase request) throws UnsupportedOperationException, IOException, JSONException {

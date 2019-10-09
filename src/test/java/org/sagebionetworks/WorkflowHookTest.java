@@ -51,7 +51,7 @@ public class WorkflowHookTest {
 	@Mock
 	SubmissionUtils submissionUtils;
 	
-	private WorkflowHook workflowHook;
+	private WorkflowOrchestrator workflowHook;
 	
 	private static final String USER_ID = "000";
 	private static final String EVALUATION_ID = "111";
@@ -88,7 +88,7 @@ public class WorkflowHookTest {
 		System.setProperty(AGENT_SHARED_DIR_PROPERTY_NAME, System.getProperty("java.io.tmpdir"));
 		
 		long sleepTimeMillis = 1*60*1000L;
-		workflowHook = new WorkflowHook(
+		workflowHook = new WorkflowOrchestrator(
 				synapse, evaluationUtils,
 				dockerUtils, submissionUtils, sleepTimeMillis);
 
@@ -146,7 +146,7 @@ public class WorkflowHookTest {
 
 		DockerUtils dockerUtils = new DockerUtils();
 
-		WorkflowHook wh = new WorkflowHook(workflowAdmin.getSynapseClient(), null, dockerUtils, null, 1000L);
+		WorkflowOrchestrator wh = new WorkflowOrchestrator(workflowAdmin.getSynapseClient(), null, dockerUtils, null, 1000L);
 		JSONObject o = new JSONObject();
 		o.put(EVALUATION_ID,  fileEntityId);
 		System.setProperty("EVALUATION_TEMPLATES", o.toString());

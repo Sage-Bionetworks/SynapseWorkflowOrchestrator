@@ -11,13 +11,13 @@ import org.junit.Test;
 
 import com.google.common.io.Files;
 
-public class WESTest {
+public class WorkflowManagerDockerTest {
 
 	@Test
 	public void testDownloadWorkflowFromURL() throws Exception {
 		URL workflowUrl = new URL("https://dockstore.org:8443/api/ga4gh/v2/tools/%23workflow%2Fgithub.com%2Fdenis-yuen%2Fhello-dockstore-workflow%2Fhello-world/versions/1.0/CWL");
 		File folder = Files.createTempDir();
-		WES.downloadWorkflowFromURL(workflowUrl, "Dockstore.cwl", folder);
+		Utils.downloadWorkflowFromURL(workflowUrl, "Dockstore.cwl", folder);
 		List<String> workflowFiles = Arrays.asList(folder.list());
 		assertTrue(workflowFiles.contains("Dockstore.cwl"));
 		assertTrue(workflowFiles.contains("grep.cwl"));

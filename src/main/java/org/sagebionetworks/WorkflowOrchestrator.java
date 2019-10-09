@@ -2,6 +2,7 @@ package org.sagebionetworks;
 
 import static org.sagebionetworks.Constants.ACCEPT_NEW_SUBMISSIONS_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.DEFAULT_MAX_CONCURRENT_WORKFLOWS;
+import static org.sagebionetworks.Constants.DOCKER_ENGINE_URL_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.MAX_CONCURRENT_WORKFLOWS_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.MAX_LOG_ANNOTATION_CHARS;
 import static org.sagebionetworks.Constants.NOTIFICATION_PRINCIPAL_ID;
@@ -13,7 +14,7 @@ import static org.sagebionetworks.Constants.SUBMISSION_STOPPED_BY_USER;
 import static org.sagebionetworks.Constants.SUBMISSION_TIMED_OUT;
 import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
 import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
-import static org.sagebionetworks.DockerUtils.PROCESS_TERMINATED_ERROR_CODE;
+import static org.sagebionetworks.Constants.WES_ENDPOINT_PROPERTY_NAME;
 import static org.sagebionetworks.EvaluationUtils.ADMIN_ANNOTS_ARE_PRIVATE;
 import static org.sagebionetworks.EvaluationUtils.FAILURE_REASON;
 import static org.sagebionetworks.EvaluationUtils.JOB_LAST_UPDATED_TIME_STAMP;
@@ -79,8 +80,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class WorkflowHook  {
-	private static Logger log = LoggerFactory.getLogger(WorkflowHook.class);
+public class WorkflowOrchestrator  {
+	private static Logger log = LoggerFactory.getLogger(WorkflowOrchestrator.class);
 
 	private static final String LOGS_SUFFIX = "_logs";
 	private static final long UPLOAD_PERIOD_MILLIS = 30*60*1000L; // 30 min in millis
@@ -92,7 +93,7 @@ public class WorkflowHook  {
 	private Archiver archiver;
 	private ShutdownHook shutdownHook;
 	private long sleepTimeMillis;
-	private WES wes;
+	private WorkflowManager workflowManager;
 
 	public static void main( String[] args ) throws Throwable {
 		SynapseClient synapse = SynapseClientFactory.createSynapseClient();
@@ -106,14 +107,22 @@ public class WorkflowHook  {
 		DockerUtils dockerUtils = new DockerUtils();
 		SubmissionUtils submissionUtils = new SubmissionUtils(synapse);
 		long sleepTimeMillis = 10*1000L;
-		WorkflowHook agent = new WorkflowHook(
+		WorkflowOrchestrator agent = new WorkflowOrchestrator(
 				synapse, evaluationUtils,
 				dockerUtils, submissionUtils, sleepTimeMillis);
 		agent.execute();
 		log.info("At end of 'main'");
 	}
+	
+	private static boolean configuredForDocker() {
+		return StringUtils.isNotEmpty(getProperty(DOCKER_ENGINE_URL_PROPERTY_NAME, false));
+	}
 
-	public WorkflowHook(SynapseClient synapse, 
+	private static boolean configuredForWES() {
+		return StringUtils.isNotEmpty(getProperty(WES_ENDPOINT_PROPERTY_NAME, false));
+	}
+
+	public WorkflowOrchestrator(SynapseClient synapse, 
 			EvaluationUtils evaluationUtils, 
 			DockerUtils dockerUtils, 
 			SubmissionUtils submissionUtils,
@@ -124,11 +133,18 @@ public class WorkflowHook  {
 		this.evaluationUtils=evaluationUtils;
 		this.submissionUtils=submissionUtils;
 		this.messageUtils=new MessageUtils(synapse);
-		this.wes = new WES(dockerUtils);
-		this.archiver = new Archiver(synapse, wes);
+		if (configuredForDocker()) {
+			if (configuredForWES()) throw new IllegalStateException("Cannot configure both Docker Engine and WES Endpoint.");
+			// precheck
+			dockerUtils.getInfo();
+			this.workflowManager = new WorkflowManagerDocker(dockerUtils);
+		} else if (configuredForWES()) {
+			this.workflowManager = new WorkflowManagerWES();
+		} else {
+			throw new IllegalStateException("Must configure either Docker Engine or WES Endpoint.");
+		}
+		this.archiver = new Archiver(synapse, workflowManager);
 
-		// precheck
-		dockerUtils.getInfo();
 		log.info("Precheck completed successfully.");
 
 	}
@@ -222,7 +238,7 @@ public class WorkflowHook  {
 	}
 
 	public void createNewWorkflowJobs(String evaluationId, WorkflowURLEntrypointAndSynapseRef workflow) throws Throwable {
-		int currentWorkflowCount = wes.listWorkflowJobs().size();
+		int currentWorkflowCount = workflowManager.listWorkflowJobs().size();
 		int maxConcurrentWorkflows = getMaxConcurrentWorkflows();
 		List<SubmissionBundle> receivedSubmissions=null;
 		try {
@@ -265,7 +281,7 @@ public class WorkflowHook  {
 					Utils.writeSynapseConfigFile(baos);
 					synapseConfigFileContent = baos.toByteArray();
 				}
-				WorkflowJob newJob = wes.createWorkflowJob(workflow.getWorkflowUrl(), workflow.getEntryPoint(), workflowParameters, synapseConfigFileContent);
+				WorkflowJob newJob = workflowManager.createWorkflowJob(workflow.getWorkflowUrl(), workflow.getEntryPoint(), workflowParameters, synapseConfigFileContent);
 				workflowId = newJob.getWorkflowId();
 				EvaluationUtils.setAnnotation(statusMods, WORKFLOW_JOB_ID, workflowId, PUBLIC_ANNOTATION_SETTING);
 
@@ -329,7 +345,7 @@ public class WorkflowHook  {
 		}
 		
 		// list the running jobs according to the workflow system
-		List<WorkflowJob> jobs = wes.listWorkflowJobs();
+		List<WorkflowJob> jobs = workflowManager.listWorkflowJobs();
 		// the two lists should be the same ...
 		Map<String, WorkflowJob> workflowIdToJobMap = workflowIdsForJobs(jobs);
 		Map<String, SubmissionBundle> workflowIdToSubmissionMap = workflowIdsForSubmissions(runningSubmissions);
@@ -383,7 +399,7 @@ public class WorkflowHook  {
 				Double progress = null;
 				WorkflowUpdateStatus containerCompletionStatus = null;
 				{
-					WESWorkflowStatus initialWorkflowStatus = wes.getWorkflowStatus(job);
+					WorkflowStatus initialWorkflowStatus = workflowManager.getWorkflowStatus(job);
 					progress = initialWorkflowStatus.getProgress();
 					containerCompletionStatus = updateJob(job, initialWorkflowStatus, submissionBundle, statusMods);
 					
@@ -459,13 +475,13 @@ public class WorkflowHook  {
 	 * 
 	 * return the ContainerCompletionStatus
 	 */
-	public WorkflowUpdateStatus updateJob(final WorkflowJob job, WESWorkflowStatus workflowStatus, 
+	public WorkflowUpdateStatus updateJob(final WorkflowJob job, WorkflowStatus workflowStatus, 
 			SubmissionBundle submissionBundle, SubmissionStatusModifications statusMods) throws Throwable {
 		final Submission submission = submissionBundle.getSubmission();
 		final SubmissionStatus submissionStatus = submissionBundle.getSubmissionStatus();
 
 		boolean isRunning = workflowStatus.isRunning();
-		Integer exitCode = null; // null means that the container is running or interrupted (vs. stopped on its own)
+		ExitStatus exitStatus = null; // null means that the container is running
 		WorkflowUpdateStatus workflowUpdateStatus = null;
 
 		SubmissionStatusEnum updatedStatus = null;
@@ -477,7 +493,7 @@ public class WorkflowHook  {
 			boolean userHasRequestedStop=submissionStatus.getCancelRequested()!=null && submissionStatus.getCancelRequested();
 			boolean teamHasTimeRemaining = EvaluationUtils.hasTimeRemaining(EvaluationUtils.getTimeRemaining(submissionStatus));
 			if (userHasRequestedStop || !teamHasTimeRemaining) {
-				wes.stopWorkflowJob(job);
+				workflowManager.stopWorkflowJob(job);
 				if (userHasRequestedStop) {
 					workflowUpdateStatus = STOPPED_UPON_REQUEST;
 				} else if (!teamHasTimeRemaining) {
@@ -491,12 +507,12 @@ public class WorkflowHook  {
 				workflowUpdateStatus = IN_PROGRESS;
 			}
 		} else {
-			exitCode = workflowStatus.getExitCode();
-			if (exitCode==0) {
+			exitStatus = workflowStatus.getExitStatus();
+			if (exitStatus==ExitStatus.SUCCESS) {
 				workflowUpdateStatus = DONE;
 				updatedStatus = SubmissionStatusEnum.CLOSED;
 			} else {
-				if (exitCode==PROCESS_TERMINATED_ERROR_CODE) {
+				if (exitStatus==ExitStatus.CANCELED) {
 					workflowUpdateStatus = STOPPED_TIME_OUT;
 					failureReason = STOPPED_TIME_OUT.toString();
 				} else {
@@ -545,7 +561,7 @@ public class WorkflowHook  {
 		} // end uploading logs
 
 		if (!isRunning) {
-			wes.deleteWorkFlowJob(job);
+			workflowManager.deleteWorkFlowJob(job);
 		}
 
 		EvaluationUtils.setAnnotation(statusMods, JOB_LAST_UPDATED_TIME_STAMP, System.currentTimeMillis(), PUBLIC_ANNOTATION_SETTING);

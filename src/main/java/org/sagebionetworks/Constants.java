@@ -90,6 +90,8 @@ public class Constants {
 	
 	public static final String UNIX_SOCKET_PREFIX = "unix://";
 
+	public static final String WES_ENDPOINT_PROPERTY_NAME = "WES_ENDPOINT";
+	
 	public static final int SUBMISSION_STARTED = 1;
 	public static final int SUBMISSION_COMPLETED = 2;
 	public static final int SUBMISSION_FAILED = 4;

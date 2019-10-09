@@ -1,8 +1,8 @@
 package org.sagebionetworks;
 
-public class WESWorkflowStatus {
+public class WorkflowStatus {
 	boolean isRunning;
-	int exitCode; // is only meaningful if 'isRunning' is false
+	ExitStatus exitStatus; // is only meaningful if 'isRunning' is false
 	Double progress;
 
 	public boolean isRunning() {
@@ -13,12 +13,13 @@ public class WESWorkflowStatus {
 		this.isRunning = isRunning;
 	}
 
-	public int getExitCode() {
-		return exitCode;
+
+	public ExitStatus getExitStatus() {
+		return exitStatus;
 	}
 
-	public void setExitCode(int exitCode) {
-		this.exitCode = exitCode;
+	public void setExitStatus(ExitStatus exitStatus) {
+		this.exitStatus = exitStatus;
 	}
 
 	public Double getProgress() {
@@ -33,7 +34,7 @@ public class WESWorkflowStatus {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + exitCode;
+		result = prime * result + ((exitStatus == null) ? 0 : exitStatus.hashCode());
 		result = prime * result + (isRunning ? 1231 : 1237);
 		result = prime * result + ((progress == null) ? 0 : progress.hashCode());
 		return result;
@@ -47,8 +48,8 @@ public class WESWorkflowStatus {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		WESWorkflowStatus other = (WESWorkflowStatus) obj;
-		if (exitCode != other.exitCode)
+		WorkflowStatus other = (WorkflowStatus) obj;
+		if (exitStatus != other.exitStatus)
 			return false;
 		if (isRunning != other.isRunning)
 			return false;
@@ -59,5 +60,11 @@ public class WESWorkflowStatus {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "WorkflowStatus [isRunning=" + isRunning + ", exitStatus=" + exitStatus + ", progress=" + progress + "]";
+	}
+
 
 }

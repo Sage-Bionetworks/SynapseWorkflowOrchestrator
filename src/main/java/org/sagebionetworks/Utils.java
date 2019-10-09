@@ -6,10 +6,15 @@ import static org.sagebionetworks.Constants.SUBMITTER_NOTIFICATION_MASK_PARAM_NA
 import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
 import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +25,13 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.fuin.utils4j.Utils4J;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.sagebionetworks.repo.model.EntityBundle;
 import org.sagebionetworks.repo.model.docker.DockerRepository;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -43,6 +55,12 @@ public class Utils {
 	public static final String DATE_FORMAT = "yyyy-MM-dd.HH:mm:ss";
 	public static final String DECIMAL_PATTERN = "##.####";
 
+	private static final String PRIMARY_DESCRIPTOR_TYPE = "PRIMARY_DESCRIPTOR";
+	private static final String SECONDARY_DESCRIPTOR_TYPE = "SECONDARY_DESCRIPTOR";
+	
+	private static final String ZIP_SUFFIX = ".zip";
+	private static final String GA4GH_TRS_FILE_FRAGMENT = "/api/ga4gh/v2/tools";
+	
 	private static Properties properties = null;
 	
 	public static void initProperties() {
@@ -167,7 +185,7 @@ public class Utils {
 	public static List<WorkflowJob> findRunningWorkflowJobs(Map<String, Container> agentContainers) {
 		List<WorkflowJob> result = new ArrayList<WorkflowJob>();
 		for (String containerName: agentContainers.keySet()) {
-			WorkflowJobImpl job = new WorkflowJobImpl();
+			WorkflowJobDocker job = new WorkflowJobDocker();
 			job.setContainerName(containerName);
 			job.setContainer(agentContainers.get(containerName));
 			result.add(job);
@@ -234,6 +252,97 @@ public class Utils {
 		int result = notificationEnabled & mask;
 		log.info("mask: "+mask+" notificationEnabled: "+notificationEnabled+" result: "+result);
 		return result !=0;
+	}
+	
+	public static JSONObject getResponseBodyAsJson(HttpResponse response) throws UnsupportedOperationException, IOException, JSONException {
+		InputStream inputStream = response.getEntity().getContent();
+		StringBuffer result = new StringBuffer();
+		try {
+			BufferedReader rd = new BufferedReader(
+					new InputStreamReader(inputStream));
+
+			String line = "";
+			while ((line = rd.readLine()) != null) {
+				result.append(line);
+			}
+		} finally {
+			inputStream.close();
+		}
+		return new JSONObject(result.toString());
+	}
+
+	public static HttpClient getHttpClient() {
+		return HttpClientBuilder.create().build();
+	}
+
+	public static void checkHttpResponseCode(HttpResponse response, int expected) {
+		if (expected!=response.getStatusLine().getStatusCode()) 
+			throw new RuntimeException("Expected "+expected+" but received "+
+					response.getStatusLine().getStatusCode());		
+	}
+
+
+	private static void downloadZip(final URL url, File tempDir, File target) throws IOException {
+		File tempZipFile = createTempFile(".zip", tempDir);
+		try {
+			(new ExponentialBackoffRunner()).execute(new NoRefreshExecutableAdapter<Void,Void>() {
+				@Override
+				public Void execute(Void args) throws Throwable {
+					try (InputStream is = url.openStream(); OutputStream os = new FileOutputStream(tempZipFile)) {
+						IOUtils.copy(is, os);
+					}
+					return null;
+				}}, null);
+		} catch (Throwable t) {
+			throw new RuntimeException(t);
+		}
+		Utils4J.unzip(tempZipFile, target);
+		tempZipFile.delete();
+	}
+	
+	private static String downloadWebDocument(URL url) throws IOException {
+		String result;
+		try (InputStream is = url.openStream(); ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+			IOUtils.copy(is, os);
+			result = os.toString();
+		}
+		return result;
+	}
+	
+	public static void downloadWorkflowFromURL(URL workflowUrl, String entrypoint, File targetDir) throws IOException {
+		String path = workflowUrl.getPath();
+		if (path.toLowerCase().endsWith(ZIP_SUFFIX)) {
+			downloadZip(workflowUrl, getTempDir(), targetDir);
+   			// root file should be relative to unzip location
+   			if (!(new File(targetDir,entrypoint)).exists()) {
+   				throw new IllegalStateException(entrypoint+" is not in the unzipped archive downloaded from "+workflowUrl);
+   			}
+		} else if (path.contains(GA4GH_TRS_FILE_FRAGMENT)) {
+			URL filesUrl = new URL(workflowUrl.toString()+"/files");
+			String filesContent = downloadWebDocument(filesUrl);
+			JSONArray files = new JSONArray(filesContent);
+			for (int i=0; i<files.length(); i++) {
+				JSONObject file = files.getJSONObject(i);
+				String fileType = file.getString("file_type");
+				String filePath = file.getString("path");
+				if (PRIMARY_DESCRIPTOR_TYPE.equals(fileType)) {
+					if (!filePath.equals(entrypoint)) throw new RuntimeException("Expected entryPoint "+entrypoint+" but found "+path);
+				} else if (SECONDARY_DESCRIPTOR_TYPE.equals(fileType)) {
+					// OK
+				} else {
+					throw new RuntimeException("Unexpected file_type "+fileType);
+				}
+				URL descriptorUrl = new URL(workflowUrl.toString()+"/descriptor/"+filePath);
+				String descriptorContent = downloadWebDocument(descriptorUrl);
+				JSONObject descriptor = new JSONObject(descriptorContent);
+				try (OutputStream os = new FileOutputStream(new File(targetDir, filePath))) {
+					IOUtils.write(descriptor.getString("content"), os, Charset.forName("utf-8"));
+				}
+			}
+			
+		} else {
+			throw new RuntimeException("Expected template to be a zip archive or TRS files URL, but found "+path);
+		}
 	}
 
 }

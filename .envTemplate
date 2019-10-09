@@ -1,3 +1,4 @@
+WES_ENPDOINT=http://localhost:8082
 DOCKER_ENGINE_URL=unix:///var/run/docker.sock
 SYNAPSE_USERNAME=
 SYNAPSE_PASSWORD=

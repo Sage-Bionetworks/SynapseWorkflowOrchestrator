@@ -1,5 +1,4 @@
 package org.sagebionetworks;
-
 import static org.sagebionetworks.Constants.AGENT_SHARED_DIR_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.DOCKER_CERT_PATH_HOST_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.DOCKER_ENGINE_URL_PROPERTY_NAME;
@@ -10,6 +9,7 @@ import static org.sagebionetworks.Constants.SHARED_VOLUME_NAME;
 import static org.sagebionetworks.Constants.TOIL_CLI_OPTIONS_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.UNIX_SOCKET_PREFIX;
 import static org.sagebionetworks.Constants.WORKFLOW_ENGINE_DOCKER_IMAGES_PROPERTY_NAME;
+import static org.sagebionetworks.DockerUtils.PROCESS_TERMINATED_ERROR_CODE;
 import static org.sagebionetworks.Utils.WORKFLOW_FILTER;
 import static org.sagebionetworks.Utils.archiveContainerName;
 import static org.sagebionetworks.Utils.createTempFile;
@@ -45,27 +45,17 @@ import org.slf4j.LoggerFactory;
 import com.github.dockerjava.api.command.InspectContainerResponse.ContainerState;
 import com.github.dockerjava.api.model.Container;
 
-/**
- * This class is a layer of abstraction to represent what would be done
- * through the Workflow Excecution Schema (create, list, delete workflow jobs)
- * See http://ga4gh.github.io/workflow-execution-service-schemas
- * 
- * @author bhoff
- *
- */
-public class WES {
-	private static Logger log = LoggerFactory.getLogger(WES.class);
+
+public class WorkflowManagerDocker implements WorkflowManager {
+	private static Logger log = LoggerFactory.getLogger(WorkflowManagerDocker.class);
 
 	private DockerUtils dockerUtils;
 	
-	private static final String ZIP_SUFFIX = ".zip";
-	private static final String GA4GH_TRS_FILE_FRAGMENT = "/api/ga4gh/v2/tools";
-
 	static {
 		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2"); // needed for some https resources
 	}
 		
-	public WES(DockerUtils dockerUtils) {
+	public WorkflowManagerDocker(DockerUtils dockerUtils) {
 		this.dockerUtils=dockerUtils;
 	}
 	
@@ -79,72 +69,6 @@ public class WES {
 		return result;
 	}
 	
-	private static void downloadZip(final URL url, File tempDir, File target) throws IOException {
-		File tempZipFile = createTempFile(".zip", tempDir);
-		try {
-			(new ExponentialBackoffRunner()).execute(new NoRefreshExecutableAdapter<Void,Void>() {
-				@Override
-				public Void execute(Void args) throws Throwable {
-					try (InputStream is = url.openStream(); OutputStream os = new FileOutputStream(tempZipFile)) {
-						IOUtils.copy(is, os);
-					}
-					return null;
-				}}, null);
-		} catch (Throwable t) {
-			throw new RuntimeException(t);
-		}
-		Utils4J.unzip(tempZipFile, target);
-		tempZipFile.delete();
-	}
-	
-	private static String downloadWebDocument(URL url) throws IOException {
-		String result;
-		try (InputStream is = url.openStream(); ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-			IOUtils.copy(is, os);
-			result = os.toString();
-		}
-		return result;
-	}
-	
-	private static final String PRIMARY_DESCRIPTOR_TYPE = "PRIMARY_DESCRIPTOR";
-	private static final String SECONDARY_DESCRIPTOR_TYPE = "SECONDARY_DESCRIPTOR";
-	
-	
-	public static void downloadWorkflowFromURL(URL workflowUrl, String entrypoint, File targetDir) throws IOException {
-		String path = workflowUrl.getPath();
-		if (path.toLowerCase().endsWith(ZIP_SUFFIX)) {
-			downloadZip(workflowUrl, getTempDir(), targetDir);
-   			// root file should be relative to unzip location
-   			if (!(new File(targetDir,entrypoint)).exists()) {
-   				throw new IllegalStateException(entrypoint+" is not in the unzipped archive downloaded from "+workflowUrl);
-   			}
-		} else if (path.contains(GA4GH_TRS_FILE_FRAGMENT)) {
-			URL filesUrl = new URL(workflowUrl.toString()+"/files");
-			String filesContent = downloadWebDocument(filesUrl);
-			JSONArray files = new JSONArray(filesContent);
-			for (int i=0; i<files.length(); i++) {
-				JSONObject file = files.getJSONObject(i);
-				String fileType = file.getString("file_type");
-				String filePath = file.getString("path");
-				if (PRIMARY_DESCRIPTOR_TYPE.equals(fileType)) {
-					if (!filePath.equals(entrypoint)) throw new RuntimeException("Expected entryPoint "+entrypoint+" but found "+path);
-				} else if (SECONDARY_DESCRIPTOR_TYPE.equals(fileType)) {
-					// OK
-				} else {
-					throw new RuntimeException("Unexpected file_type "+fileType);
-				}
-				URL descriptorUrl = new URL(workflowUrl.toString()+"/descriptor/"+filePath);
-				String descriptorContent = downloadWebDocument(descriptorUrl);
-				JSONObject descriptor = new JSONObject(descriptorContent);
-				try (OutputStream os = new FileOutputStream(new File(targetDir, filePath))) {
-					IOUtils.write(descriptor.getString("content"), os, Charset.forName("utf-8"));
-				}
-			}
-			
-		} else {
-			throw new RuntimeException("Expected template to be a zip archive or TRS files URL, but found "+path);
-		}
-	}
 	
 	private ContainerRelativeFile createWorkflowParametersYamlFile(WorkflowParameters params, ContainerRelativeFile targetFolder,
 			File hostSynapseConfig) throws IOException {
@@ -172,11 +96,12 @@ public class WES {
 	 * @return the created workflow job
 	 * @throws IOException
 	 */
+	@Override
 	public WorkflowJob createWorkflowJob(URL workflowUrl, String entrypoint, 
 			WorkflowParameters workflowParameters, byte[] synapseConfigFileContent) throws IOException {
 		ContainerRelativeFile workflowFolder = createDirInHostMountedSharedDir();
 
-		downloadWorkflowFromURL(workflowUrl, entrypoint, workflowFolder.getContainerPath());
+		Utils.downloadWorkflowFromURL(workflowUrl, entrypoint, workflowFolder.getContainerPath());
 		
 		// The folder with the workflow and param's, from the POV of the host
 		File hostWorkflowFolder = workflowFolder.getHostPath();
@@ -281,7 +206,7 @@ public class WES {
 			throw e;
 		}
 
-		WorkflowJobImpl workflowJob = new WorkflowJobImpl();
+		WorkflowJobDocker workflowJob = new WorkflowJobDocker();
 		workflowJob.setContainerName(containerName);
 		return workflowJob;
 	}
@@ -289,6 +214,7 @@ public class WES {
 	/*
 	 * This is analogous to GET /workflows in WES
 	 */
+	@Override
 	public List<WorkflowJob> listWorkflowJobs() {
 		return findRunningWorkflowJobs(dockerUtils.listContainers(WORKFLOW_FILTER));
 	}
@@ -296,13 +222,24 @@ public class WES {
 	/*
 	 * This is analogous to GET /workflows/{workflow_id}/status in WES
 	 */
-	public WESWorkflowStatus getWorkflowStatus(WorkflowJob job) throws IOException {
-		WorkflowJobImpl j = (WorkflowJobImpl)job;
+	@Override
+	public WorkflowStatus getWorkflowStatus(WorkflowJob job) throws IOException {
+		WorkflowJobDocker j = (WorkflowJobDocker)job;
 		Container container = j.getContainer();
-		WESWorkflowStatus result = new WESWorkflowStatus();
+		WorkflowStatus result = new WorkflowStatus();
 		ContainerState containerState = dockerUtils.getContainerState(container.getId());
 		result.setRunning(containerState.getRunning());
-		result.setExitCode(containerState.getExitCode());
+
+		ExitStatus exitStatus = null;
+		int exitCode = containerState.getExitCode();
+		if (exitCode==0) {
+			exitStatus=ExitStatus.SUCCESS;
+		} else if (exitCode==PROCESS_TERMINATED_ERROR_CODE) {
+			exitStatus=ExitStatus.CANCELED;
+		} else {
+			exitStatus=ExitStatus.FAILURE;
+		}
+		result.setExitStatus(exitStatus);
 		if (containerState.getRunning()) {
 			String execOutput = dockerUtils.exec(container.getId(), DUMP_PROGRESS_SHELL_COMMAND);
 			result.setProgress(Utils.getProgressPercentFromString(execOutput, NUMBER_OF_PROGRESS_CHARACTERS));        		
@@ -315,8 +252,9 @@ public class WES {
 	 * 
 	 * Writes full log to a file and optionally returns just the tail (if 'maxTailLengthInCharacters' is not null)
 	 */
+	@Override
 	public String getWorkflowLog(WorkflowJob job, Path outPath, Integer maxTailLengthInCharacters) throws IOException {
-		WorkflowJobImpl j = (WorkflowJobImpl)job;
+		WorkflowJobDocker j = (WorkflowJobDocker)job;
 		return dockerUtils.getLogs(j.getContainer().getId(), outPath, maxTailLengthInCharacters);
 	}
 	
@@ -325,8 +263,9 @@ public class WES {
 	 * interrupted but not deleted.  In this state the logs can be interrogated to show just
 	 * where the interruption occurred.
 	 */
+	@Override
 	public void stopWorkflowJob(WorkflowJob job) {
-		WorkflowJobImpl j = (WorkflowJobImpl)job;
+		WorkflowJobDocker j = (WorkflowJobDocker)job;
 		ContainerState containerState = dockerUtils.getContainerState(j.getContainer().getId());
 		if (containerState.getRunning()) {
 			dockerUtils.stopContainerWithRetry(j.getContainer().getId());			
@@ -336,12 +275,13 @@ public class WES {
 	/*
 	 * This is analogous to DELETE /workflows/{workflow_id} in WES
 	 */
+	@Override
 	public void deleteWorkFlowJob(WorkflowJob job) {
 		// stop it if it's running
 		stopWorkflowJob(job);
 		
 		// now delete or archive the job
-		WorkflowJobImpl j = (WorkflowJobImpl)job;
+		WorkflowJobDocker j = (WorkflowJobDocker)job;
 		if (Constants.ARCHIVE_CONTAINER) {
 			dockerUtils.renameContainer(j.getContainer().getId(), archiveContainerName(j.getContainerName()));
 		} else {

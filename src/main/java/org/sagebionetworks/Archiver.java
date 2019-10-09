@@ -33,15 +33,15 @@ import org.slf4j.LoggerFactory;
 
 public class Archiver {
 	private SynapseClient synapse;
-	private WES wes;
+	private WorkflowManager workflowManager;
 
 	private static Logger log = LoggerFactory.getLogger(Archiver.class);
 
 	public static final int MAX_FILE_NAME_LENGTH = 100;
 
-	public Archiver(SynapseClient synapse, WES wes) {
+	public Archiver(SynapseClient synapse, WorkflowManager workflowManager) {
 		this.synapse=synapse;
-		this.wes=wes;
+		this.workflowManager=workflowManager;
 	}
 
 	/*
@@ -258,7 +258,7 @@ public class Archiver {
 		filePrefix  = filePrefix.replaceAll("[^a-zA-Z0-9-]", "_");
 		// get the logs from the container
 		Path logFile = FileSystems.getDefault().getPath(getTempDir().getAbsolutePath(), filePrefix+".txt");
-		String logTail=wes.getWorkflowLog(workflowJob, logFile, maxTailLengthInCharacters);
+		String logTail=workflowManager.getWorkflowLog(workflowJob, logFile, maxTailLengthInCharacters);
 		assert Files.exists(logFile);
 
 		// if no output, just return
