@@ -5,9 +5,10 @@ services:
     image:
       sagebionetworks/synapse-workflow-orchestrator
     volumes:
-    - ${WES_SHARED_DIR_PROPERTY}
+    - ${WES_SHARED_DIR_PROPERTY}:${WES_SHARED_DIR_PROPERTY}:rw
     environment:
     - WES_ENDPOINT=${WES_ENDPOINT}
+    - WES_SHARED_DIR_PROPERTY=${WES_SHARED_DIR_PROPERTY}
     - SYNAPSE_USERNAME=${SYNAPSE_USERNAME}
     - SYNAPSE_PASSWORD=${SYNAPSE_PASSWORD}
     - WORKFLOW_OUTPUT_ROOT_ENTITY_ID=${WORKFLOW_OUTPUT_ROOT_ENTITY_ID}
@@ -22,9 +23,9 @@ services:
     image:
       sagebionetworks/synapse-workflow-orchestrator-wes
     volumes:
-    - ${WES_SHARED_DIR_PROPERTY}:ro
+    - ${WES_SHARED_DIR_PROPERTY}:${WES_SHARED_DIR_PROPERTY}:ro
     ports:
-      8082
+    - 8082:8082
       
     
     

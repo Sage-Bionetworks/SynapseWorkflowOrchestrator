@@ -104,7 +104,7 @@ public class WorkflowOrchestrator  {
 		loginRequest.setPassword(password);
 		synapse.login(loginRequest);
 		EvaluationUtils evaluationUtils = new EvaluationUtils(synapse);
-		DockerUtils dockerUtils = new DockerUtils();
+		DockerUtils dockerUtils = configuredForDocker() ? new DockerUtils() : null;
 		SubmissionUtils submissionUtils = new SubmissionUtils(synapse);
 		long sleepTimeMillis = 10*1000L;
 		WorkflowOrchestrator agent = new WorkflowOrchestrator(
@@ -347,40 +347,48 @@ public class WorkflowOrchestrator  {
 		// list the running jobs according to the workflow system
 		List<WorkflowJob> jobs = workflowManager.listWorkflowJobs();
 		// the two lists should be the same ...
-		Map<String, WorkflowJob> workflowIdToJobMap = workflowIdsForJobs(jobs);
 		Map<String, SubmissionBundle> workflowIdToSubmissionMap = workflowIdsForSubmissions(runningSubmissions);
-		Set<WorkflowJob> jobsWithoutSubmissions = new HashSet<WorkflowJob>();
-		for (String workflowId : workflowIdToJobMap.keySet()) {
-			WorkflowJob jobForWorkflowId = workflowIdToJobMap.get(workflowId);
-			SubmissionBundle submissionForWorkflowId = workflowIdToSubmissionMap.get(workflowId);
-			if (submissionForWorkflowId==null) {
-				jobsWithoutSubmissions.add(jobForWorkflowId);
+		{
+			Map<String, WorkflowJob> workflowIdToJobMap = workflowIdsForJobs(jobs);
+			Set<WorkflowJob> jobsWithoutSubmissions = new HashSet<WorkflowJob>();
+			for (String workflowId : workflowIdToJobMap.keySet()) {
+				WorkflowJob jobForWorkflowId = workflowIdToJobMap.get(workflowId);
+				SubmissionBundle submissionForWorkflowId = workflowIdToSubmissionMap.get(workflowId);
+				if (submissionForWorkflowId==null) {
+					jobsWithoutSubmissions.add(jobForWorkflowId);
+				}
 			}
-		}
-		// if there  any running workflow jobs not in the EIP list, throw an IllegalStateException
-		if (!jobsWithoutSubmissions.isEmpty()) {
-			StringBuffer msg = new StringBuffer("The following workflow job(s) are running but have no corresponding open Synapse submissions.");
-			for (WorkflowJob job : jobsWithoutSubmissions) {
-				msg.append("\n\t");
-				msg.append(job.getWorkflowId());
+			// WES does not provide a way to remove a completed job so we cannot do this part of the reconciliation if using WES
+			if (configuredForDocker()) {
+				// if there are any running workflow jobs not in the EIP list, throw an IllegalStateException
+				if (!jobsWithoutSubmissions.isEmpty()) {
+					StringBuffer msg = new StringBuffer("The following workflow job(s) are running but have no corresponding open Synapse submissions.");
+					for (WorkflowJob job : jobsWithoutSubmissions) {
+						msg.append("\n\t");
+						msg.append(job.getWorkflowId());
+					}
+					msg.append("\nOne way to recover is to delete the workflow job(s).");
+					final String errorMessage = createPipelineFailureMessage(null, null, msg.toString());
+					messageUtils.sendMessage(getNotificationPrincipalId(), SUBMISSION_PIPELINE_FAILURE_SUBJECT, 
+							errorMessage);
+					throw new IllegalStateException(msg.toString());
+					// Note: An alternative is to kill the workflow(s) and let the WorkflowHook keep running.
+					// For now we let the submission queue administrator do this, to ensure they are aware of the issue.
+				}
+			} else {
+				// just remove the jobs lacking submissions
+				jobs.removeAll(jobsWithoutSubmissions);
 			}
-			msg.append("\nOne way to recover is to delete the workflow job(s).");
-			final String errorMessage = createPipelineFailureMessage(null, null, msg.toString());
-			messageUtils.sendMessage(getNotificationPrincipalId(), SUBMISSION_PIPELINE_FAILURE_SUBJECT, 
-					errorMessage);
-			throw new IllegalStateException(msg.toString());
-			// Note: An alternative is to kill the workflow(s) and let the WorkflowHook keep running.
-			// For now we let the submission queue administrator do this, to ensure they are aware of the issue.
-		}
 
-		Set<SubmissionBundle> submissionsWithoutJobs = new HashSet<SubmissionBundle>();
-		for (String workflowId : workflowIdToSubmissionMap.keySet()) {
-			if (workflowIdToJobMap.get(workflowId)==null) submissionsWithoutJobs.add(workflowIdToSubmissionMap.get(workflowId));
-		}
-		for (SubmissionBundle submissionBundle : submissionsWithoutJobs) {
-			String messageBody = createPipelineFailureMessage(submissionBundle.getSubmission().getId(), null, "No running workflow found for submission.");
-			submissionUtils.closeSubmissionAndSendNotification(getNotificationPrincipalId(), submissionBundle.getSubmissionStatus(), new SubmissionStatusModifications(),
-					SubmissionStatusEnum.INVALID, WorkflowUpdateStatus.ERROR_ENCOUNTERED_DURING_EXECUTION, null, WORKFLOW_FAILURE_SUBJECT, messageBody);
+			Set<SubmissionBundle> submissionsWithoutJobs = new HashSet<SubmissionBundle>();
+			for (String workflowId : workflowIdToSubmissionMap.keySet()) {
+				if (workflowIdToJobMap.get(workflowId)==null) submissionsWithoutJobs.add(workflowIdToSubmissionMap.get(workflowId));
+			}
+			for (SubmissionBundle submissionBundle : submissionsWithoutJobs) {
+				String messageBody = createPipelineFailureMessage(submissionBundle.getSubmission().getId(), null, "No running workflow found for submission.");
+				submissionUtils.closeSubmissionAndSendNotification(getNotificationPrincipalId(), submissionBundle.getSubmissionStatus(), new SubmissionStatusModifications(),
+						SubmissionStatusEnum.INVALID, WorkflowUpdateStatus.ERROR_ENCOUNTERED_DURING_EXECUTION, null, WORKFLOW_FAILURE_SUBJECT, messageBody);
+			}
 		}
 
 		String shareImmediatelyString = getProperty("SHARE_RESULTS_IMMEDIATELY", false);
@@ -448,7 +456,7 @@ public class WorkflowOrchestrator  {
 				submissionUtils.updateSubmissionStatus(submissionStatus, statusMods);
 			} catch (final Throwable t) {
 				log.error("Pipeline failed", t);
-				final String submissionId = job==null?null:submission.getId();
+				final String submissionId = submission==null?null:submission.getId();
 				final String workflowDescription = job==null?null:job.toString();
 				final String errorMessage = createPipelineFailureMessage(submissionId, workflowDescription, ExceptionUtils.getStackTrace(t));
 				// send this notification to an admin, not to the submitter

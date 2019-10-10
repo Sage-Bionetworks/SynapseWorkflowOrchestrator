@@ -91,6 +91,7 @@ When using `DOCKER_CERT_PATH_HOST` you must also add the following under `volume
     - ${DOCKER_CERT_PATH_HOST}:/certs:ro
 ```
 - `WES_ENDPOINT` - The address prefix of the WES Server, e.g., https://weshost.com/ga4gh/wes/v1. If using this option then `DOCKER_ENGINE_URL` must be omitted.
+- `WES_SHARED_DIR_PROPERTY` - The location of a folder accessible by both the Orchestrator and the WES server.  This is where the Synapse credentials file will be written.  Note, this means that the server and the Orchestrator must share a file system.
 - `SYNAPSE_USERNAME` - Synapse credentials under which the Workflow Orchestrator will run. Must have access to evaluation queue(s) being serviced
 - `SYNAPSE_PASSWORD` - password for `SYNAPSE_USERNAME`
 - `WORKFLOW_OUTPUT_ROOT_ENTITY_ID` - root (Project or Folder) for uploaded doc's, like log files. Hierarchy is root/submitterId/submissionId/files. May be the ID of the project generated in the set-up step, above.
