@@ -37,7 +37,7 @@ import org.sagebionetworks.repo.model.Project;
 import org.sagebionetworks.repo.model.UserProfile;
 
 @RunWith(MockitoJUnitRunner.class)
-public class WorkflowHookTest {
+public class WorkflowOrchestratorTest {
 	
 	@Mock
 	SynapseClient synapse;
@@ -51,7 +51,7 @@ public class WorkflowHookTest {
 	@Mock
 	SubmissionUtils submissionUtils;
 	
-	private WorkflowOrchestrator workflowHook;
+	private WorkflowOrchestrator workflowOrchestrator;
 	
 	private static final String USER_ID = "000";
 	private static final String EVALUATION_ID = "111";
@@ -88,7 +88,7 @@ public class WorkflowHookTest {
 		System.setProperty(AGENT_SHARED_DIR_PROPERTY_NAME, System.getProperty("java.io.tmpdir"));
 		
 		long sleepTimeMillis = 1*60*1000L;
-		workflowHook = new WorkflowOrchestrator(
+		workflowOrchestrator = new WorkflowOrchestrator(
 				synapse, evaluationUtils,
 				dockerUtils, submissionUtils, sleepTimeMillis);
 
@@ -121,7 +121,7 @@ public class WorkflowHookTest {
 		folder.setId(FOLDER_ID);
 		when(synapse.createEntity(any(Folder.class))).thenReturn(folder);
 		// method under test
-		workflowHook.createNewWorkflowJobs(EVALUATION_ID, WORKFLOW_REF);
+		workflowOrchestrator.createNewWorkflowJobs(EVALUATION_ID, WORKFLOW_REF);
 		
 		
 		verify(evaluationUtils).selectSubmissions(EVALUATION_ID, SubmissionStatusEnum.RECEIVED);
@@ -129,7 +129,7 @@ public class WorkflowHookTest {
 	
 	@Test 
 	public void testUpdateWorkflowJobs() throws Throwable {
-		workflowHook.updateWorkflowJobs(Collections.singletonList(EVALUATION_ID));
+		workflowOrchestrator.updateWorkflowJobs(Collections.singletonList(EVALUATION_ID));
 	}
 	
 	private static String ZIP_FILE_URL = "https://github.com/Sage-Bionetworks/SynapseWorkflowExample/archive/master.zip";

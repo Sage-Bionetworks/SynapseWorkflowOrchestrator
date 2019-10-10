@@ -3,7 +3,7 @@ version: '3'
 services:
   workflow-orchestrator:
     image:
-      sagebionetworks/synapse-workflow-orchestrator
+      sagebionetworks/synapse-workflow-orchestrator:1.0
     volumes:
     - ${WES_SHARED_DIR_PROPERTY}:${WES_SHARED_DIR_PROPERTY}:rw
     environment:
@@ -21,7 +21,7 @@ services:
     
   wes:
     image:
-      sagebionetworks/synapse-workflow-orchestrator-wes
+      sagebionetworks/synapse-workflow-orchestrator-wes:1.0
     volumes:
     - ${WES_SHARED_DIR_PROPERTY}:${WES_SHARED_DIR_PROPERTY}:ro
     ports:

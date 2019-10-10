@@ -183,8 +183,8 @@ public class WorkflowManagerDocker implements WorkflowManager {
 		
 		String workflowEngineImage = getProperty(WORKFLOW_ENGINE_DOCKER_IMAGES_PROPERTY_NAME, false);
 		// normally would use quay.io ("quay.io/ucsc_cgl/toil")
-		// but sagebionetworks/synapseworkflowhook-toil incorporates the Synapse client as well at Toil and Docker
-		if (StringUtils.isEmpty(workflowEngineImage)) workflowEngineImage = "sagebionetworks/synapseworkflowhook-toil";
+		// but sagebionetworks/synapse-workflow-orchestrator-toil:1.0 incorporates the Synapse client as well at Toil and Docker
+		if (StringUtils.isEmpty(workflowEngineImage)) workflowEngineImage = "sagebionetworks/synapse-workflow-orchestrator-toil:1.0";
 		
 		boolean privileged = new Boolean(getProperty(RUN_WORKFLOW_CONTAINER_IN_PRIVILEGED_MODE_PROPERTY_NAME, false));
 		

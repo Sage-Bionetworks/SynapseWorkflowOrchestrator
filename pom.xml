@@ -6,17 +6,17 @@
 
 
 	<groupId>org.sagebionetworks</groupId>
-	<artifactId>WorkflowHook</artifactId>
+	<artifactId>WorkflowOrchestrator</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>WorkflowHook</name>
+	<name>WorkflowOrchestrator</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<synapseVersion>232.00-1-g697a598</synapseVersion>
-		<entryPoint>org.sagebionetworks.WorkflowHook</entryPoint>
+		<entryPoint>org.sagebionetworks.WorkflowOrchestrator</entryPoint>
 	</properties>
 
 	<build>

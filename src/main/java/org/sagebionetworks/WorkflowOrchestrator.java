@@ -372,7 +372,7 @@ public class WorkflowOrchestrator  {
 					messageUtils.sendMessage(getNotificationPrincipalId(), SUBMISSION_PIPELINE_FAILURE_SUBJECT, 
 							errorMessage);
 					throw new IllegalStateException(msg.toString());
-					// Note: An alternative is to kill the workflow(s) and let the WorkflowHook keep running.
+					// Note: An alternative is to kill the workflow(s) and let the Orchestrator keep running.
 					// For now we let the submission queue administrator do this, to ensure they are aware of the issue.
 				}
 			} else {

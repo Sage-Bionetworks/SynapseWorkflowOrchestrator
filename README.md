@@ -120,10 +120,10 @@ Default is 31, i.e. send notifications for every event.
 - `SHARE_RESULTS_IMMEDIATELY` - (optional) if omitted or set to 'true', uploaded results are immediately accessible by submitter. If false then a separate process must 'unlock' files. This is useful when workflows run on sensitive data and administration needs to control the volume of results returned to the workflow submitter.
 - `DATA_UNLOCK_SYNAPSE_PRINCIPAL_ID` - (optional) Synapse ID of user authorized to share (unlock) workflow output files 
 	(only required if `SHARE_RESULTS_IMMEDIATELY` is false).
-- `WORKFLOW_ENGINE_DOCKER_IMAGE` - (optional) Used when `DOCKER_ENGINE_URL` is selected. Defaults to sagebionetworks/synapseworkflowhook-toil, produced from [this Dockerfile](Dockerfile.Toil). When overriding the default, you must ensure that the existing dependencies are preserved. One way to do this is to start your own Dockerfile with
+- `WORKFLOW_ENGINE_DOCKER_IMAGE` - (optional) Used when `DOCKER_ENGINE_URL` is selected. Defaults to sagebionetworks/synapse-workflow-orchestrator-toil:1.0 , produced from [this Dockerfile](Dockerfile.Toil). When overriding the default, you must ensure that the existing dependencies are preserved. One way to do this is to start your own Dockerfile with
 
 ```
-FROM sagebionetworks/synapseworkflowhook-toil
+FROM sagebionetworks/synapse-workflow-orchestrator-toil:1.0 
 ```
 and then to add additional dependencies.
 - `MAX_CONCURRENT_WORKFLOWS` - (optional) the maximum number of workflows that will be allowed to run at any time. Default is 10.
@@ -140,7 +140,7 @@ docker-compose --verbose up
 
 ```
 docker run --rm -it -e SYNAPSE_USERNAME=xxxxx -e SYNAPSE_PASSWORD=xxxxx -e EVALUATION_ID=xxxxx \
--v /path/to/workflow/job:/workflowjob sagebionetworks/synapseworkflowhook /submit.sh
+-v /path/to/workflow/job:/workflowjob sagebionetworks/synapse-workflow-orchestrator:1.0  /submit.sh
 ```
 where `EVALUATION_ID` is one of the keys in the `EVALUATION_TEMPLATES` map returned from the set-up step
 
@@ -169,7 +169,7 @@ See [this example](https://github.com/Sage-Bionetworks/SynapseWorkflowExample) f
 - If the submission is a .cwl input file then it can be download by [this script](https://github.com/Sage-Bionetworks/SynapseWorkflowExample/blob/master/downloadSubmissionFile.cwl) and parsed by a step customized from [this example](https://github.com/Sage-Bionetworks/SynapseWorkflowExample/blob/master/job_file_reader_tool_yaml_sample.cwl).
 
 
-- The workflow should not change the 'status' field of the submission status, which is reserved for the use of the Workflow Hook.
+- The workflow should not change the 'status' field of the submission status, which is reserved for the use of the Workflow Orchestrator.
 
 
 - The workflow must have no output. Any results should be written to Synapse along the way, e.g., as shown in in [this example](https://github.com/Sage-Bionetworks/SynapseWorkflowExample/blob/master/uploadToSynapse.cwl).
@@ -178,7 +178,7 @@ See [this example](https://github.com/Sage-Bionetworks/SynapseWorkflowExample) f
 
 #### Uploading results
 
-The workflow hook uses this folder hierarchy for uploading results:
+The workflow orchestrator uses this folder hierarchy for uploading results:
 
 ```
 < WORKFLOW_OUTPUT_ROOT_ENTITY_ID> / <SUBMITTER_ID> / <SUBMISSION_ID> / 
@@ -191,7 +191,7 @@ and
 ```
 where 
 
-- `<WORKFLOW_OUTPUT_ROOT_ENTITY_ID>` is a parameter passed to the hook at startup;
+- `<WORKFLOW_OUTPUT_ROOT_ENTITY_ID>` is a parameter passed to the orchestrator at startup;
 
 - `<SUBMITTER_ID>` is the user or team responsible for the submission;
 
@@ -203,7 +203,7 @@ The workflow is passed the IDs of both the locked and unlocked submission folder
 
 #### Timing out
 
-The workflow hook checks each submission for an integer (long) annotation named `org.sagebionetworks.SynapseWorkflowHook.TimeRemaining`. If the value is present and not greater than zero then the submission will be stopped and a "timed out" notification sent. If the annotation is not present then no action will be taken. Through this mechanism a custom application can determine which submissions have exceeded their alloted time and stop them. Such an application is communicating with the workflow hook via the submissions' annotations. This architecture allows each submission queue administrator to customize the time-out logic rather than having some particular algorithm hard-coded into the workflow hook.
+The workflow orchestrator checks each submission for an integer (long) annotation named `org.sagebionetworks.SynapseWorkflowOrchestrator.TimeRemaining`. If the value is present and not greater than zero then the submission will be stopped and a "timed out" notification sent. If the annotation is not present then no action will be taken. Through this mechanism a custom application can determine which submissions have exceeded their alloted time and stop them. Such an application is communicating with the workflow orchestrator via the submissions' annotations. This architecture allows each submission queue administrator to customize the time-out logic rather than having some particular algorithm hard-coded into the workflow orchestrator.
 
 
 #### Decommissioning a Machine
