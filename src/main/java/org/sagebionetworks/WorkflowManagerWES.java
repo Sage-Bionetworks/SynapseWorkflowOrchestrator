@@ -1,6 +1,6 @@
 package org.sagebionetworks;
 
-import static org.sagebionetworks.Constants.SHARED_VOLUME_NAME;
+import static org.sagebionetworks.Constants.*;
 import static org.sagebionetworks.Constants.WES_ENDPOINT_PROPERTY_NAME;
 import static org.sagebionetworks.Utils.checkHttpResponseCode;
 import static org.sagebionetworks.Utils.getHttpClient;
@@ -107,7 +107,7 @@ public class WorkflowManagerWES implements WorkflowManager {
 		}
 		addAllDirToHttpEntity(entrypointRoot, entrypointRoot, requestBuilder);
 		
-		File synapseConfig = new File(SHARED_VOLUME_NAME, ".synapseConfig"); // write to a sub-dir of the working dir
+		File synapseConfig = new File(getProperty(WES_SHARED_DIR_PROPERTY_NAME), ".synapseConfig");
 		// write the synapse config file into the workflow folder
 		// this is NOT secure but there's no good option today
 		try (FileOutputStream fos=new FileOutputStream(synapseConfig)) {
@@ -122,7 +122,7 @@ public class WorkflowManagerWES implements WorkflowManager {
 		params.put("adminUploadSynId", workflowParameters.getAdminUploadSynId());
 		JSONObject config = new JSONObject();
 		config.put("class", "File");
-		config.put("path", "/shared/.synapseConfig"); // TODO this is dictated by Docker volume mounting and needs to be generalized
+		config.put("path", synapseConfig.getAbsolutePath());
 		params.put("synapseConfig", config);
 		requestBuilder.addTextBody("workflow_params", params.toString());
 		

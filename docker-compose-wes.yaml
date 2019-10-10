@@ -1,18 +1,13 @@
 version: '3'
 
-volumes:
-  shared:
-    driver: local
-
 services:
   workflow-orchestrator:
     image:
       sagebionetworks/synapse-workflow-orchestrator
     volumes:
-    - shared:/shared:rw
-    - /var/run/docker.sock:/var/run/docker.sock
+    - ${WES_SHARED_DIR_PROPERTY}
     environment:
-    - DOCKER_ENGINE_URL=${DOCKER_ENGINE_URL}
+    - WES_ENDPOINT=${WES_ENDPOINT}
     - SYNAPSE_USERNAME=${SYNAPSE_USERNAME}
     - SYNAPSE_PASSWORD=${SYNAPSE_PASSWORD}
     - WORKFLOW_OUTPUT_ROOT_ENTITY_ID=${WORKFLOW_OUTPUT_ROOT_ENTITY_ID}
@@ -20,9 +15,16 @@ services:
     - NOTIFICATION_PRINCIPAL_ID=${NOTIFICATION_PRINCIPAL_ID}
     - SHARE_RESULTS_IMMEDIATELY=${SHARE_RESULTS_IMMEDIATELY}
     - DATA_UNLOCK_SYNAPSE_PRINCIPAL_ID=${DATA_UNLOCK_SYNAPSE_PRINCIPAL_ID}
-    - TOIL_CLI_OPTIONS=${TOIL_CLI_OPTIONS}
     - MAX_CONCURRENT_WORKFLOWS=${MAX_CONCURRENT_WORKFLOWS}
     - SUBMITTER_NOTIFICATION_MASK=${SUBMITTER_NOTIFICATION_MASK}
-    - COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}
-    - RUN_WORKFLOW_CONTAINER_IN_PRIVILEGED_MODE=${RUN_WORKFLOW_CONTAINER_IN_PRIVILEGED_MODE}
+    
+  wes:
+    image:
+      sagebionetworks/synapse-workflow-orchestrator-wes
+    volumes:
+    - ${WES_SHARED_DIR_PROPERTY}:ro
+    ports:
+      8082
+      
+    
     

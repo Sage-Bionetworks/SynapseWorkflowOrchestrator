@@ -44,6 +44,11 @@ public class Constants {
 		System.setProperty(AGENT_SHARED_DIR_PROPERTY_NAME, AGENT_SHARED_DIR_DEFAULT);
 	}
 	
+	// the name of the system property containing the path in which to write a file
+	// that WES will be able to access.  Note, this means that WES runs on the same file
+	// system as the Orchestrator.
+	public static final String WES_SHARED_DIR_PROPERTY_NAME = "WES_SHARED_DIR_PROPERTY";
+	
 	public static final String ROOT_TEMPLATE_ANNOTATION_NAME="ROOT_TEMPLATE";
 	
 	public static final String MAX_CONCURRENT_WORKFLOWS_PROPERTY_NAME = "MAX_CONCURRENT_WORKFLOWS";
