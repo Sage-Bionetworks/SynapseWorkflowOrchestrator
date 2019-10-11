@@ -1,4 +1,4 @@
-WES_ENDPOINT=http://localhost:8082
+WES_ENDPOINT=http://localhost:8082/ga4gh/wes/v1
 DOCKER_ENGINE_URL=unix:///var/run/docker.sock
 #WES_SHARED_DIR_PROPERTY=
 SYNAPSE_USERNAME=
