@@ -145,13 +145,6 @@ public class WorkflowManagerWES implements WorkflowManager {
 			throw new RuntimeException(e);
 		}
 		
-		// DEBUG
-		System.out.println("Request content type: "+requestBody.getContentType());
-		System.out.println("Request content:");
-		requestBody.writeTo(System.out);
-		System.out.println("---- END request content ----");
-		// END DEBUG
-		
 		WorkflowJobWES result = new WorkflowJobWES();
 		result.setWorkflowId(id);
 		return result;

@@ -145,6 +145,7 @@ public class DockerUtils {
 
 		dockerHubClient = DockerClientBuilder.getInstance(
 				dockerhubConfigBuilder.build()).build();
+		
 	}
 
 	public Info getInfo() {
@@ -227,7 +228,7 @@ public class DockerUtils {
 			try {
 				PullImageResultCallback callback = null;
 				if (DockerNameUtil.getRegistryHost(imageReference) == null) {
-					// if not host then it's a DockerHub reference
+					// if no host then it's a DockerHub reference
 					callback = dockerHubClient.pullImageCmd(imageReference)
 							.exec(new PullImageResultCallback());
 				} else { // TODO authenticate to quay.io
