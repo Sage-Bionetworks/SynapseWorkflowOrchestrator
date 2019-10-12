@@ -220,21 +220,38 @@ public class DockerUtils {
 		return !StringUtils.isEmpty(e.getMessage()) &&
 				e.getMessage().indexOf(IMAGE_TOO_BIG_MESSAGE_SEGMENT)>=0;
 	}
+	
+	private static boolean isSynapseImageReference(String imageReference) {
+		return imageReference.indexOf(".synapse.org")<0;
+	}
 
 	public void pullImageWithRetry(String imageReference) {
 		for (int i = 0; i < MAX_RETRIES; i++) {
 			String msg = "Unable to pull image " + imageReference + " after "
 					+ (i + 1) + " try(ies).";
 			try {
-				PullImageResultCallback callback = null;
-				if (DockerNameUtil.getRegistryHost(imageReference) == null) {
+				DockerClient registrySpecificClient;
+				AuthConfig authConfig;
+				if (!isSynapseImageReference(imageReference)) {
 					// if no host then it's a DockerHub reference
-					callback = dockerHubClient.pullImageCmd(imageReference)
-							.exec(new PullImageResultCallback());
+					registrySpecificClient = dockerHubClient;
+					authConfig = new AuthConfig()
+						.withUsername(getProperty(DOCKERHUB_USERNAME_PROPERTY, false))
+						.withEmail(DOCKERHUB_EMAIL)
+						.withRegistryAddress(DOCKERHUB_REGISTRY_ADDRESS)
+						.withPassword(getProperty(DOCKERHUB_PASSWORD_PROPERTY, false));
 				} else { // TODO authenticate to quay.io
-					callback = dockerClient.pullImageCmd(imageReference).exec(
-							new PullImageResultCallback());
+					registrySpecificClient = dockerClient;
+					authConfig = new AuthConfig()
+							.withUsername(getProperty(SYNAPSE_USERNAME_PROPERTY, false))
+							.withEmail(SYNAPSE_EMAIL)
+							.withRegistryAddress(SYNAPSE_REGISTRY_ADDRESS)
+							.withPassword(getProperty(SYNAPSE_PASSWORD_PROPERTY, false));
 				}
+				PullImageResultCallback  callback = registrySpecificClient
+						.pullImageCmd(imageReference)
+						.withAuthConfig(authConfig)
+						.exec(new PullImageResultCallback());
 				callback.awaitSuccess();
 				return;
 			} catch (InternalServerErrorException e) {
@@ -437,31 +454,31 @@ public class DockerUtils {
 	 * Send a tagged image to the registry.
 	 */
 	public void pushImageToRepo(String imageId, String repo) {
-		String registryAddress = null;
-		String registryUsername = null;
-		String registryPassword = null;
-		String registryEmail = null;
-		if (DockerNameUtil.getRegistryHost(repo) == null) {
-			registryAddress = DOCKERHUB_REGISTRY_ADDRESS;
-			registryUsername = getProperty(DOCKERHUB_USERNAME_PROPERTY);
-			registryPassword = getProperty(DOCKERHUB_PASSWORD_PROPERTY);
-			registryEmail = DOCKERHUB_EMAIL;
-		} else {
-			registryAddress = SYNAPSE_REGISTRY_ADDRESS;
-			registryUsername = getProperty(SYNAPSE_USERNAME_PROPERTY);
-			registryPassword = getProperty(SYNAPSE_PASSWORD_PROPERTY);
-			registryEmail = SYNAPSE_EMAIL;
+		DockerClient registrySpecificClient;
+		AuthConfig authConfig;
+		if (!isSynapseImageReference(repo)) {
+			// if no host then it's a DockerHub reference
+			registrySpecificClient = dockerHubClient;
+			authConfig = new AuthConfig()
+				.withUsername(getProperty(DOCKERHUB_USERNAME_PROPERTY, false))
+				.withEmail(DOCKERHUB_EMAIL)
+				.withRegistryAddress(DOCKERHUB_REGISTRY_ADDRESS)
+				.withPassword(getProperty(DOCKERHUB_PASSWORD_PROPERTY, false));
+		} else { // TODO authenticate to quay.io
+			registrySpecificClient = dockerClient;
+			authConfig = new AuthConfig()
+					.withUsername(getProperty(SYNAPSE_USERNAME_PROPERTY, false))
+					.withEmail(SYNAPSE_EMAIL)
+					.withRegistryAddress(SYNAPSE_REGISTRY_ADDRESS)
+					.withPassword(getProperty(SYNAPSE_PASSWORD_PROPERTY, false));
 		}
 
-		AuthConfig authConfig = new AuthConfig().withUsername(registryUsername)
-				.withEmail(registryEmail).withRegistryAddress(registryAddress)
-				.withPassword(registryPassword);
+		registrySpecificClient.tagImageCmd(imageId, repo, "latest").exec();
 
-
-		dockerClient.tagImageCmd(imageId, repo, "latest").exec();
-
-		PushImageResultCallback callback = dockerClient.pushImageCmd(imageId)
-				.withName(repo).withAuthConfig(authConfig)
+		PushImageResultCallback callback = registrySpecificClient
+				.pushImageCmd(imageId)
+				.withName(repo)
+				.withAuthConfig(authConfig)
 				.exec(new PushImageResultCallback());
 		callback.awaitSuccess();
 	}

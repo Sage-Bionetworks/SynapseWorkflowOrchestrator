@@ -45,5 +45,13 @@ public class DockerUtilsTest {
 			System.out.println(name);
 		}
 	}
+	
+	@Ignore
+	@Test
+	public void testPull() throws Exception {
+		System.setProperty("DOCKER_ENGINE_URL", "unix:///var/run/docker.sock");
+		DockerUtils dockerUtils = new DockerUtils();
+		dockerUtils.pullImageWithRetry("sagebionetworks/synapse-workflow-orchestrator-toil:1.0");
+	}
 
 }
