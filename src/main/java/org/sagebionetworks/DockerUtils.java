@@ -222,7 +222,7 @@ public class DockerUtils {
 	}
 	
 	private static boolean isSynapseImageReference(String imageReference) {
-		return imageReference.indexOf(".synapse.org")<0;
+		return imageReference.indexOf(".synapse.org")>=0;
 	}
 
 	public void pullImageWithRetry(String imageReference) {
