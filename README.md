@@ -168,11 +168,11 @@ screen -S orchestrator
 # Export all the values you use in your .env file
 # these values are explained above
 export WES_ENDPOINT=http://localhost:8082/ga4gh/wes/v1
-export WES_SHARED_DIR_PROPERTY=/home/tyu/java_orchestrator
+export WES_SHARED_DIR_PROPERTY=/path/to/something
 # export DOCKER_ENGINE_URL=unix:///var/run/docker.sock
-export SYNAPSE_USERNAME=thomasyu
-export SYNAPSE_PASSWORD=
-export WORKFLOW_OUTPUT_ROOT_ENTITY_ID=syn4990358
+export SYNAPSE_USERNAME=xxxxxx
+export SYNAPSE_PASSWORD=xxxxxx
+export WORKFLOW_OUTPUT_ROOT_ENTITY_ID=syn3333
 # Remember to put quotes around the EVALUATION_TEMPLATES
 export EVALUATION_TEMPLATES='{"111": "syn111"}'
 export COMPOSE_PROJECT_NAME=workflow_orchestrator
