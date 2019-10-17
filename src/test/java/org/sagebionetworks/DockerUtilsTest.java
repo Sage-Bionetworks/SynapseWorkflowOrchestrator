@@ -33,14 +33,16 @@ public class DockerUtilsTest {
 		dockerUtils.removeContainer(containerId, true);
 	}
 
+	
 	@Ignore
 	@Test
 	public void testListContainers() throws Exception {
+		System.setProperty("DOCKER_ENGINE_URL", "unix:///var/run/docker.sock");
 		DockerUtils dockerUtils = new DockerUtils();
 		Map<String, Container> result = dockerUtils.listContainers(new Filter(){
 			public boolean match(String s) {
 				return true;
-			}});
+			}}, null);
 		for (String name : result.keySet()) {
 			System.out.println(name);
 		}

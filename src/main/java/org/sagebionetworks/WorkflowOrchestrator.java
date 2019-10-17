@@ -238,7 +238,7 @@ public class WorkflowOrchestrator  {
 	}
 
 	public void createNewWorkflowJobs(String evaluationId, WorkflowURLEntrypointAndSynapseRef workflow) throws Throwable {
-		int currentWorkflowCount = workflowManager.listWorkflowJobs().size();
+		int currentWorkflowCount = workflowManager.listWorkflowJobs(/*running*/true).size();
 		int maxConcurrentWorkflows = getMaxConcurrentWorkflows();
 		List<SubmissionBundle> receivedSubmissions=null;
 		try {
@@ -344,8 +344,8 @@ public class WorkflowOrchestrator  {
 			}
 		}
 		
-		// list the running jobs according to the workflow system
-		List<WorkflowJob> jobs = workflowManager.listWorkflowJobs();
+		// list the current jobs according to the workflow system
+		List<WorkflowJob> jobs = workflowManager.listWorkflowJobs(null);
 		// the two lists should be the same ...
 		Map<String, SubmissionBundle> workflowIdToSubmissionMap = workflowIdsForSubmissions(runningSubmissions);
 		{

@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -483,14 +484,34 @@ public class DockerUtils {
 		callback.awaitSuccess();
 	}
 
+	// per https://docs.docker.com/engine/reference/commandline/ps/#filtering
+	// state is one of: created, restarting, running, removing, paused, exited, or dead
+	private static final List<String> PRE_TERMINAL_STATES = Arrays.asList(new String[] {
+			"created",
+			"restarting",
+			"running",
+			"paused"
+	});
+
+	private static final List<String> TERMINAL_STATES = Arrays.asList(new String[] {
+			"removing",
+			"exited",
+			"dead"
+	});
+	
+	
 	/*
 	 * pass null for filter to return all containers
 	 */
-	public Map<String, Container> listContainers(Filter filter) {
+	public Map<String, Container> listContainers(Filter filter, Boolean running) {
 		Map<String, Container> result = new HashMap<String, Container>();
 		List<Container> containers = dockerClient.listContainersCmd()
 				.withShowAll(true).exec();
 		for (Container container : containers) {
+			boolean jobIsRunning = PRE_TERMINAL_STATES.contains(container.getState());
+			// if running==true only add running jobs; if running==false only add non-running jobs
+			if (running!=null && (running != jobIsRunning)) continue;
+			
 			for (String name : container.getNames()) {
 				// for some reason 'listContainers' prepends a leading "/" to
 				// the assigned name

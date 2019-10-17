@@ -52,7 +52,7 @@ public class WorkflowManagerWESTest {
 	@Test
 	public void testCheckStatus() throws Exception {
 		WorkflowManagerWES wdm = new WorkflowManagerWES();
-		List<WorkflowJob> jobs = wdm.listWorkflowJobs();
+		List<WorkflowJob> jobs = wdm.listWorkflowJobs(null);
 		System.out.println("Found "+jobs.size()+" jobs.");
 		for (WorkflowJob job : jobs) {
 			System.out.println("\nJob: "+job.getWorkflowId());
@@ -70,7 +70,7 @@ public class WorkflowManagerWESTest {
 	public void testDeleteAllJobs() throws Exception {
 		WorkflowManagerWES wdm = new WorkflowManagerWES();
 
-		List<WorkflowJob> jobs = wdm.listWorkflowJobs();
+		List<WorkflowJob> jobs = wdm.listWorkflowJobs(null);
 		System.out.println("Found "+jobs.size()+" jobs.");
 		
 		for (WorkflowJob job : jobs) {

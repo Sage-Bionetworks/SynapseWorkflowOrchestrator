@@ -215,8 +215,8 @@ public class WorkflowManagerDocker implements WorkflowManager {
 	 * This is analogous to GET /workflows in WES
 	 */
 	@Override
-	public List<WorkflowJob> listWorkflowJobs() {
-		return findRunningWorkflowJobs(dockerUtils.listContainers(WORKFLOW_FILTER));
+	public List<WorkflowJob> listWorkflowJobs(Boolean running) {
+		return findRunningWorkflowJobs(dockerUtils.listContainers(WORKFLOW_FILTER, running));
 	}
 	
 	/*

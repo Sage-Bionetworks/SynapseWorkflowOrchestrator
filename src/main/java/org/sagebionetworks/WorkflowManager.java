@@ -30,8 +30,9 @@ public interface WorkflowManager {
 
 	/*
 	 * This is analogous to GET /workflows in WES
+	 * @param running true: list only the running jobs, false: list only the non-running jobs, null: list all jobs
 	 */
-	List<WorkflowJob> listWorkflowJobs();
+	List<WorkflowJob> listWorkflowJobs(Boolean running);
 
 	/*
 	 * This is analogous to GET /workflows/{workflow_id}/status in WES

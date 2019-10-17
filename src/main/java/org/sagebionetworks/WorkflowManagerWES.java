@@ -153,7 +153,7 @@ public class WorkflowManagerWES implements WorkflowManager {
 
 
 	@Override
-	public List<WorkflowJob> listWorkflowJobs() {
+	public List<WorkflowJob> listWorkflowJobs(Boolean running) {
 		try {
 			List<WorkflowJob> result = new ArrayList<WorkflowJob>();
 
@@ -178,7 +178,9 @@ public class WorkflowManagerWES implements WorkflowManager {
 						JSONObject run = runs.getJSONObject(i);
 						WorkflowJobWES job = new WorkflowJobWES();
 						job.setWorkflowId(run.getString("run_id"));
-						result.add(job);
+						boolean jobIsRunning = PRE_TERMINAL_STATES.contains(run.getString("state"));
+						// if running==true only add running jobs; if running==false only add non-running jobs
+						if (running==null || (running == jobIsRunning)) result.add(job);
 					}
 				}
 			} while (StringUtils.isNotEmpty(nextPage));
