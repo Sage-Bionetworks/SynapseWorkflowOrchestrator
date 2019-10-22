@@ -31,3 +31,4 @@ CMD wes-server --backend=wes_service.cwl_runner --opt runner=cwltool --opt extra
 # to run:
 # docker run --name wes --rm -it -p 8082:8082 -v $(pwd)/shared:/shared:ro sagebionetworks/synapse-workflow-orchestrator-wes
 #
+#
