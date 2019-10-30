@@ -136,6 +136,7 @@ public class WorkflowOrchestrator  {
 		this.evaluationUtils=evaluationUtils;
 		this.submissionUtils=submissionUtils;
 		this.messageUtils=new MessageUtils(synapse);
+		login();
 		if (configuredForDocker()) {
 			if (configuredForWES()) throw new IllegalStateException("Cannot configure both Docker Engine and WES Endpoint.");
 			// precheck
