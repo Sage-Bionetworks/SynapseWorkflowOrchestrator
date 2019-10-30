@@ -94,15 +94,18 @@ public class WorkflowOrchestrator  {
 	private ShutdownHook shutdownHook;
 	private long sleepTimeMillis;
 	private WorkflowManager workflowManager;
-
-	public static void main( String[] args ) throws Throwable {
-		SynapseClient synapse = SynapseClientFactory.createSynapseClient();
+	
+	private void login() throws SynapseException {
 		String userName = getProperty(SYNAPSE_USERNAME_PROPERTY);
 		String password = getProperty(SYNAPSE_PASSWORD_PROPERTY);
 		LoginRequest loginRequest = new LoginRequest();
 		loginRequest.setUsername(userName);
 		loginRequest.setPassword(password);
-		synapse.login(loginRequest);
+		synapse.login(loginRequest);		
+	}
+
+	public static void main( String[] args ) throws Throwable {
+		SynapseClient synapse = SynapseClientFactory.createSynapseClient();
 		EvaluationUtils evaluationUtils = new EvaluationUtils(synapse);
 		DockerUtils dockerUtils = configuredForDocker() ? new DockerUtils() : null;
 		SubmissionUtils submissionUtils = new SubmissionUtils(synapse);
@@ -212,7 +215,7 @@ public class WorkflowOrchestrator  {
 		Map<String,WorkflowURLEntrypointAndSynapseRef> evaluationIdToTemplateMap = getWorkflowURLAndEntrypoint();
 		while (!shutdownHook.shouldShutDown()) { // this allows a system shut down to shut down the agent
 			log.info("Top level loop: checking progress or starting new job.");
-
+			login();
 			
 			String acceptNewSubmissionsString = getProperty(ACCEPT_NEW_SUBMISSIONS_PROPERTY_NAME, false);
 			if (StringUtils.isEmpty(acceptNewSubmissionsString) || Boolean.getBoolean(acceptNewSubmissionsString)) {
