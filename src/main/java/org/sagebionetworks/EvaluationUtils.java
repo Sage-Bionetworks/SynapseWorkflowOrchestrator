@@ -29,18 +29,18 @@ public class EvaluationUtils {
 	private static final int PAGE_SIZE = 10;
 
 	// submission annotation names
-	public static final String WORKFLOW_JOB_ID = "org.sagebionetworks.SynapseWorkflowOrchestrator.workflowJobId";
-	public static final String JOB_STARTED_TIME_STAMP = "org.sagebionetworks.SynapseWorkflowOrchestrator.ExecutionStarted";
-	public static final String TIME_REMAINING = "org.sagebionetworks.SynapseWorkflowOrchestrator.TimeRemaining";
-	public static final String FAILURE_REASON = "org.sagebionetworks.SynapseWorkflowOrchestrator.FailureReason";
-	public static final String SUBMISSION_ARTIFACTS_FOLDER = "org.sagebionetworks.SynapseWorkflowOrchestrator.SubmissionFolder";
-	public static final String JOB_LAST_UPDATED_TIME_STAMP = "org.sagebionetworks.SynapseWorkflowOrchestrator.WorkflowLastUpdated";
-	public static final String STATUS_DESCRIPTION = "org.sagebionetworks.SynapseWorkflowOrchestrator.StatusDescription";
-	public static final String USER_ID_PUBLIC = "org.sagebionetworks.SynapseWorkflowOrchestrator.UserId";
-	public static final String LOG_FILE_SIZE_EXCEEDED = "org.sagebionetworks.SynapseWorkflowOrchestrator.LogFileSizeExceeded";
-	public static final String LAST_LOG_UPLOAD = "org.sagebionetworks.SynapseWorkflowOrchestrator.LastLogUpload";
-	public static final String SUBMISSION_PROCESSING_STARTED_SENT = "org.sagebionetworks.SynapseWorkflowOrchestrator.SubmissionProcessingStartedSent";
-	public static final String PROGRESS = "org.sagebionetworks.SynapseWorkflowOrchestrator.Progress";
+	public static final String WORKFLOW_JOB_ID = "orgSagebionetworksSynapseWorkflowOrchestratorWorkflowJobId";
+	public static final String JOB_STARTED_TIME_STAMP = "orgSagebionetworksSynapseWorkflowOrchestratorExecutionStarted";
+	public static final String TIME_REMAINING = "orgSagebionetworksSynapseWorkflowOrchestratorTimeRemaining";
+	public static final String FAILURE_REASON = "orgSagebionetworksSynapseWorkflowOrchestratorFailureReason";
+	public static final String SUBMISSION_ARTIFACTS_FOLDER = "orgSagebionetworksSynapseWorkflowOrchestratorSubmissionFolder";
+	public static final String JOB_LAST_UPDATED_TIME_STAMP = "orgSagebionetworksSynapseWorkflowOrchestratorWorkflowLastUpdated";
+	public static final String STATUS_DESCRIPTION = "orgSagebionetworksSynapseWorkflowOrchestratorStatusDescription";
+	public static final String USER_ID_PUBLIC = "orgSagebionetworksSynapseWorkflowOrchestratorUserId";
+	public static final String LOG_FILE_SIZE_EXCEEDED = "orgSagebionetworksSynapseWorkflowOrchestratorLogFileSizeExceeded";
+	public static final String LAST_LOG_UPLOAD = "orgSagebionetworksSynapseWorkflowOrchestratorLastLogUpload";
+	public static final String SUBMISSION_PROCESSING_STARTED_SENT = "orgSagebionetworksSynapseWorkflowOrchestratorSubmissionProcessingStartedSent";
+	public static final String PROGRESS = "orgSagebionetworksSynapseWorkflowOrchestratorProgress";
 	public static final boolean ADMIN_ANNOTS_ARE_PRIVATE = true;
 
 	//annotation values
