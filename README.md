@@ -157,6 +157,29 @@ docker-compose down
 ```
 Now, in Synapse, simply delete the root level project
 
+### Can't use Docker?
+Sometimes you are forced to be on infrastructure that doesn't allow Docker.  Due to this, we have also provided a jar file to execute the infrastructure.  You can find the setup instructions below.   You can download the jar files [here](https://github.com/Sage-Bionetworks/SynapseWorkflowOrchestrator/releases)
+
+```
+sudo yum install java-1.8.0-openjdk
+sudo yum install java-1.8.0-openjdk-devel
+# Use screen to allow for continous running
+screen -S orchestrator
+# Export all the values you use in your .env file
+# these values are explained above
+export WES_ENDPOINT=http://localhost:8082/ga4gh/wes/v1
+export WES_SHARED_DIR_PROPERTY=/path/to/something
+# export DOCKER_ENGINE_URL=unix:///var/run/docker.sock
+export SYNAPSE_USERNAME=xxxxxx
+export SYNAPSE_PASSWORD=xxxxxx
+export WORKFLOW_OUTPUT_ROOT_ENTITY_ID=syn3333
+# Remember to put quotes around the EVALUATION_TEMPLATES
+export EVALUATION_TEMPLATES='{"111": "syn111"}'
+export COMPOSE_PROJECT_NAME=workflow_orchestrator
+# export MAX_CONCURRENT_WORKFLOWS=
+java -jar  WorkflowOrchestrator-1.0-SNAPSHOT-jar-with-dependencies.jar
+```
+
 
 ### Workflow creation guidelines
 
