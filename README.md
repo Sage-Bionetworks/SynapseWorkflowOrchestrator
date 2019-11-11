@@ -48,7 +48,6 @@ docker run --rm -it -e SYNAPSE_USERNAME=xxxxx -e SYNAPSE_PASSWORD=xxxxx \
 -e WORKFLOW_TEMPLATE_URL=https://dockstore.org:8443/api/ga4gh/v2/tools/{id}/versions/{version_id}/CWL \
 -e ROOT_TEMPLATE=xxxxx sagebionetworks/synapseworkfloworchestrator /set_up.sh
 ```
-TODO:  Automatically lookup ROOT_TEMPLATE in Dockstore
 
 Will print out created Project ID and the value for the `EVALUATION_TEMPLATES` in the following step.
 
@@ -67,6 +66,14 @@ If you already have an existing project and do not want to follow the `Create a 
 
 #### Start the workflow service
 
+There are two main configuration choices to make:  
+1. Do you wish to run the Orchestrator as a Docker container or as a Java executable .jar file?  The former is convenient if your environment supports Docker and you are authorized to run Docker containers in it, while the latter is an alternative requiring the Java Runtime Environment;
+2. Do you wish to run the workflow jobs themselves as Docker containers or by sending jobs as web requests to a Workflow Execution Service (W.E.S.)?  The former is useful if Docker is available while the latter lets you leverage the features of a chosen W.E.S. implementation.
+
+##### Running the Orchestrator as a Docker container
+
+###### Running the Orchestrator as a Docker container with workflows also run as Docker containers 
+
 Set the following as properties in a .env file to use with Docker Compose. Please carefully read through these properties and fill out the .envTemplate, but make sure you rename the template to .env. 
 
 - `DOCKER_ENGINE_URL` - address of the Docker engine. Along with `DOCKER_CERT_PATH_HOST` this is needed since the Workflow Orchestrator will manage containers. Examples:
@@ -79,7 +86,6 @@ or
 ```
 DOCKER_ENGINE_URL=tcp://192.168.0.1:2376
 ```
-If this parameter is set then `WES_ENDPOINT` must be omitted (see below).
 - `DOCKER_CERT_PATH_HOST` - (optional) path to credentials files allowing networked access to Docker engine. Required if connecting over the network (`DOCKER_ENGINE_URL` starts with `http`, `https` or `tcp`, but not with `unix`). Example:
 
 ```
@@ -90,8 +96,8 @@ When using `DOCKER_CERT_PATH_HOST` you must also add the following under `volume
 ```
     - ${DOCKER_CERT_PATH_HOST}:/certs:ro
 ```
-- `WES_ENDPOINT` - The address prefix of the WES Server, e.g., https://weshost.com/ga4gh/wes/v1. If using this option then `DOCKER_ENGINE_URL` must be omitted.
-- `WES_SHARED_DIR_PROPERTY` - The location of a folder accessible by both the Orchestrator and the WES server.  This is where the Synapse credentials file will be written.  Note, this means that the server and the Orchestrator must share a file system.
+- `WES_ENDPOINT` - omit this parameter
+- `WES_SHARED_DIR_PROPERTY` - omit this parameter
 - `SYNAPSE_USERNAME` - Synapse credentials under which the Workflow Orchestrator will run. Must have access to evaluation queue(s) being serviced
 - `SYNAPSE_PASSWORD` - password for `SYNAPSE_USERNAME`
 - `WORKFLOW_OUTPUT_ROOT_ENTITY_ID` - root (Project or Folder) for uploaded doc's, like log files. Hierarchy is root/submitterId/submissionId/files. May be the ID of the project generated in the set-up step, above.
@@ -136,7 +142,54 @@ Now run:
 docker-compose --verbose up
 ```
 
+###### Running the Orchestrator as a Docker container with workflows submitted to a Workflow Execution Service
+
+The instructions in the previous sections should be modified as follows:
+
+- `WES_ENDPOINT` - The address prefix of the WES Server, e.g., https://weshost.com/ga4gh/wes/v1.
+- `WES_SHARED_DIR_PROPERTY` - The location of a folder accessible by both the Orchestrator and the WES server.  This is where the Synapse credentials file will be written.  Note, this means that the server and the Orchestrator must share a file system.
+- `DOCKER_ENGINE_URL` - omit this parameter
+- `DOCKER_CERT_PATH_HOST` - omit this parameter
+- `TOIL_CLI_OPTIONS` - omit this parameter
+- `WORKFLOW_ENGINE_DOCKER_IMAGE` - omit this parameter
+- `RUN_WORKFLOW_CONTAINER_IN_PRIVILEGED_MODE` - omit this parameter
+
+To start the service use
+
+
+```
+docker-compose -f docker-compose-wes.yaml --verbose up
+```
+
+##### Running the Orchestrator as an Executable .jar file
+Sometimes you are forced to be on infrastructure that doesn't allow Docker.  To support this we have also provided the Orchestrator in the form of an executable .jar file.  You can find the setup instructions below.   You can download the jar files [here](https://github.com/Sage-Bionetworks/SynapseWorkflowOrchestrator/releases)
+
+Running the container as an executable .jar file still allows you the choice of running the workflow jobs themselves as Docker containers or as submissions to a Workflow Excecution Service (W.E.S.)  The example below includes environment settings for the latter.  Please refer to the setting instructions above to see the full range of options.
+
+```
+sudo yum install java-1.8.0-openjdk
+sudo yum install java-1.8.0-openjdk-devel
+# Use screen to allow for continous running
+screen -S orchestrator
+# Export all the values you use in your .env file
+# these values are explained above
+export WES_ENDPOINT=http://localhost:8082/ga4gh/wes/v1
+export WES_SHARED_DIR_PROPERTY=/path/to/something
+export SYNAPSE_USERNAME=xxxxxx
+export SYNAPSE_PASSWORD=xxxxxx
+export WORKFLOW_OUTPUT_ROOT_ENTITY_ID=syn3333
+# Remember to put quotes around the EVALUATION_TEMPLATES
+export EVALUATION_TEMPLATES='{"111": "syn111"}'
+export COMPOSE_PROJECT_NAME=workflow_orchestrator
+# export MAX_CONCURRENT_WORKFLOWS=
+java -jar  WorkflowOrchestrator-1.0-SNAPSHOT-jar-with-dependencies.jar
+```
+
+
+
 #### Submit a job to the queue
+
+Jobs can be submitted using the Synapse web portal.  Below is a command-line convenience for submitting using a Dockerized tool.
 
 ```
 docker run --rm -it -e SYNAPSE_USERNAME=xxxxx -e SYNAPSE_PASSWORD=xxxxx -e EVALUATION_ID=xxxxx \
@@ -203,22 +256,28 @@ The workflow is passed the IDs of both the locked and unlocked submission folder
 
 #### Timing out
 
-The workflow orchestrator checks each submission for an integer (long) annotation named `org.sagebionetworks.SynapseWorkflowOrchestrator.TimeRemaining`. If the value is present and not greater than zero then the submission will be stopped and a "timed out" notification sent. If the annotation is not present then no action will be taken. Through this mechanism a custom application can determine which submissions have exceeded their alloted time and stop them. Such an application is communicating with the workflow orchestrator via the submissions' annotations. This architecture allows each submission queue administrator to customize the time-out logic rather than having some particular algorithm hard-coded into the workflow orchestrator.
+The workflow orchestrator checks each submission for an integer (long) annotation named `orgSagebionetworksSynapseWorkflowOrchestratorTimeRemaining`. If the value is present and not greater than zero then the submission will be stopped and a "timed out" notification sent. If the annotation is not present then no action will be taken. Through this mechanism a custom application can determine which submissions have exceeded their alloted time and stop them. Such an application is communicating with the workflow orchestrator via the submissions' annotations. This architecture allows each submission queue administrator to customize the time-out logic rather than having some particular algorithm hard-coded into the workflow orchestrator.
 
 
 #### Decommissioning a Machine
 If there is a need to decommission a machine while workflows are pending, then do the following:
 
-Stop the service,
+Stop the service, e.g., if you started via Docker:
 
 ```
 docker-compose down
 ```
-Set the environment variable, `ACCEPT_NEW_SUBMISSIONS` to `false`. Now restart, 
+Set the environment variable, `ACCEPT_NEW_SUBMISSIONS` to `false`. Now restart, if you started via Docker:
 
 ```
 docker-compose up
 ```
+or, if using Docker with W.E.S.:
+
+```
+docker-compose up -f docker-compose-wes.yaml
+```
+
 The currently running submissions will finish up but no new jobs will be started. When all running jobs have finished,
 
 ```
