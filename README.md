@@ -81,7 +81,7 @@ or
 ```
 DOCKER_ENGINE_URL=tcp://192.168.0.1:2376
 ```
-*`DOCKER_CERT_PATH_HOST` - (optional) path to credentials files allowing networked access to Docker engine. Required if connecting over the network (`DOCKER_ENGINE_URL` starts with `http`, `https` or `tcp`, but not with `unix`). Example:
+* `DOCKER_CERT_PATH_HOST` - (optional) path to credentials files allowing networked access to Docker engine. Required if connecting over the network (`DOCKER_ENGINE_URL` starts with `http`, `https` or `tcp`, but not with `unix`). Example:
 ```
 DOCKER_CERT_PATH_HOST=/my/home/dir/.docker/machine/certs
 ```
@@ -89,25 +89,21 @@ When using `DOCKER_CERT_PATH_HOST` you must also add the following under `volume
 ```
     - ${DOCKER_CERT_PATH_HOST}:/certs:ro
 ```
-
-- `WES_ENDPOINT` - omit this parameter
-- `WES_SHARED_DIR_PROPERTY` - omit this parameter
-- `SYNAPSE_USERNAME` - Synapse credentials under which the Workflow Orchestrator will run. Must have access to evaluation queue(s) being serviced
-- `SYNAPSE_PASSWORD` - password for `SYNAPSE_USERNAME`
-- `WORKFLOW_OUTPUT_ROOT_ENTITY_ID` - root (Project or Folder) for uploaded doc's, like log files. Hierarchy is root/submitterId/submissionId/files. May be the ID of the project generated in the set-up step, above.
-- `EVALUATION_TEMPLATES` - JSON mapping evaluation ID(s) to URL(s) for workflow template archive. Returned by the set up step, above. Example:
-
+* `WES_ENDPOINT` - omit this parameter
+* `WES_SHARED_DIR_PROPERTY` - omit this parameter
+* `SYNAPSE_USERNAME` - Synapse credentials under which the Workflow Orchestrator will run. Must have access to evaluation queue(s) being serviced
+* `SYNAPSE_PASSWORD` - password for `SYNAPSE_USERNAME`
+* `WORKFLOW_OUTPUT_ROOT_ENTITY_ID` - root (Project or Folder) for uploaded doc's, like log files. Hierarchy is root/submitterId/submissionId/files. May be the ID of the project generated in the set-up step, above.
+* `EVALUATION_TEMPLATES` - JSON mapping evaluation ID(s) to URL(s) for workflow template archive. Returned by the set up step, above. Example:
 ```
 {"9614045":"syn16799953"}
 ```
-- `TOIL_CLI_OPTIONS` - (optional, but highly recommended) Used when `DOCKER_ENGINE_URL` is selected. Space separated list of options. (Without the toil parameters, you may run into errors when a new workflow job is started). See https://toil.readthedocs.io/en/3.15.0/running/cliOptions.html. Example:
-
+* `TOIL_CLI_OPTIONS` - (optional, but highly recommended) Used when `DOCKER_ENGINE_URL` is selected. Space separated list of options. (Without the toil parameters, you may run into errors when a new workflow job is started). See https://toil.readthedocs.io/en/3.15.0/running/cliOptions.html. Example:
 ```
 TOIL_CLI_OPTIONS=--defaultMemory 100M --retryCount 0 --defaultDisk 1000000
 ```
-- `NOTIFICATION_PRINCIPAL_ID` - (optional) Synapse ID of user or team to be notified of system issues. If omitted then notification are sent to the Synapse account under which the workflow pipeline is run.
-- `SUBMITTER_NOTIFICATION_MASK` - controls for which events notifications are sent to the submitter. The integer value is a union of these masks:
-
+* `NOTIFICATION_PRINCIPAL_ID` - (optional) Synapse ID of user or team to be notified of system issues. If omitted then notification are sent to the Synapse account under which the workflow pipeline is run.
+* `SUBMITTER_NOTIFICATION_MASK` - controls for which events notifications are sent to the submitter. The integer value is a union of these masks:
 ```
  1: send message when job has started;
  2: send message when job has completed;
@@ -115,20 +111,17 @@ TOIL_CLI_OPTIONS=--defaultMemory 100M --retryCount 0 --defaultDisk 1000000
  8: send message when job has been stopped by user;
 16: send message when job has timed out;
 ```
-
 Default is 31, i.e. send notifications for every event.
-- `SHARE_RESULTS_IMMEDIATELY` - (optional) if omitted or set to 'true', uploaded results are immediately accessible by submitter. If false then a separate process must 'unlock' files. This is useful when workflows run on sensitive data and administration needs to control the volume of results returned to the workflow submitter.
-- `DATA_UNLOCK_SYNAPSE_PRINCIPAL_ID` - (optional) Synapse ID of user authorized to share (unlock) workflow output files 
-	(only required if `SHARE_RESULTS_IMMEDIATELY` is false).
-- `WORKFLOW_ENGINE_DOCKER_IMAGE` - (optional) Used when `DOCKER_ENGINE_URL` is selected. Defaults to sagebionetworks/synapse-workflow-orchestrator-toil:1.0 , produced from [this Dockerfile](Dockerfile.Toil). When overriding the default, you must ensure that the existing dependencies are preserved. One way to do this is to start your own Dockerfile with
-
+* `SHARE_RESULTS_IMMEDIATELY` - (optional) if omitted or set to 'true', uploaded results are immediately accessible by submitter. If false then a separate process must 'unlock' files. This is useful when workflows run on sensitive data and administration needs to control the volume of results returned to the workflow submitter.
+* `DATA_UNLOCK_SYNAPSE_PRINCIPAL_ID` - (optional) Synapse ID of user authorized to share (unlock) workflow output files (only required if `SHARE_RESULTS_IMMEDIATELY` is false).
+* `WORKFLOW_ENGINE_DOCKER_IMAGE` - (optional) Used when `DOCKER_ENGINE_URL` is selected. Defaults to sagebionetworks/synapse-workflow-orchestrator-toil:1.0 , produced from [this Dockerfile](Dockerfile.Toil). When overriding the default, you must ensure that the existing dependencies are preserved. One way to do this is to start your own Dockerfile with
 ```
 FROM sagebionetworks/synapse-workflow-orchestrator-toil:1.0 
 ```
 and then to add additional dependencies.
-- `MAX_CONCURRENT_WORKFLOWS` - (optional) the maximum number of workflows that will be allowed to run at any time. Default is 10.
-- `RUN_WORKFLOW_CONTAINER_IN_PRIVILEGED_MODE` - (optional) Used when `DOCKER_ENGINE_URL` is selected. If `true` then when the containerized workflow is initiated, the container it's running in will be run in 'privileged mode'. In some environments this is required for workflows which themselves run containers.
-- `ACCEPT_NEW_SUBMISSIONS` - (optional) if omitted then new submissions will be started. If present, then should be boolean (`true` or `false`). If `false` then no new submissions will be started, only existing ones will be finished up. This is an important feature for smoothly decommissioning one machine to switch to another.
+* `MAX_CONCURRENT_WORKFLOWS` - (optional) the maximum number of workflows that will be allowed to run at any time. Default is 10.
+* `RUN_WORKFLOW_CONTAINER_IN_PRIVILEGED_MODE` - (optional) Used when `DOCKER_ENGINE_URL` is selected. If `true` then when the containerized workflow is initiated, the container it's running in will be run in 'privileged mode'. In some environments this is required for workflows which themselves run containers.
+* `ACCEPT_NEW_SUBMISSIONS` - (optional) if omitted then new submissions will be started. If present, then should be boolean (`true` or `false`). If `false` then no new submissions will be started, only existing ones will be finished up. This is an important feature for smoothly decommissioning one machine to switch to another.
 
 Now run:
 
