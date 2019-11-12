@@ -75,7 +75,6 @@ Set the following as properties in a .env file to use with Docker Compose. Pleas
 
 * `DOCKER_ENGINE_URL` - address of the Docker engine. Along with `DOCKER_CERT_PATH_HOST` this is needed since the Workflow Orchestrator will manage containers. Examples:
 +
-.............................................
 ```
 DOCKER_ENGINE_URL=unix:///var/run/docker.sock
 ```
@@ -83,8 +82,6 @@ or
 ```
 DOCKER_ENGINE_URL=tcp://192.168.0.1:2376
 ```
-.............................................
-+
 * `DOCKER_CERT_PATH_HOST` - (optional) path to credentials files allowing networked access to Docker engine. Required if connecting over the network (`DOCKER_ENGINE_URL` starts with `http`, `https` or `tcp`, but not with `unix`). Example:
 ```
 DOCKER_CERT_PATH_HOST=/my/home/dir/.docker/machine/certs
