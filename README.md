@@ -26,10 +26,10 @@ Links one or more Synapse Evaluation queues to a workflow engine. Each Evaluatio
 ### Setting up Amazon linux environment
 
 1. Install docker `sudo yum install docker`
-2. Must start the docker service: `sudo service docker start` or you will get this error: `Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?`
-3. Allow for non-root user to manage docker: https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user
-4. Log out and back into the instance to be able to do `docker images` as current user
-5. Install docker-compose https://docs.docker.com/compose/install/#install-compose.
+1. Must start the docker service: `sudo service docker start` or you will get this error: `Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?`
+1. Allow for non-root user to manage docker: https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user
+1. Log out and back into the instance to be able to do `docker images` as current user
+1. Install docker-compose https://docs.docker.com/compose/install/#install-compose.
 
 ### To use:
 
@@ -56,19 +56,16 @@ Will print out created Project ID and the value for the `EVALUATION_TEMPLATES` i
 If you already have an existing project and do not want to follow the `Create a project, submission queue, workflow template and dashboard` instructions above, here are instructions on how to link your workflow with an Evaluation queue.
 
 1. Create an Evaluation queue in a Synapse Project and retrieve the Evaluation id. View instructions [here](https://docs.synapse.org/articles/evaluation_queues.html) to learn more. For this example, lets say the Evaluation id is `1234`.
-
-2. Obtain the link of your github repo as a zipped file. (eg. https://github.com/Sage-Bionetworks/SynapseWorkflowExample/archive/master.zip)
-
-3. Upload this URL into your project and set the annotation ROOT_TEMPLATE to be the path of your workflow. So for the example, the value would be `SynapseWorkflowExample-master/workflow-entrypoint.cwl`. For this example, lets say the Synapse id of this File is `syn2345`
-
-4. `EVALUATION_TEMPLATES` will be: {"1234":"syn2345"}
+1. Obtain the link of your github repo as a zipped file. (eg. https://github.com/Sage-Bionetworks/SynapseWorkflowExample/archive/master.zip)
+1. Upload this URL into your project and set the annotation ROOT_TEMPLATE to be the path of your workflow. So for the example, the value would be `SynapseWorkflowExample-master/workflow-entrypoint.cwl`. For this example, lets say the Synapse id of this File is `syn2345`
+1. `EVALUATION_TEMPLATES` will be: {"1234":"syn2345"}
 
 
 #### Start the workflow service
 
 There are two main configuration choices to make:  
 1. Do you wish to run the Orchestrator as a Docker container or as a Java executable .jar file?  The former is convenient if your environment supports Docker and you are authorized to run Docker containers in it, while the latter is an alternative requiring the Java Runtime Environment;
-2. Do you wish to run the workflow jobs themselves as Docker containers or by sending jobs as web requests to a Workflow Execution Service (W.E.S.)?  The former is useful if Docker is available while the latter lets you leverage the features of a chosen W.E.S. implementation.
+1. Do you wish to run the workflow jobs themselves as Docker containers or by sending jobs as web requests to a Workflow Execution Service (W.E.S.)?  The former is useful if Docker is available while the latter lets you leverage the features of a chosen W.E.S. implementation.
 
 ##### Running the Orchestrator as a Docker container
 
