@@ -1,6 +1,6 @@
 **Synapse Workflow Orchestrator Build**
 
-![Docker Automated](https://img.shields.io/docker/automated/sagebionetworks/synapse-workflow-orchestrator.svg) ![Docker Build](https://img.shields.io/docker/build/sagebionetworks/synapse-workflow-orchestrator.svg)
+![Docker Automated](https://img.shields.io/docker/cloud/automated/sagebionetworks/synapse-workflow-orchestrator.svg) ![Docker Build](https://img.shields.io/docker/cloud/build/sagebionetworks/synapse-workflow-orchestrator.svg)
 
 # Synapse Workflow Orchestrator
 Links one or more Synapse Evaluation queues to a workflow engine. Each Evaluation queue is associated with a workflow template. Each submission is a workflow job, an instance of the workflow template. Upon submission to the Evaluation queue the Workflow Orchestrator initiates and tracks the workflow job, sending progress notifications and uploading log files.
