@@ -63,15 +63,13 @@ If you already have an existing project and do not want to follow the `Create a 
 
 ### Start the workflow service
 
-There are two main configuration choices to make:  
-1. Do you wish to run the Orchestrator as a Docker container or as a Java executable .jar file?  The former is convenient if your environment supports Docker and you are authorized to run Docker containers in it, while the latter is an alternative requiring the Java Runtime Environment;
-1. Do you wish to run the workflow jobs themselves as Docker containers or by sending jobs as web requests to a Workflow Execution Service (W.E.S.)?  The former is useful if Docker is available while the latter lets you leverage the features of a chosen W.E.S. implementation.
+There are three ways to start the workflow service:
+1. Orchestrator with Docker containers
+1. Orchestrator with Workflow Execution Service (W.E.S.)
+1. Orchestrator with a Java executable `.jar` file + Docker
 
-#### Running the Orchestrator as a Docker container
-
-##### Running the Orchestrator as a Docker container with workflows also run as Docker containers 
-
-Set the following as properties in a .env file to use with Docker Compose. Please carefully read through these properties and fill out the .envTemplate, but make sure you rename the template to .env. 
+#### Running the Orchestrator with Docker containers
+This method is convenient if your environment supports Docker and you are authorized to run Docker containers in it. Set the following as properties in a .env file to use with Docker Compose. Please carefully read through these properties and fill out the .envTemplate, but make sure you rename the template to .env.
 
 * `DOCKER_ENGINE_URL` - address of the Docker engine. Along with `DOCKER_CERT_PATH_HOST` this is needed since the Workflow Orchestrator will manage containers. Examples:
 
@@ -132,15 +130,15 @@ Set the following as properties in a .env file to use with Docker Compose. Pleas
 * `RUN_WORKFLOW_CONTAINER_IN_PRIVILEGED_MODE` - (optional) Used when `DOCKER_ENGINE_URL` is selected. If `true` then when the containerized workflow is initiated, the container it's running in will be run in 'privileged mode'. In some environments this is required for workflows which themselves run containers.
 * `ACCEPT_NEW_SUBMISSIONS` - (optional) if omitted then new submissions will be started. If present, then should be boolean (`true` or `false`). If `false` then no new submissions will be started, only existing ones will be finished up. This is an important feature for smoothly decommissioning one machine to switch to another.
 
-Now run:
+To start the service use:
 
 ```
 docker-compose --verbose up
 ```
 
-##### Running the Orchestrator as a Docker container with workflows submitted to a Workflow Execution Service
+#### Running the Orchestrator with Workflow Execution Service
 
-The instructions in the previous sections should be modified as follows:
+Do you wish to run the workflow jobs themselves as Docker containers or by sending jobs as web requests to a Workflow Execution Service (W.E.S.)? This lets you leverage the features of a chosen W.E.S. implementation. The instructions in the previous sections should be modified as follows:
 
 * `WES_ENDPOINT` - The address prefix of the WES Server, e.g., https://weshost.com/ga4gh/wes/v1.
 * `WES_SHARED_DIR_PROPERTY` - The location of a folder accessible by both the Orchestrator and the WES server.  This is where the Synapse credentials file will be written.  Note, this means that the server and the Orchestrator must share a file system.
@@ -150,13 +148,13 @@ The instructions in the previous sections should be modified as follows:
 * `WORKFLOW_ENGINE_DOCKER_IMAGE` - omit this parameter
 * `RUN_WORKFLOW_CONTAINER_IN_PRIVILEGED_MODE` - omit this parameter
 
-To start the service use
+To start the service use:
 
 ```
 docker-compose -f docker-compose-wes.yaml --verbose up
 ```
 
-##### Running the Orchestrator as an Executable .jar file
+#### Running the Orchestrator as an Executable .jar file
 Sometimes you are forced to be on infrastructure that doesn't allow Docker.  To support this we have also provided the Orchestrator in the form of an executable .jar file.  You can find the setup instructions below.   You can download the jar files [here](https://github.com/Sage-Bionetworks/SynapseWorkflowOrchestrator/releases)
 
 Running the container as an executable .jar file still allows you the choice of running the workflow jobs themselves as Docker containers or as submissions to a Workflow Excecution Service (W.E.S.)  The example below includes environment settings for the latter.  Please refer to the setting instructions above to see the full range of options.
@@ -177,6 +175,10 @@ export WORKFLOW_OUTPUT_ROOT_ENTITY_ID=syn3333
 export EVALUATION_TEMPLATES='{"111": "syn111"}'
 export COMPOSE_PROJECT_NAME=workflow_orchestrator
 # export MAX_CONCURRENT_WORKFLOWS=
+```
+
+To start the service use:
+```
 java -jar  WorkflowOrchestrator-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
 
