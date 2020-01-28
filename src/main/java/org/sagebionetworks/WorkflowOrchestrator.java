@@ -66,6 +66,7 @@ import org.json.JSONObject;
 import org.sagebionetworks.client.SynapseClient;
 import org.sagebionetworks.client.exceptions.SynapseConflictingUpdateException;
 import org.sagebionetworks.client.exceptions.SynapseException;
+import org.sagebionetworks.evaluation.model.Evaluation;
 import org.sagebionetworks.evaluation.model.Submission;
 import org.sagebionetworks.evaluation.model.SubmissionBundle;
 import org.sagebionetworks.evaluation.model.SubmissionStatus;
@@ -567,7 +568,18 @@ public class WorkflowOrchestrator  {
 				boolean shareImmediately = StringUtils.isEmpty(shareImmediatelyString) ? true : new Boolean(shareImmediatelyString);
 				String sharedSubmissionFolderId = shareImmediately ? submissionFolderId : null;
 				String messageBody = createSubmissionStartedMessage(submitter.getName(), submission.getId(), sharedSubmissionFolderId);
-				messageUtils.sendMessage(submittingUserOrTeamId, SUBMISSION_PROCESSING_STARTED_SUBJECT, messageBody);
+				Evaluation evaluation = evaluationUtils.getEvaluation(submission.getEvaluationId());
+				StringBuilder subject = new StringBuilder(SUBMISSION_PROCESSING_STARTED_SUBJECT);
+				if (StringUtils.isEmpty(evaluation.getName())) {
+					subject.append("evaluation queue ");
+					subject.append(evaluation.getId());
+				} else {
+					subject.append(evaluation.getName());
+					subject.append(" (");
+					subject.append(evaluation.getId());
+					subject.append(")");
+				}
+				messageUtils.sendMessage(submittingUserOrTeamId, subject.toString(), messageBody);
 				updatedHasSubmissionStartedMessageBeenSent=true;
 			}
 		} // end uploading logs

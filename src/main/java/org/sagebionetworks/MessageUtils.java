@@ -21,7 +21,7 @@ public class MessageUtils {
 	public  static final String WORKFLOW_TERMINATED_SUBJECT = "Workflow Terminated";
 	public  static final String WORKFLOW_COMPLETE_SUBJECT = "Workflow Complete";
 	private static final String SUBMISSION_PROCESSING_STARTED = "SubmissionProcessingStarted.txt";
-	public  static final String SUBMISSION_PROCESSING_STARTED_SUBJECT = "Submission Processing Started";
+	public  static final String SUBMISSION_PROCESSING_STARTED_SUBJECT = "Submission Processing Started in ";
 	
 	private SynapseClient synapse;
 	

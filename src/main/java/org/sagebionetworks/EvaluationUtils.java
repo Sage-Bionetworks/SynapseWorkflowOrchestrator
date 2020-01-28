@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 import org.sagebionetworks.client.SynapseClient;
 import org.sagebionetworks.client.exceptions.SynapseException;
+import org.sagebionetworks.evaluation.model.Evaluation;
 import org.sagebionetworks.evaluation.model.SubmissionBundle;
 import org.sagebionetworks.evaluation.model.SubmissionStatus;
 import org.sagebionetworks.evaluation.model.SubmissionStatusEnum;
@@ -367,6 +368,10 @@ public class EvaluationUtils {
 		if (statusMods.getStatus()!=null) submissionStatus.setStatus(statusMods.getStatus());
 		if (statusMods.getCanCancel()!=null) submissionStatus.setCanCancel(statusMods.getCanCancel());
 		if (statusMods.getCancelRequested()!=null) submissionStatus.setCancelRequested(statusMods.getCancelRequested());
+	}
+	
+	public Evaluation getEvaluation(String evaluationId) throws SynapseException {
+		return synapse.getEvaluation(evaluationId);
 	}
 	
 	/**
