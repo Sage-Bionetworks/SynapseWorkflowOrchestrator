@@ -234,6 +234,12 @@ public class Archiver {
 		return submitterFolder;
 	}
 
+	public Folder getOrCreateSubmissionUploadFolder(String submissionId, String submittingUserOrTeamId) throws SynapseException {
+		String shareImmediatelyString = getProperty("SHARE_RESULTS_IMMEDIATELY", false);
+		boolean shareImmediately = StringUtils.isEmpty(shareImmediatelyString) ? true : new Boolean(shareImmediatelyString);
+		return getOrCreateSubmissionUploadFolder( submissionId, submittingUserOrTeamId, shareImmediately);
+	}
+		
 	public Folder getOrCreateSubmissionUploadFolder(String submissionId, String submittingUserOrTeamId, boolean sharedWithSubmitter) throws SynapseException {
 		Folder submitterFolder = getOrCreateSubmitterFolder(submittingUserOrTeamId, sharedWithSubmitter);
 
@@ -247,13 +253,14 @@ public class Archiver {
 	}
 
 	/*
-	 * returns the submission folder ID
+	 * returns the tail of the uploaded logs
 	 */
-	public SubmissionFolderAndLogTail uploadLogs(WorkflowJob workflowJob, 
+	public String uploadLogs(WorkflowJob workflowJob, 
 			String submissionId,
 			String submittingUserOrTeamId,
 			String nameSuffix, // e.g., "_logs"
-			Integer maxTailLengthInCharacters) throws Throwable {
+			Integer maxTailLengthInCharacters,
+			Folder submissionFolder) throws Throwable {
 		String filePrefix = submissionId+nameSuffix;
 		filePrefix  = filePrefix.replaceAll("[^a-zA-Z0-9-]", "_");
 		// get the logs from the container
@@ -264,20 +271,15 @@ public class Archiver {
 		// if no output, just return
 		if (Files.size(logFile)==0) {
 			log.info("logFile "+logFile+" has no content.  Nothing to upload.");
-			return new SubmissionFolderAndLogTail(null,null);
+			return null;
 		}
 
 		log.info("Found "+Files.size(logFile)+" bytes to log.");
-
-		
-		String shareImmediatelyString = getProperty("SHARE_RESULTS_IMMEDIATELY", false);
-		boolean shareImmediately = StringUtils.isEmpty(shareImmediatelyString) ? true : new Boolean(shareImmediatelyString);
-		Folder submissionFolder =  getOrCreateSubmissionUploadFolder(submissionId, submittingUserOrTeamId, shareImmediately);
 
 		archiveLogsToSynapse(logFile, filePrefix, submissionFolder);
 
 		logFile.toFile().delete();
 
-		return new SubmissionFolderAndLogTail(submissionFolder,logTail);
+		return logTail;
 	}
 }

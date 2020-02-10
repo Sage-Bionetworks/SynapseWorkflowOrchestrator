@@ -541,24 +541,27 @@ public class WorkflowOrchestrator  {
 		boolean timeToUploadLogs = lastLogUploadTimeStamp==null ||
 				lastLogUploadTimeStamp+UPLOAD_PERIOD_MILLIS<System.currentTimeMillis();
 
-		SubmissionFolderAndLogTail submissionFolderAndLogTail = null;
+		String logTail = null;
 		String submissionFolderId = null;
 		// we upload logs periodically and when container finally finishes, unless we've exceeded the maximum log size
 		if ((true/*TODO not if log file size exceeded*/) && (timeToUploadLogs || !isRunning)) {
 			String submittingUserOrTeamId = SubmissionUtils.getSubmittingUserOrTeamId(submission);
 			Submitter submitter = submissionUtils.getSubmitter(submission);
 
-			submissionFolderAndLogTail = archiver.uploadLogs(
+			Folder submissionFolder =  archiver.getOrCreateSubmissionUploadFolder(submission.getId(), submittingUserOrTeamId);
+
+			logTail = archiver.uploadLogs(
 					job, 
 					submission.getId(),
 					submittingUserOrTeamId, 
 					LOGS_SUFFIX,
-					MAX_LOG_ANNOTATION_CHARS);
-			Folder submissionFolder = submissionFolderAndLogTail.getSubmissionFolder();
+					MAX_LOG_ANNOTATION_CHARS,
+					submissionFolder);
+
 			submissionFolderId = submissionFolder==null?null:submissionFolder.getId();
 
 			if (ERROR_ENCOUNTERED_DURING_EXECUTION.toString().equals(failureReason)) {
-				failureReason = submissionFolderAndLogTail.getLogTail();
+				failureReason = logTail;
 			}
 
 			String hasSubmissionStartedMessageBeenSentString = EvaluationUtils.getStringAnnotation(submissionStatus, SUBMISSION_PROCESSING_STARTED_SENT);
