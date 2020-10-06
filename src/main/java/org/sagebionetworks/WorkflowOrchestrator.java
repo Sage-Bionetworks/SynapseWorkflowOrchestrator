@@ -1,4 +1,5 @@
 package org.sagebionetworks;
+
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -12,8 +13,9 @@ import org.sagebionetworks.evaluation.model.Submission;
 import org.sagebionetworks.evaluation.model.SubmissionBundle;
 import org.sagebionetworks.evaluation.model.SubmissionStatus;
 import org.sagebionetworks.evaluation.model.SubmissionStatusEnum;
-import org.sagebionetworks.repo.model.Annotations;
 import org.sagebionetworks.repo.model.Folder;
+import org.sagebionetworks.repo.model.annotation.v2.Annotations;
+import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValue;
 import org.sagebionetworks.repo.model.auth.LoginRequest;
 import org.sagebionetworks.repo.model.file.ExternalFileHandle;
 import org.sagebionetworks.repo.model.file.FileHandle;
@@ -37,7 +39,6 @@ import static org.sagebionetworks.Constants.DOCKER_ENGINE_URL_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.MAX_CONCURRENT_WORKFLOWS_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.MAX_LOG_ANNOTATION_CHARS;
 import static org.sagebionetworks.Constants.NOTIFICATION_PRINCIPAL_ID;
-import static org.sagebionetworks.Constants.ROOT_TEMPLATE_ANNOTATION_NAME;
 import static org.sagebionetworks.Constants.SUBMISSION_COMPLETED;
 import static org.sagebionetworks.Constants.SUBMISSION_FAILED;
 import static org.sagebionetworks.Constants.SUBMISSION_STARTED;
@@ -46,6 +47,7 @@ import static org.sagebionetworks.Constants.SUBMISSION_TIMED_OUT;
 import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
 import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
 import static org.sagebionetworks.Constants.WES_ENDPOINT_PROPERTY_NAME;
+import static org.sagebionetworks.Constants.ROOT_TEMPLATE_ANNOTATION_NAME;
 import static org.sagebionetworks.EvaluationUtils.ADMIN_ANNOTS_ARE_PRIVATE;
 import static org.sagebionetworks.EvaluationUtils.FAILURE_REASON;
 import static org.sagebionetworks.EvaluationUtils.JOB_LAST_UPDATED_TIME_STAMP;
@@ -187,8 +189,9 @@ public class WorkflowOrchestrator  {
 			String urlString = efh.getExternalURL();
 			URL url = new URL(urlString);
 			// get annotation for the CWL entry point.  Does the file exist?
-			// BEGIN NEW ANNOTATION CODE
 
+
+			/**
 			Annotations annotations = synapse.getAnnotations(entityId);
 			org.sagebionetworks.repo.model.annotation.v2.Annotations annotations = synapse.getAnnotationsV2(entityId);
 			Map<String, List<String>> annotationsMap = annotations.getStringAnnotations();
@@ -200,7 +203,19 @@ public class WorkflowOrchestrator  {
 				new IllegalStateException(entityId+" has no string annotation called "+ROOT_TEMPLATE_ANNOTATION_NAME);
 			String rootTemplateString = stringAnnotations.get(0);
 			result.put(evaluationId, new WorkflowURLEntrypointAndSynapseRef(url, rootTemplateString, entityId));
-			// END NEW ANNOTATION CODE
+			 **/
+
+
+			Annotations annotations = synapse.getAnnotationsV2(entityId);
+			Map<String, AnnotationsValue> annotationsMap = annotations.getAnnotations();
+			if (annotationsMap==null) throw
+					new IllegalStateException("Expected string annotation called "+
+							ROOT_TEMPLATE_ANNOTATION_NAME+" for "+entityId+" but the entity has no string annotations.");
+			AnnotationsValue valueAnnotations = annotationsMap.get(ROOT_TEMPLATE_ANNOTATION_NAME);
+			if (valueAnnotations == null || valueAnnotations.toString().isEmpty() ) throw
+					new IllegalStateException(entityId+" has no AnnotationValue called "+ROOT_TEMPLATE_ANNOTATION_NAME);
+			String rootTemplateString = valueAnnotations.toString();
+			result.put(evaluationId, new WorkflowURLEntrypointAndSynapseRef(url, rootTemplateString, entityId));
 		}
 		return result;
 	}
