@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.sagebionetworks:schema-to-pojo-core:0.6.3">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/sagebionetworks/schema-to-pojo-core/0.6.3/schema-to-pojo-core-0.6.3.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/sagebionetworks/schema-to-pojo-core/0.6.3/schema-to-pojo-core-0.6.3-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/sagebionetworks/schema-to-pojo-core/0.6.3/schema-to-pojo-core-0.6.3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

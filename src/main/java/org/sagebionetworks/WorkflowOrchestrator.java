@@ -1,4 +1,35 @@
 package org.sagebionetworks;
+import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.sagebionetworks.client.SynapseClient;
+import org.sagebionetworks.client.exceptions.SynapseConflictingUpdateException;
+import org.sagebionetworks.client.exceptions.SynapseException;
+import org.sagebionetworks.evaluation.model.Evaluation;
+import org.sagebionetworks.evaluation.model.Submission;
+import org.sagebionetworks.evaluation.model.SubmissionBundle;
+import org.sagebionetworks.evaluation.model.SubmissionStatus;
+import org.sagebionetworks.evaluation.model.SubmissionStatusEnum;
+import org.sagebionetworks.repo.model.Annotations;
+import org.sagebionetworks.repo.model.Folder;
+import org.sagebionetworks.repo.model.auth.LoginRequest;
+import org.sagebionetworks.repo.model.file.ExternalFileHandle;
+import org.sagebionetworks.repo.model.file.FileHandle;
+import org.sagebionetworks.repo.model.file.FileHandleResults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayOutputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.sagebionetworks.Constants.ACCEPT_NEW_SUBMISSIONS_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.DEFAULT_MAX_CONCURRENT_WORKFLOWS;
@@ -47,38 +78,6 @@ import static org.sagebionetworks.WorkflowUpdateStatus.ERROR_ENCOUNTERED_DURING_
 import static org.sagebionetworks.WorkflowUpdateStatus.IN_PROGRESS;
 import static org.sagebionetworks.WorkflowUpdateStatus.STOPPED_TIME_OUT;
 import static org.sagebionetworks.WorkflowUpdateStatus.STOPPED_UPON_REQUEST;
-
-import java.io.ByteArrayOutputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.sagebionetworks.client.SynapseClient;
-import org.sagebionetworks.client.exceptions.SynapseConflictingUpdateException;
-import org.sagebionetworks.client.exceptions.SynapseException;
-import org.sagebionetworks.evaluation.model.Evaluation;
-import org.sagebionetworks.evaluation.model.Submission;
-import org.sagebionetworks.evaluation.model.SubmissionBundle;
-import org.sagebionetworks.evaluation.model.SubmissionStatus;
-import org.sagebionetworks.evaluation.model.SubmissionStatusEnum;
-import org.sagebionetworks.repo.model.Annotations;
-import org.sagebionetworks.repo.model.Folder;
-import org.sagebionetworks.repo.model.auth.LoginRequest;
-import org.sagebionetworks.repo.model.file.ExternalFileHandle;
-import org.sagebionetworks.repo.model.file.FileHandle;
-import org.sagebionetworks.repo.model.file.FileHandleResults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 public class WorkflowOrchestrator  {
@@ -188,7 +187,10 @@ public class WorkflowOrchestrator  {
 			String urlString = efh.getExternalURL();
 			URL url = new URL(urlString);
 			// get annotation for the CWL entry point.  Does the file exist?
+			// BEGIN NEW ANNOTATION CODE
+
 			Annotations annotations = synapse.getAnnotations(entityId);
+			org.sagebionetworks.repo.model.annotation.v2.Annotations annotations = synapse.getAnnotationsV2(entityId);
 			Map<String, List<String>> annotationsMap = annotations.getStringAnnotations();
 			if (annotationsMap==null) throw 
 				new IllegalStateException("Expected string annotation called "+
@@ -198,6 +200,7 @@ public class WorkflowOrchestrator  {
 				new IllegalStateException(entityId+" has no string annotation called "+ROOT_TEMPLATE_ANNOTATION_NAME);
 			String rootTemplateString = stringAnnotations.get(0);
 			result.put(evaluationId, new WorkflowURLEntrypointAndSynapseRef(url, rootTemplateString, entityId));
+			// END NEW ANNOTATION CODE
 		}
 		return result;
 	}
@@ -405,8 +408,11 @@ public class WorkflowOrchestrator  {
 			final Submission submission = submissionBundle.getSubmission();
 			final SubmissionStatus submissionStatus = submissionBundle.getSubmissionStatus();
 			final SubmissionStatusModifications statusMods = new SubmissionStatusModifications();
-			
+
+// BEGIN NEW ANNOTATION CODE
+
 			String sharedSubmissionFolderId = shareImmediately ? EvaluationUtils.getStringAnnotation(submissionStatus, SUBMISSION_ARTIFACTS_FOLDER) : null;
+// END NEW ANNOTATION CODE
 
 			try {
 				Double progress = null;
@@ -535,9 +541,9 @@ public class WorkflowOrchestrator  {
 				updatedStatus = SubmissionStatusEnum.CLOSED;
 			}
 		}
-
-		
+// BEGIN NEW ANNOTATION CODE
 		Long lastLogUploadTimeStamp = EvaluationUtils.getLongAnnotation(submissionStatus, LAST_LOG_UPLOAD);
+// END NEW ANNOTATION CODE
 		boolean timeToUploadLogs = lastLogUploadTimeStamp==null ||
 				lastLogUploadTimeStamp+UPLOAD_PERIOD_MILLIS<System.currentTimeMillis();
 
@@ -563,8 +569,10 @@ public class WorkflowOrchestrator  {
 			if (ERROR_ENCOUNTERED_DURING_EXECUTION.toString().equals(failureReason)) {
 				failureReason = logTail;
 			}
-
+// BEGIN NEW ANNOTATION CODE
 			String hasSubmissionStartedMessageBeenSentString = EvaluationUtils.getStringAnnotation(submissionStatus, SUBMISSION_PROCESSING_STARTED_SENT);
+// END NEW ANNOTATION CODE
+
 			boolean hasSubmissionStartedMessageBeenSent = hasSubmissionStartedMessageBeenSentString!=null && new Boolean(hasSubmissionStartedMessageBeenSentString);
 			if (isRunning && !hasSubmissionStartedMessageBeenSent && notificationEnabled(SUBMISSION_STARTED)) {
 				String shareImmediatelyString = getProperty("SHARE_RESULTS_IMMEDIATELY", false);
@@ -590,7 +598,7 @@ public class WorkflowOrchestrator  {
 		if (!isRunning) {
 			workflowManager.deleteWorkFlowJob(job);
 		}
-
+// BEGIN NEW ANNOTATION CODE
 		EvaluationUtils.setAnnotation(statusMods, JOB_LAST_UPDATED_TIME_STAMP, System.currentTimeMillis(), PUBLIC_ANNOTATION_SETTING);
 		if (submissionFolderId!=null) {
 			EvaluationUtils.setAnnotation(statusMods, LAST_LOG_UPLOAD, System.currentTimeMillis(), ADMIN_ANNOTS_ARE_PRIVATE);    				
@@ -613,7 +621,7 @@ public class WorkflowOrchestrator  {
 		if (progress!=null) {
 			EvaluationUtils.setAnnotation(statusMods, PROGRESS, progress, false);
 		}
-
+// END NEW ANNOTATION CODE
 		if (workflowUpdateStatus==null) throw new IllegalStateException("Failed to set workflowUpdateStatus");
 		return workflowUpdateStatus;
 	}

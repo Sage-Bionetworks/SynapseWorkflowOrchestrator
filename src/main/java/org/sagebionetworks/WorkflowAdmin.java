@@ -1,22 +1,5 @@
 package org.sagebionetworks;
 
-import static org.sagebionetworks.Constants.ROOT_TEMPLATE_ANNOTATION_NAME;
-import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
-import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
-import static org.sagebionetworks.EvaluationUtils.JOB_LAST_UPDATED_TIME_STAMP;
-import static org.sagebionetworks.EvaluationUtils.JOB_STARTED_TIME_STAMP;
-import static org.sagebionetworks.EvaluationUtils.STATUS_DESCRIPTION;
-import static org.sagebionetworks.Utils.getProperty;
-
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.sagebionetworks.client.SynapseClient;
@@ -24,13 +7,29 @@ import org.sagebionetworks.client.exceptions.SynapseException;
 import org.sagebionetworks.evaluation.model.Evaluation;
 import org.sagebionetworks.evaluation.model.EvaluationStatus;
 import org.sagebionetworks.evaluation.model.Submission;
-import org.sagebionetworks.repo.model.Annotations;
 import org.sagebionetworks.repo.model.FileEntity;
 import org.sagebionetworks.repo.model.ObjectType;
 import org.sagebionetworks.repo.model.Project;
+import org.sagebionetworks.repo.model.annotation.v2.Annotations;
+import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValue;
 import org.sagebionetworks.repo.model.auth.LoginRequest;
 import org.sagebionetworks.repo.model.file.ExternalFileHandle;
 import org.sagebionetworks.repo.model.wiki.WikiPage;
+import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
+
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.Map;
+
+import static org.sagebionetworks.Constants.ROOT_TEMPLATE_ANNOTATION_NAME;
+import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
+import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
+import static org.sagebionetworks.EvaluationUtils.JOB_LAST_UPDATED_TIME_STAMP;
+import static org.sagebionetworks.EvaluationUtils.JOB_STARTED_TIME_STAMP;
+import static org.sagebionetworks.EvaluationUtils.STATUS_DESCRIPTION;
+import static org.sagebionetworks.Utils.getProperty;
 
 public class WorkflowAdmin {
 
@@ -104,11 +103,17 @@ public class WorkflowAdmin {
 		fileEntity.setDataFileHandleId(efh.getId());
 		fileEntity.setParentId(parentId);
 		fileEntity = synapseAdmin.createEntity(fileEntity);
-		Annotations annotations = synapseAdmin.getAnnotations(fileEntity.getId());
-		Map<String, List<String>> stringAnnotations = new HashMap<String, List<String>>();
-		annotations.setStringAnnotations(stringAnnotations);
-		stringAnnotations.put(ROOT_TEMPLATE_ANNOTATION_NAME, Collections.singletonList(rootTemplate));
-		annotations = synapseAdmin.updateAnnotations(fileEntity.getId(), annotations);
+		//Annotations annotations = synapseAdmin.getAnnotations(fileEntity.getId());
+		Annotations annotations = synapseAdmin.getAnnotationsV2(fileEntity.getId());
+		//Map<String, List<String>> stringAnnotations = new HashMap<String, List<String>>();
+		//annotations.setStringAnnotations(stringAnnotations);
+		//stringAnnotations.put(ROOT_TEMPLATE_ANNOTATION_NAME, Collections.singletonList(rootTemplate));
+		//annotations = synapseAdmin.updateAnnotations(fileEntity.getId(), annotations);
+		Map<String, AnnotationsValue> updatedAnnotations = annotations.getAnnotations();
+		JSONObjectAdapterImpl adapter = new JSONObjectAdapterImpl(rootTemplate);
+		updatedAnnotations.put(ROOT_TEMPLATE_ANNOTATION_NAME, new AnnotationsValue(adapter));
+		annotations.setAnnotations(updatedAnnotations);
+		annotations = synapseAdmin.updateAnnotationsV2(fileEntity.getId(), annotations);
 		return fileEntity.getId();
 	}
 	

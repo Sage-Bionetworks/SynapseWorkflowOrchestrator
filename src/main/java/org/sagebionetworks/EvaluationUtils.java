@@ -1,16 +1,5 @@
 package org.sagebionetworks;
 
-import static org.sagebionetworks.Constants.EXECUTION_STAGE_PROPERTY_NAME;
-import static org.sagebionetworks.Utils.getProperty;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.lang.StringUtils;
 import org.sagebionetworks.client.SynapseClient;
 import org.sagebionetworks.client.exceptions.SynapseException;
@@ -25,6 +14,17 @@ import org.sagebionetworks.repo.model.annotation.DoubleAnnotation;
 import org.sagebionetworks.repo.model.annotation.LongAnnotation;
 import org.sagebionetworks.repo.model.annotation.StringAnnotation;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import static org.sagebionetworks.Constants.EXECUTION_STAGE_PROPERTY_NAME;
+import static org.sagebionetworks.Utils.getProperty;
 
 public class EvaluationUtils {
 	private static final int PAGE_SIZE = 10;
@@ -354,6 +354,7 @@ public class EvaluationUtils {
 	}
 
 	public static void applyModifications(final SubmissionStatus submissionStatus, final SubmissionStatusModifications statusMods) {
+		// BEGIN NEW ANNOTATION CODE
 		for (AnnotationBase annot : statusMods.getAnnotationsToAdd()) {
 			if (annot instanceof StringAnnotation) 
 				setAnnotation(submissionStatus, annot.getKey(), ((StringAnnotation) annot).getValue(), annot.getIsPrivate());
@@ -364,7 +365,7 @@ public class EvaluationUtils {
 		}
 		
 		for (String key : statusMods.getAnnotationNamesToRemove()) removeAnnotation(submissionStatus, key);
-		
+		// END NEW ANNOTATION CODE
 		if (statusMods.getStatus()!=null) submissionStatus.setStatus(statusMods.getStatus());
 		if (statusMods.getCanCancel()!=null) submissionStatus.setCanCancel(statusMods.getCanCancel());
 		if (statusMods.getCancelRequested()!=null) submissionStatus.setCancelRequested(statusMods.getCancelRequested());

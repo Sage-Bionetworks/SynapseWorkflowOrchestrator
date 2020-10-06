@@ -87,8 +87,8 @@ public class Archiver {
 	public String uploadToSynapse(
 			final File file, 
 			String parentId) throws Throwable {
+		//S3FileHandle uploadResult = synapse.multipartUpload(file, null, true, false);
 		S3FileHandle uploadResult = synapse.multipartUpload(file, null, true, false);
-
 		FileEntity fileEntity = new FileEntity();
 		String fileName = file.getName();
 		fileEntity.setName(fileName);

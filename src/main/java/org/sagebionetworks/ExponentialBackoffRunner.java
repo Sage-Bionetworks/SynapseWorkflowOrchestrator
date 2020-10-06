@@ -1,6 +1,9 @@
 package org.sagebionetworks;
-
-import static org.sagebionetworks.Constants.DEFAULT_NUM_RETRY_ATTEMPTS;
+import org.sagebionetworks.client.exceptions.SynapseException;
+import org.sagebionetworks.client.exceptions.SynapseServerException;
+import org.sagebionetworks.client.exceptions.SynapseServiceUnavailable;
+import org.sagebionetworks.client.exceptions.SynapseTooManyRequestsException;
+import org.sagebionetworks.client.exceptions.UnknownSynapseServerException;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -8,13 +11,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.sagebionetworks.client.exceptions.SynapseException;
-import org.sagebionetworks.client.exceptions.SynapseServerException;
-import org.sagebionetworks.client.exceptions.SynapseServiceUnavailable;
-import org.sagebionetworks.client.exceptions.SynapseTooManyRequestsException;
-import org.sagebionetworks.client.exceptions.UnknownSynapseServerException;
+import static org.sagebionetworks.Constants.DEFAULT_NUM_RETRY_ATTEMPTS;
 
-import com.amazonaws.services.lambda.model.ServiceException;
 
 public class ExponentialBackoffRunner {
 	private static Logger log = Logger.getLogger(ExponentialBackoffRunner.class.getName());
