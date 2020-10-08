@@ -1,18 +1,19 @@
 package org.sagebionetworks;
 
-import static org.junit.Assert.assertEquals;
-import static org.sagebionetworks.Constants.EXECUTION_STAGE_PROPERTY_NAME;
-import static org.sagebionetworks.EvaluationUtils.applyModifications;
-import static org.sagebionetworks.EvaluationUtils.removeAnnotation;
-import static org.sagebionetworks.EvaluationUtils.setAnnotation;
-
-import java.util.Collections;
-
 import org.junit.Test;
 import org.sagebionetworks.evaluation.model.SubmissionStatus;
 import org.sagebionetworks.evaluation.model.SubmissionStatusEnum;
 import org.sagebionetworks.repo.model.annotation.Annotations;
 import org.sagebionetworks.repo.model.annotation.StringAnnotation;
+
+import java.util.Collections;
+
+import static org.junit.Assert.assertEquals;
+import static org.sagebionetworks.Constants.EXECUTION_STAGE_PROPERTY_NAME;
+import static org.sagebionetworks.EvaluationUtils.applyModifications;
+import static org.sagebionetworks.EvaluationUtils.removeAnnotation;
+import static org.sagebionetworks.EvaluationUtils.setAnnotation;
+import static org.sagebionetworks.EvaluationUtils.setStatus;
 
 
 public class EvaluationUtilsTest {
@@ -58,6 +59,7 @@ public class EvaluationUtilsTest {
 		SubmissionStatus actual = new SubmissionStatus();
 		
 		removeAnnotation(statusMods, "foo1");
+
 		setAnnotation(statusMods, "foo1", "bar", true);
 		setAnnotation(statusMods, "foo2", "bar", false);
 		applyModifications(actual, statusMods);
@@ -77,6 +79,20 @@ public class EvaluationUtilsTest {
 		
 		assertEquals(expected, actual);
 	}
+
+	@Test
+	public void testSetStatusV2AnnotationsAccepted() throws Exception {
+		SubmissionStatusModifications statusMods = new SubmissionStatusModifications();
+		SubmissionStatusEnum submissionStatusEnum = SubmissionStatusEnum.ACCEPTED;
+		WorkflowUpdateStatus containerStatus = WorkflowUpdateStatus.DONE;
+        setStatus(statusMods, submissionStatusEnum, containerStatus);
+	}
+
+	@Test
+	public void testRemoveAnnotationsIntern() throws Exception {
+
+	}
+
 	
 
 }

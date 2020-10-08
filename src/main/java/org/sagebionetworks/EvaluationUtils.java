@@ -13,6 +13,7 @@ import org.sagebionetworks.repo.model.annotation.Annotations;
 import org.sagebionetworks.repo.model.annotation.DoubleAnnotation;
 import org.sagebionetworks.repo.model.annotation.LongAnnotation;
 import org.sagebionetworks.repo.model.annotation.StringAnnotation;
+import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValue;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -278,37 +280,56 @@ public class EvaluationUtils {
 	}
 	
 	private static void removeAnnotation(SubmissionStatus status, String key) {
-		Annotations annotations = status.getAnnotations();
-		if (annotations==null) return;
+		//Annotations annotations = status.getAnnotations();
+		Object annotations = status.getAnnotations();
+		if (annotations instanceof Annotations) {
+			annotations = (Annotations)annotations;
+			if (annotations == null) return;
 
-		List<StringAnnotation> sas = annotations.getStringAnnos();
-		if (sas!=null) {
-			for (Iterator<StringAnnotation> iterator = sas.iterator(); iterator.hasNext();) {
-				StringAnnotation existing = iterator.next();
-				if (existing.getKey().equals(key)) {
-					iterator.remove();
+			List<StringAnnotation> sas = ((Annotations)annotations).getStringAnnos();
+			if (sas != null) {
+				for (Iterator<StringAnnotation> iterator = sas.iterator(); iterator.hasNext(); ) {
+					StringAnnotation existing = iterator.next();
+					if (existing.getKey().equals(key)) {
+						iterator.remove();
+					}
 				}
 			}
-		}
 
-		List<DoubleAnnotation> das = annotations.getDoubleAnnos();
-		if (das!=null) {
-			for (Iterator<DoubleAnnotation> iterator = das.iterator(); iterator.hasNext();) {
-				DoubleAnnotation existing = iterator.next();
-				if (existing.getKey().equals(key)) {
-					iterator.remove();
+			List<DoubleAnnotation> das = ((Annotations)annotations).getDoubleAnnos();
+			if (das != null) {
+				for (Iterator<DoubleAnnotation> iterator = das.iterator(); iterator.hasNext(); ) {
+					DoubleAnnotation existing = iterator.next();
+					if (existing.getKey().equals(key)) {
+						iterator.remove();
+					}
 				}
 			}
-		}
 
-		List<LongAnnotation> las = annotations.getLongAnnos();
-		if (las!=null) {
-			for (Iterator<LongAnnotation> iterator = las.iterator(); iterator.hasNext();) {
-				LongAnnotation existing = iterator.next();
-				if (existing.getKey().equals(key)) {
-					iterator.remove();
+			List<LongAnnotation> las = ((Annotations)annotations).getLongAnnos();
+			if (las != null) {
+				for (Iterator<LongAnnotation> iterator = las.iterator(); iterator.hasNext(); ) {
+					LongAnnotation existing = iterator.next();
+					if (existing.getKey().equals(key)) {
+						iterator.remove();
+					}
+				}
+
+			}
+
+		} else if (annotations instanceof org.sagebionetworks.repo.model.annotation.v2.Annotations) {
+			Map<String, AnnotationsValue> annotationsValue =
+					((org.sagebionetworks.repo.model.annotation.v2.Annotations)annotations).getAnnotations();
+			if (annotationsValue != null) {
+
+				AnnotationsValue value = annotationsValue.remove(key);
+				if (value != null) {
+					((org.sagebionetworks.repo.model.annotation.v2.Annotations) annotations).setAnnotations(annotationsValue);
+					//status.setAnnotations((org.sagebionetworks.repo.model.annotation.v2.Annotations) annotations);
 				}
 			}
+		} else {
+			throw new IllegalArgumentException("Invalid type of annotations");
 		}
 	}
 	

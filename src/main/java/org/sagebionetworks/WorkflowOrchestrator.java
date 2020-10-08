@@ -190,7 +190,6 @@ public class WorkflowOrchestrator  {
 			URL url = new URL(urlString);
 			// get annotation for the CWL entry point.  Does the file exist?
 
-
 			/**
 			Annotations annotations = synapse.getAnnotations(entityId);
 			org.sagebionetworks.repo.model.annotation.v2.Annotations annotations = synapse.getAnnotationsV2(entityId);
@@ -204,7 +203,6 @@ public class WorkflowOrchestrator  {
 			String rootTemplateString = stringAnnotations.get(0);
 			result.put(evaluationId, new WorkflowURLEntrypointAndSynapseRef(url, rootTemplateString, entityId));
 			 **/
-
 
 			Annotations annotations = synapse.getAnnotationsV2(entityId);
 			Map<String, AnnotationsValue> annotationsMap = annotations.getAnnotations();
