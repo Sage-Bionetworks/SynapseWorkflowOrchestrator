@@ -13,13 +13,16 @@ import org.sagebionetworks.repo.model.annotation.Annotations;
 import org.sagebionetworks.repo.model.annotation.DoubleAnnotation;
 import org.sagebionetworks.repo.model.annotation.LongAnnotation;
 import org.sagebionetworks.repo.model.annotation.StringAnnotation;
+import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValue;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -140,6 +143,21 @@ public class EvaluationUtils {
 			if (sa.getKey().equals(key)) return new Boolean(sa.getValue());
 		}
 		return false;
+	}
+
+	public static void setAnnotation(SubmissionStatus status, String key, boolean isPrivate, AnnotationsValue value) {
+		org.sagebionetworks.repo.model.annotation.v2.Annotations annotationsV2 = status.getSubmissionAnnotations();
+		if ( annotationsV2 == null) {
+			annotationsV2 = new org.sagebionetworks.repo.model.annotation.v2.Annotations();
+			status.setSubmissionAnnotations(annotationsV2);
+		}
+		Map<String, AnnotationsValue> annotationValueMap = annotationsV2.getAnnotations();
+		if ( annotationValueMap == null ) {
+			annotationValueMap = new HashMap<String, AnnotationsValue>();
+			annotationsV2.setAnnotations(annotationValueMap);
+		}
+
+		annotationValueMap.put(key, value);
 	}
 
 	public static void setAnnotation(SubmissionStatus status, String key, String value, boolean isPrivate) {
@@ -310,6 +328,17 @@ public class EvaluationUtils {
 				}
 			}
 		}
+
+		org.sagebionetworks.repo.model.annotation.v2.Annotations annotationsV2 = status.getSubmissionAnnotations();
+		if(annotationsV2 == null) return;
+		Map<String, AnnotationsValue> annotationsValueMap = annotationsV2.getAnnotations();
+		if (annotationsValueMap != null){
+			if (annotationsValueMap.containsKey(key)){
+				annotationsValueMap.remove(key);
+				annotationsV2.setAnnotations(annotationsValueMap);
+				status.setSubmissionAnnotations(annotationsV2);
+			}
+		}
 	}
 	
 	private static void removeAnnotationIntern(SubmissionStatusModifications statusMods, String key) {
@@ -362,10 +391,11 @@ public class EvaluationUtils {
 				setAnnotation(submissionStatus, annot.getKey(), ((LongAnnotation) annot).getValue(), annot.getIsPrivate());
 			if (annot instanceof DoubleAnnotation) 
 				setAnnotation(submissionStatus, annot.getKey(), ((DoubleAnnotation) annot).getValue(), annot.getIsPrivate());
+			if (annot instanceof AnnotationsValue)
+				setAnnotation(submissionStatus, annot.getKey(), annot.getIsPrivate(), (AnnotationsValue)annot);
 		}
-		
+
 		for (String key : statusMods.getAnnotationNamesToRemove()) removeAnnotation(submissionStatus, key);
-		// END NEW ANNOTATION CODE
 		if (statusMods.getStatus()!=null) submissionStatus.setStatus(statusMods.getStatus());
 		if (statusMods.getCanCancel()!=null) submissionStatus.setCanCancel(statusMods.getCanCancel());
 		if (statusMods.getCancelRequested()!=null) submissionStatus.setCancelRequested(statusMods.getCancelRequested());

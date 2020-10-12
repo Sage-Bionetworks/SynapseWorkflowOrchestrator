@@ -9,6 +9,7 @@ import org.sagebionetworks.repo.model.annotation.StringAnnotation;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.sagebionetworks.Constants.EXECUTION_STAGE_PROPERTY_NAME;
 import static org.sagebionetworks.EvaluationUtils.applyModifications;
 import static org.sagebionetworks.EvaluationUtils.removeAnnotation;
@@ -81,18 +82,19 @@ public class EvaluationUtilsTest {
 	}
 
 	@Test
-	public void testSetStatusV2AnnotationsAccepted() throws Exception {
+	public void testSetStatusCancelRequest() throws Exception {
 		SubmissionStatusModifications statusMods = new SubmissionStatusModifications();
-		SubmissionStatusEnum submissionStatusEnum = SubmissionStatusEnum.ACCEPTED;
-		WorkflowUpdateStatus containerStatus = WorkflowUpdateStatus.DONE;
-        setStatus(statusMods, submissionStatusEnum, containerStatus);
+		assertNotNull(statusMods.getAnnotationsToAdd());
+		assertEquals(0, statusMods.getAnnotationsToAdd().size());
+		SubmissionStatusEnum submissionStatusEnum = SubmissionStatusEnum.INVALID;
+		WorkflowUpdateStatus containerStatus = WorkflowUpdateStatus.STOPPED_UPON_REQUEST;
+		setStatus(statusMods, submissionStatusEnum, containerStatus);
+		assertNotNull(statusMods);
+		assertEquals(submissionStatusEnum, statusMods.getStatus());
+		assertNotNull(statusMods.getAnnotationsToAdd());
+		assertEquals(1, statusMods.getAnnotationsToAdd().size());
+		String expectedKey = "orgSagebionetworksSynapseWorkflowOrchestratorStatusDescription";
+		assertNotNull(expectedKey, statusMods.getAnnotationsToAdd().get(0).getKey());
 	}
-
-	@Test
-	public void testRemoveAnnotationsIntern() throws Exception {
-
-	}
-
-	
 
 }

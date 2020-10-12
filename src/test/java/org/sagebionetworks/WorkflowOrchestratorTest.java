@@ -1,24 +1,5 @@
 package org.sagebionetworks;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.sagebionetworks.Constants.AGENT_SHARED_DIR_DEFAULT;
-import static org.sagebionetworks.Constants.AGENT_SHARED_DIR_PROPERTY_NAME;
-import static org.sagebionetworks.Constants.COMPOSE_PROJECT_NAME_ENV_VAR;
-import static org.sagebionetworks.Constants.DOCKER_ENGINE_URL_PROPERTY_NAME;
-import static org.sagebionetworks.Constants.SHARED_VOLUME_NAME;
-import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
-import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
-import static org.sagebionetworks.Utils.dockerComposeName;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.Collections;
-import java.util.Map;
-
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -35,6 +16,25 @@ import org.sagebionetworks.evaluation.model.SubmissionStatusEnum;
 import org.sagebionetworks.repo.model.Folder;
 import org.sagebionetworks.repo.model.Project;
 import org.sagebionetworks.repo.model.UserProfile;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.sagebionetworks.Constants.AGENT_SHARED_DIR_DEFAULT;
+import static org.sagebionetworks.Constants.AGENT_SHARED_DIR_PROPERTY_NAME;
+import static org.sagebionetworks.Constants.COMPOSE_PROJECT_NAME_ENV_VAR;
+import static org.sagebionetworks.Constants.DOCKER_ENGINE_URL_PROPERTY_NAME;
+import static org.sagebionetworks.Constants.SHARED_VOLUME_NAME;
+import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
+import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
+import static org.sagebionetworks.Utils.dockerComposeName;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WorkflowOrchestratorTest {
