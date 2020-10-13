@@ -238,10 +238,12 @@ public class WorkflowOrchestrator  {
 			String acceptNewSubmissionsString = getProperty(ACCEPT_NEW_SUBMISSIONS_PROPERTY_NAME, false);
 			if (StringUtils.isEmpty(acceptNewSubmissionsString) || Boolean.getBoolean(acceptNewSubmissionsString)) {
 				for (String evaluationId : getEvaluationIds()) {
+					log.info("createNewWorkflowjobs");
 					WorkflowURLEntrypointAndSynapseRef workflow = evaluationIdToTemplateMap.get(evaluationId);
 					createNewWorkflowJobs(evaluationId, workflow);
 				}
 			}
+			log.info("updateworkflowjobs");
 			updateWorkflowJobs(getEvaluationIds());
 
 			try {
@@ -263,6 +265,7 @@ public class WorkflowOrchestrator  {
 		int maxConcurrentWorkflows = getMaxConcurrentWorkflows();
 		List<SubmissionBundle> receivedSubmissions=null;
 		try {
+			log.info("selectSubmissions");
 			receivedSubmissions = 
 					evaluationUtils.selectSubmissions(evaluationId, getInitialSubmissionState() );
 		} catch (IllegalStateException e ) {
@@ -274,6 +277,7 @@ public class WorkflowOrchestrator  {
 			try {
 				if (BooleanUtils.isTrue(submissionStatus.getCancelRequested())) {
 					SubmissionStatusModifications statusMods = new SubmissionStatusModifications();
+					log.info("setstatus in newworkflow InvalidStatus");
 					setStatus(statusMods, SubmissionStatusEnum.INVALID, WorkflowUpdateStatus.STOPPED_UPON_REQUEST);
 					try {
 						submissionUtils.updateSubmissionStatus(submissionStatus, statusMods);
