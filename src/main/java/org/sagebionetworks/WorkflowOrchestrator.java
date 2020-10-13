@@ -304,6 +304,7 @@ public class WorkflowOrchestrator  {
 				}
 				WorkflowJob newJob = workflowManager.createWorkflowJob(workflow.getWorkflowUrl(), workflow.getEntryPoint(), workflowParameters, synapseConfigFileContent);
 				workflowId = newJob.getWorkflowId();
+				//EvaluationUtils.setAnnotation(statusMods, WORKFLOW_JOB_ID, workflowId, PUBLIC_ANNOTATION_SETTING);
 				EvaluationUtils.setAnnotation(statusMods, WORKFLOW_JOB_ID, workflowId, PUBLIC_ANNOTATION_SETTING);
 
 				try {
