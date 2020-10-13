@@ -232,7 +232,7 @@ public class WorkflowOrchestrator  {
 	public void execute() throws Throwable {
 		Map<String,WorkflowURLEntrypointAndSynapseRef> evaluationIdToTemplateMap = getWorkflowURLAndEntrypoint();
 		while (!shutdownHook.shouldShutDown()) { // this allows a system shut down to shut down the agent
-			log.info("Top level loop: checking progress or starting new job.");
+			log.info("Top level loop: checking progress or starting new job. lala");
 			login();
 			
 			String acceptNewSubmissionsString = getProperty(ACCEPT_NEW_SUBMISSIONS_PROPERTY_NAME, false);
