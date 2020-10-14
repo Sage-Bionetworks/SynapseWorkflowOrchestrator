@@ -210,10 +210,10 @@ public class WorkflowOrchestrator  {
 					new IllegalStateException("Expected string annotation called "+
 							ROOT_TEMPLATE_ANNOTATION_NAME+" for "+entityId+" but the entity has no string annotations.");
 			AnnotationsValue valueAnnotations = annotationsMap.get(ROOT_TEMPLATE_ANNOTATION_NAME);
-			if (valueAnnotations == null || valueAnnotations.toString().isEmpty() ) throw
+			if (valueAnnotations == null || valueAnnotations.getValue() == null || valueAnnotations.getValue().size() == 0 ) throw
 					new IllegalStateException(entityId+" has no AnnotationValue called "+ROOT_TEMPLATE_ANNOTATION_NAME);
-			String rootTemplateString = valueAnnotations.toString();
-			result.put(evaluationId, new WorkflowURLEntrypointAndSynapseRef(url, rootTemplateString, entityId));
+				String rootTemplateString = valueAnnotations.getValue().get(0);
+				result.put(evaluationId, new WorkflowURLEntrypointAndSynapseRef(url, rootTemplateString, entityId));
 		}
 		return result;
 	}

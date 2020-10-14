@@ -12,15 +12,17 @@ import org.sagebionetworks.repo.model.ObjectType;
 import org.sagebionetworks.repo.model.Project;
 import org.sagebionetworks.repo.model.annotation.v2.Annotations;
 import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValue;
+import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValueType;
 import org.sagebionetworks.repo.model.auth.LoginRequest;
 import org.sagebionetworks.repo.model.file.ExternalFileHandle;
 import org.sagebionetworks.repo.model.wiki.WikiPage;
-import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import static org.sagebionetworks.Constants.ROOT_TEMPLATE_ANNOTATION_NAME;
@@ -110,8 +112,13 @@ public class WorkflowAdmin {
 		//stringAnnotations.put(ROOT_TEMPLATE_ANNOTATION_NAME, Collections.singletonList(rootTemplate));
 		//annotations = synapseAdmin.updateAnnotations(fileEntity.getId(), annotations);
 		Map<String, AnnotationsValue> updatedAnnotations = annotations.getAnnotations();
-		JSONObjectAdapterImpl adapter = new JSONObjectAdapterImpl(rootTemplate);
-		updatedAnnotations.put(ROOT_TEMPLATE_ANNOTATION_NAME, new AnnotationsValue(adapter));
+		//JSONObjectAdapterImpl adapter = new JSONObjectAdapterImpl("{\"" + ROOT_TEMPLATE_ANNOTATION_NAME + "\":\"" + rootTemplate + "\"}");
+		AnnotationsValue value = new AnnotationsValue();
+		List<String> list = new ArrayList<String>();
+		list.add(rootTemplate);
+		value.setValue(list);
+		value.setType(AnnotationsValueType.STRING);
+		updatedAnnotations.put(ROOT_TEMPLATE_ANNOTATION_NAME, value);
 		annotations.setAnnotations(updatedAnnotations);
 		annotations = synapseAdmin.updateAnnotationsV2(fileEntity.getId(), annotations);
 		return fileEntity.getId();
