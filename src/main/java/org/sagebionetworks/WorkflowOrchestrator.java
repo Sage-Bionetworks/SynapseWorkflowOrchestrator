@@ -190,30 +190,16 @@ public class WorkflowOrchestrator  {
 			URL url = new URL(urlString);
 			// get annotation for the CWL entry point.  Does the file exist?
 
-			/**
-			Annotations annotations = synapse.getAnnotations(entityId);
-			org.sagebionetworks.repo.model.annotation.v2.Annotations annotations = synapse.getAnnotationsV2(entityId);
-			Map<String, List<String>> annotationsMap = annotations.getStringAnnotations();
-			if (annotationsMap==null) throw 
-				new IllegalStateException("Expected string annotation called "+
-					ROOT_TEMPLATE_ANNOTATION_NAME+" for "+entityId+" but the entity has no string annotations.");
-			List<String> stringAnnotations = annotationsMap.get(ROOT_TEMPLATE_ANNOTATION_NAME);
-			if (stringAnnotations==null || stringAnnotations.isEmpty()) throw 
-				new IllegalStateException(entityId+" has no string annotation called "+ROOT_TEMPLATE_ANNOTATION_NAME);
-			String rootTemplateString = stringAnnotations.get(0);
-			result.put(evaluationId, new WorkflowURLEntrypointAndSynapseRef(url, rootTemplateString, entityId));
-			 **/
-
 			Annotations annotations = synapse.getAnnotationsV2(entityId);
 			Map<String, AnnotationsValue> annotationsMap = annotations.getAnnotations();
 			if (annotationsMap==null) throw
 					new IllegalStateException("Expected string annotation called "+
 							ROOT_TEMPLATE_ANNOTATION_NAME+" for "+entityId+" but the entity has no string annotations.");
 			AnnotationsValue valueAnnotations = annotationsMap.get(ROOT_TEMPLATE_ANNOTATION_NAME);
-			if (valueAnnotations == null || valueAnnotations.toString().isEmpty() ) throw
+			if (valueAnnotations == null || valueAnnotations.getValue() == null || valueAnnotations.getValue().size() == 0 ) throw
 					new IllegalStateException(entityId+" has no AnnotationValue called "+ROOT_TEMPLATE_ANNOTATION_NAME);
-			String rootTemplateString = valueAnnotations.toString();
-			result.put(evaluationId, new WorkflowURLEntrypointAndSynapseRef(url, rootTemplateString, entityId));
+				String rootTemplateString = valueAnnotations.getValue().get(0);
+				result.put(evaluationId, new WorkflowURLEntrypointAndSynapseRef(url, rootTemplateString, entityId));
 		}
 		return result;
 	}
@@ -232,18 +218,16 @@ public class WorkflowOrchestrator  {
 	public void execute() throws Throwable {
 		Map<String,WorkflowURLEntrypointAndSynapseRef> evaluationIdToTemplateMap = getWorkflowURLAndEntrypoint();
 		while (!shutdownHook.shouldShutDown()) { // this allows a system shut down to shut down the agent
-			log.info("Top level loop: checking progress or starting new job. lala");
+			log.info("Top level loop: checking progress or starting new job.");
 			login();
 			
 			String acceptNewSubmissionsString = getProperty(ACCEPT_NEW_SUBMISSIONS_PROPERTY_NAME, false);
 			if (StringUtils.isEmpty(acceptNewSubmissionsString) || Boolean.getBoolean(acceptNewSubmissionsString)) {
 				for (String evaluationId : getEvaluationIds()) {
-					log.info("createNewWorkflowjobs");
 					WorkflowURLEntrypointAndSynapseRef workflow = evaluationIdToTemplateMap.get(evaluationId);
 					createNewWorkflowJobs(evaluationId, workflow);
 				}
 			}
-			log.info("updateworkflowjobs");
 			updateWorkflowJobs(getEvaluationIds());
 
 			try {
@@ -265,7 +249,6 @@ public class WorkflowOrchestrator  {
 		int maxConcurrentWorkflows = getMaxConcurrentWorkflows();
 		List<SubmissionBundle> receivedSubmissions=null;
 		try {
-			log.info("selectSubmissions");
 			receivedSubmissions = 
 					evaluationUtils.selectSubmissions(evaluationId, getInitialSubmissionState() );
 		} catch (IllegalStateException e ) {
@@ -277,7 +260,6 @@ public class WorkflowOrchestrator  {
 			try {
 				if (BooleanUtils.isTrue(submissionStatus.getCancelRequested())) {
 					SubmissionStatusModifications statusMods = new SubmissionStatusModifications();
-					log.info("setstatus in newworkflow InvalidStatus");
 					setStatus(statusMods, SubmissionStatusEnum.INVALID, WorkflowUpdateStatus.STOPPED_UPON_REQUEST);
 					try {
 						submissionUtils.updateSubmissionStatus(submissionStatus, statusMods);
@@ -308,7 +290,6 @@ public class WorkflowOrchestrator  {
 				}
 				WorkflowJob newJob = workflowManager.createWorkflowJob(workflow.getWorkflowUrl(), workflow.getEntryPoint(), workflowParameters, synapseConfigFileContent);
 				workflowId = newJob.getWorkflowId();
-				//EvaluationUtils.setAnnotation(statusMods, WORKFLOW_JOB_ID, workflowId, PUBLIC_ANNOTATION_SETTING);
 				EvaluationUtils.setAnnotation(statusMods, WORKFLOW_JOB_ID, workflowId, PUBLIC_ANNOTATION_SETTING);
 
 				try {
@@ -345,7 +326,10 @@ public class WorkflowOrchestrator  {
 	public static Map<String, SubmissionBundle> workflowIdsForSubmissions(List<SubmissionBundle> bundles) {
 		Map<String, SubmissionBundle> result = new HashMap<String, SubmissionBundle>();
 		for (SubmissionBundle b : bundles) {
-			String workflowId = EvaluationUtils.getStringAnnotation(b.getSubmissionStatus(), WORKFLOW_JOB_ID);
+			String workflowId = EvaluationUtils.getStringAnnotationV2(b.getSubmissionStatus(), WORKFLOW_JOB_ID);
+			if (workflowId == null) {
+				workflowId = EvaluationUtils.getStringAnnotation(b.getSubmissionStatus(), WORKFLOW_JOB_ID);
+			}
 			if (workflowId==null) throw new IllegalStateException("Submission "+b.getSubmission().getId()+" has no workflow job ID.");
 			result.put(workflowId, b);
 		}
@@ -427,10 +411,11 @@ public class WorkflowOrchestrator  {
 			final SubmissionStatus submissionStatus = submissionBundle.getSubmissionStatus();
 			final SubmissionStatusModifications statusMods = new SubmissionStatusModifications();
 
-// BEGIN NEW ANNOTATION CODE
-
-			String sharedSubmissionFolderId = shareImmediately ? EvaluationUtils.getStringAnnotation(submissionStatus, SUBMISSION_ARTIFACTS_FOLDER) : null;
-// END NEW ANNOTATION CODE
+			String submissionFolderIdAnnotation = EvaluationUtils.getStringAnnotationV2(submissionStatus, SUBMISSION_ARTIFACTS_FOLDER);
+			if (submissionFolderIdAnnotation == null) {
+				submissionFolderIdAnnotation = EvaluationUtils.getStringAnnotation(submissionStatus, SUBMISSION_ARTIFACTS_FOLDER);
+			}
+			String sharedSubmissionFolderId = shareImmediately ? submissionFolderIdAnnotation : null;
 
 			try {
 				Double progress = null;
@@ -469,8 +454,12 @@ public class WorkflowOrchestrator  {
 						containerCompletionStatus==STOPPED_UPON_REQUEST && notificationEnabled(SUBMISSION_STOPPED_BY_USER) || 
 						containerCompletionStatus==STOPPED_TIME_OUT && notificationEnabled(SUBMISSION_TIMED_OUT)) {
 						Submitter submitter = submissionUtils.getSubmitter(submission);
+						String annotString = EvaluationUtils.getStringAnnotationV2(submissionStatus, FAILURE_REASON);
+						if (annotString == null) {
+							annotString = EvaluationUtils.getStringAnnotation(submissionStatus, FAILURE_REASON);
+						}
 						String messageBody = createWorkflowFailedMessage(submitter.getName(), submission.getId(), 
-								EvaluationUtils.getStringAnnotation(submissionStatus, FAILURE_REASON), 
+								annotString,
 								null, sharedSubmissionFolderId);
 						messageUtils.sendMessage(submitter.getId(), WORKFLOW_FAILURE_SUBJECT,  messageBody);
 					}
@@ -559,9 +548,12 @@ public class WorkflowOrchestrator  {
 				updatedStatus = SubmissionStatusEnum.CLOSED;
 			}
 		}
-// BEGIN NEW ANNOTATION CODE
-		Long lastLogUploadTimeStamp = EvaluationUtils.getLongAnnotation(submissionStatus, LAST_LOG_UPLOAD);
-// END NEW ANNOTATION CODE
+
+		Long lastLogUploadTimeStamp = EvaluationUtils.getLongAnnotationV2(submissionStatus, LAST_LOG_UPLOAD);
+		if (lastLogUploadTimeStamp == null) {
+			lastLogUploadTimeStamp = EvaluationUtils.getLongAnnotation(submissionStatus, LAST_LOG_UPLOAD);
+		}
+
 		boolean timeToUploadLogs = lastLogUploadTimeStamp==null ||
 				lastLogUploadTimeStamp+UPLOAD_PERIOD_MILLIS<System.currentTimeMillis();
 
@@ -587,9 +579,11 @@ public class WorkflowOrchestrator  {
 			if (ERROR_ENCOUNTERED_DURING_EXECUTION.toString().equals(failureReason)) {
 				failureReason = logTail;
 			}
-// BEGIN NEW ANNOTATION CODE
-			String hasSubmissionStartedMessageBeenSentString = EvaluationUtils.getStringAnnotation(submissionStatus, SUBMISSION_PROCESSING_STARTED_SENT);
-// END NEW ANNOTATION CODE
+
+			String hasSubmissionStartedMessageBeenSentString = EvaluationUtils.getStringAnnotationV2(submissionStatus, SUBMISSION_PROCESSING_STARTED_SENT);
+			if (hasSubmissionStartedMessageBeenSentString == null) {
+				hasSubmissionStartedMessageBeenSentString = EvaluationUtils.getStringAnnotation(submissionStatus, SUBMISSION_PROCESSING_STARTED_SENT);
+			}
 
 			boolean hasSubmissionStartedMessageBeenSent = hasSubmissionStartedMessageBeenSentString!=null && new Boolean(hasSubmissionStartedMessageBeenSentString);
 			if (isRunning && !hasSubmissionStartedMessageBeenSent && notificationEnabled(SUBMISSION_STARTED)) {
@@ -616,7 +610,7 @@ public class WorkflowOrchestrator  {
 		if (!isRunning) {
 			workflowManager.deleteWorkFlowJob(job);
 		}
-// BEGIN NEW ANNOTATION CODE
+
 		EvaluationUtils.setAnnotation(statusMods, JOB_LAST_UPDATED_TIME_STAMP, System.currentTimeMillis(), PUBLIC_ANNOTATION_SETTING);
 		if (submissionFolderId!=null) {
 			EvaluationUtils.setAnnotation(statusMods, LAST_LOG_UPLOAD, System.currentTimeMillis(), ADMIN_ANNOTS_ARE_PRIVATE);    				
@@ -639,7 +633,7 @@ public class WorkflowOrchestrator  {
 		if (progress!=null) {
 			EvaluationUtils.setAnnotation(statusMods, PROGRESS, progress, false);
 		}
-// END NEW ANNOTATION CODE
+
 		if (workflowUpdateStatus==null) throw new IllegalStateException("Failed to set workflowUpdateStatus");
 		return workflowUpdateStatus;
 	}
