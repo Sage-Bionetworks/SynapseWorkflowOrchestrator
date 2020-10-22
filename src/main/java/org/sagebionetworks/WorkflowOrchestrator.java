@@ -278,6 +278,7 @@ public class WorkflowOrchestrator  {
 				if (BooleanUtils.isTrue(submissionStatus.getCancelRequested())) {
 					SubmissionStatusModifications statusMods = new SubmissionStatusModifications();
 					log.info("setstatus in newworkflow InvalidStatus");
+					/// CHANGE HERE CHANGE HERE
 					setStatus(statusMods, SubmissionStatusEnum.INVALID, WorkflowUpdateStatus.STOPPED_UPON_REQUEST);
 					try {
 						submissionUtils.updateSubmissionStatus(submissionStatus, statusMods);

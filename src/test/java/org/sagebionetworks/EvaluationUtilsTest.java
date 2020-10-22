@@ -14,6 +14,9 @@ import static org.sagebionetworks.Constants.EXECUTION_STAGE_PROPERTY_NAME;
 import static org.sagebionetworks.EvaluationUtils.applyModifications;
 import static org.sagebionetworks.EvaluationUtils.removeAnnotation;
 import static org.sagebionetworks.EvaluationUtils.setAnnotation;
+import static org.sagebionetworks.EvaluationUtils.setAnnotationDoubleV2;
+import static org.sagebionetworks.EvaluationUtils.setAnnotationLongV2;
+import static org.sagebionetworks.EvaluationUtils.setAnnotationStringV2;
 import static org.sagebionetworks.EvaluationUtils.setStatus;
 
 
@@ -32,10 +35,15 @@ public class EvaluationUtilsTest {
 		SubmissionStatus actual = new SubmissionStatus();
 		
 		setAnnotation(expected, "foo1", "bar", false);
+		setAnnotationStringV2(expected, "foo1", "bar", false);
 		setAnnotation(statusMods, "foo1", "bar", false);
+
 		setAnnotation(expected, "foo2", 1L, false);
+		setAnnotationLongV2(expected, "foo2", 1L, false);;
 		setAnnotation(statusMods, "foo2", 1L, false);
+
 		setAnnotation(expected, "foo3", 3.14D, true);
+		setAnnotationDoubleV2(expected, "foo3", 3.14D, false);;
 		setAnnotation(statusMods, "foo3", 3.14D, true);
 		
 		expected.setCanCancel(true);
@@ -63,6 +71,7 @@ public class EvaluationUtilsTest {
 
 		setAnnotation(statusMods, "foo1", "bar", true);
 		setAnnotation(statusMods, "foo2", "bar", false);
+		setAnnotationStringV2(expected, "foo2", "bar", false);
 		applyModifications(actual, statusMods);
 		
 		statusMods = new SubmissionStatusModifications();
@@ -77,6 +86,7 @@ public class EvaluationUtilsTest {
 		sa.setIsPrivate(false);
 		annotations.setStringAnnos(Collections.singletonList(sa));
 		expected.setAnnotations(annotations);
+		setAnnotationStringV2(expected, "foo2", "baz", false);
 		
 		assertEquals(expected, actual);
 	}
@@ -97,4 +107,72 @@ public class EvaluationUtilsTest {
 		assertNotNull(expectedKey, statusMods.getAnnotationsToAdd().get(0).getKey());
 	}
 
+	@Test
+	public void testApplyModificationsString() throws Exception {
+		SubmissionStatusModifications statusMods = new SubmissionStatusModifications();
+		SubmissionStatus expected = new SubmissionStatus();
+		SubmissionStatus actual = new SubmissionStatus();
+
+		setAnnotation(expected, "foo1", "bar", false);
+		setAnnotationStringV2(expected, "foo1", "bar", false);
+		setAnnotation(statusMods, "foo1", "bar", false);
+
+		expected.setCanCancel(true);
+		statusMods.setCanCancel(true);
+
+		expected.setCancelRequested(false);
+		statusMods.setCancelRequested(false);
+
+		expected.setStatus(SubmissionStatusEnum.VALIDATED);
+		statusMods.setStatus(SubmissionStatusEnum.VALIDATED);
+
+		applyModifications(actual, statusMods);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testApplyModificationsLong() throws Exception {
+		SubmissionStatusModifications statusMods = new SubmissionStatusModifications();
+		SubmissionStatus expected = new SubmissionStatus();
+		SubmissionStatus actual = new SubmissionStatus();
+
+		setAnnotation(expected, "foo2", 1L, false);
+		setAnnotationLongV2(expected, "foo2", 1L, false);
+		setAnnotation(statusMods, "foo2", 1L, false);
+
+		expected.setCanCancel(true);
+		statusMods.setCanCancel(true);
+
+		expected.setCancelRequested(false);
+		statusMods.setCancelRequested(false);
+
+		expected.setStatus(SubmissionStatusEnum.VALIDATED);
+		statusMods.setStatus(SubmissionStatusEnum.VALIDATED);
+
+		applyModifications(actual, statusMods);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testApplyModificationsDouble() throws Exception {
+		SubmissionStatusModifications statusMods = new SubmissionStatusModifications();
+		SubmissionStatus expected = new SubmissionStatus();
+		SubmissionStatus actual = new SubmissionStatus();
+
+		setAnnotation(expected, "foo3", 3.14D, true);
+		setAnnotationDoubleV2(expected, "foo3", 3.14D, false);
+		setAnnotation(statusMods, "foo3", 3.14D, true);
+
+		expected.setCanCancel(true);
+		statusMods.setCanCancel(true);
+
+		expected.setCancelRequested(false);
+		statusMods.setCancelRequested(false);
+
+		expected.setStatus(SubmissionStatusEnum.VALIDATED);
+		statusMods.setStatus(SubmissionStatusEnum.VALIDATED);
+
+		applyModifications(actual, statusMods);
+		assertEquals(expected, actual);
+	}
 }

@@ -178,6 +178,78 @@ public class EvaluationUtils {
 		annotationValueMap.put(key, value);
 	}
 
+	public static void setAnnotationStringV2(SubmissionStatus status, String key, String value, boolean isPrivate) {
+		org.sagebionetworks.repo.model.annotation.v2.Annotations annotations = status.getSubmissionAnnotations();
+		if (annotations == null) {
+			annotations = new org.sagebionetworks.repo.model.annotation.v2.Annotations();
+			status.setSubmissionAnnotations(annotations);
+		}
+		if (annotations.getAnnotations() == null) {
+			annotations.setAnnotations(new HashMap<String, AnnotationsValue>());
+		}
+
+		if (annotations.getAnnotations().containsKey(key)) {
+			AnnotationsValue annotationsValue  = annotations.getAnnotations().get(key);
+			annotationsValue.getValue().add(value);
+			annotations.getAnnotations().put(key, annotationsValue);
+		} else {
+			AnnotationsValue annotationsValue = new AnnotationsValue();
+			annotationsValue.setType(AnnotationsValueType.STRING);
+			List<String> stringList = new ArrayList<>();
+			stringList.add(value);
+			annotationsValue.setValue(stringList);
+			annotations.getAnnotations().put(key, annotationsValue);
+		}
+	}
+
+	public static void setAnnotationLongV2(SubmissionStatus status, String key, Long value, boolean isPrivate) {
+		org.sagebionetworks.repo.model.annotation.v2.Annotations annotations = status.getSubmissionAnnotations();
+		if (annotations == null) {
+			annotations = new org.sagebionetworks.repo.model.annotation.v2.Annotations();
+			status.setSubmissionAnnotations(annotations);
+		}
+		if (annotations.getAnnotations() == null) {
+			annotations.setAnnotations(new HashMap<String, AnnotationsValue>());
+		}
+
+		if (annotations.getAnnotations().containsKey(key)) {
+			AnnotationsValue annotationsValue  = annotations.getAnnotations().get(key);
+			annotationsValue.getValue().add(value.toString());
+			annotations.getAnnotations().put(key, annotationsValue);
+		} else {
+			AnnotationsValue annotationsValue = new AnnotationsValue();
+			annotationsValue.setType(AnnotationsValueType.LONG);
+			List<String> stringList = new ArrayList<>();
+			stringList.add(value.toString());
+			annotationsValue.setValue(stringList);
+			annotations.getAnnotations().put(key, annotationsValue);
+		}
+	}
+
+	public static void setAnnotationDoubleV2(SubmissionStatus status, String key, Double value, boolean isPrivate) {
+		org.sagebionetworks.repo.model.annotation.v2.Annotations annotations = status.getSubmissionAnnotations();
+		if (annotations == null) {
+			annotations = new org.sagebionetworks.repo.model.annotation.v2.Annotations();
+			status.setSubmissionAnnotations(annotations);
+		}
+		if (annotations.getAnnotations() == null) {
+			annotations.setAnnotations(new HashMap<String, AnnotationsValue>());
+		}
+
+		if (annotations.getAnnotations().containsKey(key)) {
+			AnnotationsValue annotationsValue  = annotations.getAnnotations().get(key);
+			annotationsValue.getValue().add(value.toString());
+			annotations.getAnnotations().put(key, annotationsValue);
+		} else {
+			AnnotationsValue annotationsValue = new AnnotationsValue();
+			annotationsValue.setType(AnnotationsValueType.DOUBLE);
+			List<String> stringList = new ArrayList<>();
+			stringList.add(value.toString());
+			annotationsValue.setValue(stringList);
+			annotations.getAnnotations().put(key, annotationsValue);
+		}
+	}
+
 	public static void setAnnotation(SubmissionStatus status, String key, String value, boolean isPrivate) {
 		if (value!=null && value.length()>499) value = value.substring(0, 499);
 		Annotations annotations = status.getAnnotations();
@@ -373,8 +445,6 @@ public class EvaluationUtils {
 		stringList.add(value);
 		annotationsValue.setValue(stringList);
 		//statusMods.getAnnotationsToAdd().add(annotationsValue);
-
-
 	}
 
 	public static void setAnnotation(SubmissionStatusModifications statusMods, String key, String value, boolean isPrivate) {
@@ -415,14 +485,18 @@ public class EvaluationUtils {
 	public static void applyModifications(final SubmissionStatus submissionStatus, final SubmissionStatusModifications statusMods) {
 		// BEGIN NEW ANNOTATION CODE
 		for (AnnotationBase annot : statusMods.getAnnotationsToAdd()) {
-			if (annot instanceof StringAnnotation) 
+			if (annot instanceof StringAnnotation) {
 				setAnnotation(submissionStatus, annot.getKey(), ((StringAnnotation) annot).getValue(), annot.getIsPrivate());
-			if (annot instanceof LongAnnotation) 
+				setAnnotationStringV2(submissionStatus, annot.getKey(), ((StringAnnotation) annot).getValue(), annot.getIsPrivate());
+			}
+			if (annot instanceof LongAnnotation) {
 				setAnnotation(submissionStatus, annot.getKey(), ((LongAnnotation) annot).getValue(), annot.getIsPrivate());
-			if (annot instanceof DoubleAnnotation) 
+				setAnnotationLongV2(submissionStatus, annot.getKey(), ((LongAnnotation) annot).getValue(), annot.getIsPrivate());
+			}
+			if (annot instanceof DoubleAnnotation) {
 				setAnnotation(submissionStatus, annot.getKey(), ((DoubleAnnotation) annot).getValue(), annot.getIsPrivate());
-			if (annot instanceof AnnotationsValue)
-				setAnnotation(submissionStatus, annot.getKey(), annot.getIsPrivate(), (AnnotationsValue)annot);
+				setAnnotationDoubleV2(submissionStatus, annot.getKey(), ((DoubleAnnotation) annot).getValue(), annot.getIsPrivate());
+			}
 		}
 
 		for (String key : statusMods.getAnnotationNamesToRemove()) removeAnnotation(submissionStatus, key);

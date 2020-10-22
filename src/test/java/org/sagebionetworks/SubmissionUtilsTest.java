@@ -12,12 +12,15 @@ import org.sagebionetworks.evaluation.model.Submission;
 import org.sagebionetworks.evaluation.model.SubmissionStatus;
 import org.sagebionetworks.repo.model.EntityBundle;
 import org.sagebionetworks.repo.model.FileEntity;
+import org.sagebionetworks.repo.model.annotation.StringAnnotation;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -129,6 +132,16 @@ public class SubmissionUtilsTest {
 		
 		// no need to refresh
 		verify(synapse).getSubmissionStatus(SUBMISSION_ID);
+	}
+
+	@Test
+	public void testSubmissionStatusModsStringAnnotation() {
+		SubmissionStatusModifications mods = new SubmissionStatusModifications();
+		assertTrue(mods.getAnnotationsToAdd().isEmpty());
+		StringAnnotation stringAnnotation = new StringAnnotation();
+		stringAnnotation.setValue("test1");
+		mods.getAnnotationsToAdd().add(stringAnnotation);
+		assertFalse(mods.getAnnotationsToAdd().isEmpty());
 	}
 
 	/*

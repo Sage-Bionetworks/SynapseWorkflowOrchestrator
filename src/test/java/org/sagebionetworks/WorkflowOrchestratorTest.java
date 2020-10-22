@@ -5,9 +5,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.sagebionetworks.client.SynapseClient;
 import org.sagebionetworks.evaluation.model.Submission;
 import org.sagebionetworks.evaluation.model.SubmissionBundle;
@@ -16,10 +17,13 @@ import org.sagebionetworks.evaluation.model.SubmissionStatusEnum;
 import org.sagebionetworks.repo.model.Folder;
 import org.sagebionetworks.repo.model.Project;
 import org.sagebionetworks.repo.model.UserProfile;
+import org.sagebionetworks.repo.model.annotation.v2.Annotations;
+import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValue;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -31,12 +35,13 @@ import static org.sagebionetworks.Constants.AGENT_SHARED_DIR_DEFAULT;
 import static org.sagebionetworks.Constants.AGENT_SHARED_DIR_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.COMPOSE_PROJECT_NAME_ENV_VAR;
 import static org.sagebionetworks.Constants.DOCKER_ENGINE_URL_PROPERTY_NAME;
+import static org.sagebionetworks.Constants.ROOT_TEMPLATE_ANNOTATION_NAME;
 import static org.sagebionetworks.Constants.SHARED_VOLUME_NAME;
 import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
 import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
 import static org.sagebionetworks.Utils.dockerComposeName;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class WorkflowOrchestratorTest {
 	
 	@Mock
@@ -134,7 +139,83 @@ public class WorkflowOrchestratorTest {
 	
 	private static String ZIP_FILE_URL = "https://github.com/Sage-Bionetworks/SynapseWorkflowExample/archive/master.zip";
 	private static String ROOT_TEMPLATE = "SynapseWorkflowExample-master/workflow-entrypoint.cwl";
-	
+
+
+	@Test
+	public void testGetWorkflowURLAndEntrypointException() throws Throwable {
+		String test = "test";
+		Annotations v2 = new Annotations();
+		v2.setAnnotations(null);
+		when(synapse.getAnnotationsV2(test)).thenReturn(v2);
+
+		WorkflowAdmin workflowAdmin = new WorkflowAdmin();
+		String projectId = workflowAdmin.createProject();
+		String fileEntityId = workflowAdmin.createExternalFileEntity(ZIP_FILE_URL, projectId, ROOT_TEMPLATE);
+
+		DockerUtils dockerUtils = new DockerUtils();
+
+		WorkflowOrchestrator wh = new WorkflowOrchestrator(workflowAdmin.getSynapseClient(), null, dockerUtils, null, 1000L);
+		JSONObject o = new JSONObject();
+		o.put(EVALUATION_ID,  fileEntityId);
+		System.setProperty("EVALUATION_TEMPLATES", o.toString());
+
+		String expectedMessage = "Expected string annotation called "+
+				ROOT_TEMPLATE_ANNOTATION_NAME+" for " + fileEntityId + " but the entity has no string annotations.";
+		IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			wh.getWorkflowURLAndEntrypoint();
+		});
+	}
+
+	@Test
+	public void testGetWorkflowURLAndEntrypointExceptionNullAnnotationsValue() throws Throwable {
+		String test = "test";
+		Annotations v2 = new Annotations();
+		v2.setAnnotations(new HashMap<String, AnnotationsValue>());
+		when(synapse.getAnnotationsV2(test)).thenReturn(v2);
+
+		WorkflowAdmin workflowAdmin = new WorkflowAdmin();
+		String projectId = workflowAdmin.createProject();
+		String fileEntityId = workflowAdmin.createExternalFileEntity(ZIP_FILE_URL, projectId, ROOT_TEMPLATE);
+
+		DockerUtils dockerUtils = new DockerUtils();
+
+		WorkflowOrchestrator wh = new WorkflowOrchestrator(workflowAdmin.getSynapseClient(), null, dockerUtils, null, 1000L);
+		JSONObject o = new JSONObject();
+		o.put(EVALUATION_ID,  fileEntityId);
+		System.setProperty("EVALUATION_TEMPLATES", o.toString());
+
+		String expectedMessage = fileEntityId + " has no AnnotationValue called "+ROOT_TEMPLATE_ANNOTATION_NAME ;
+		IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			wh.getWorkflowURLAndEntrypoint();
+		});
+	}
+
+	@Test
+	public void testGetWorkflowURLAndEntrypointExceptionNullValue() throws Throwable {
+		String test = "test";
+		Annotations v2 = new Annotations();
+		Map<String, AnnotationsValue> map = new HashMap<String, AnnotationsValue>();
+		map.put(ROOT_TEMPLATE_ANNOTATION_NAME, null);
+		v2.setAnnotations(map);
+		when(synapse.getAnnotationsV2(test)).thenReturn(v2);
+
+		WorkflowAdmin workflowAdmin = new WorkflowAdmin();
+		String projectId = workflowAdmin.createProject();
+		String fileEntityId = workflowAdmin.createExternalFileEntity(ZIP_FILE_URL, projectId, ROOT_TEMPLATE);
+
+		DockerUtils dockerUtils = new DockerUtils();
+
+		WorkflowOrchestrator wh = new WorkflowOrchestrator(workflowAdmin.getSynapseClient(), null, dockerUtils, null, 1000L);
+		JSONObject o = new JSONObject();
+		o.put(EVALUATION_ID,  fileEntityId);
+		System.setProperty("EVALUATION_TEMPLATES", o.toString());
+
+		String expectedMessage = fileEntityId + " has no AnnotationValue called "+ROOT_TEMPLATE_ANNOTATION_NAME ;
+		IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			wh.getWorkflowURLAndEntrypoint();
+		});
+	}
+
 	@Ignore
 	@Test
 	public void testGetWorkflowURLAndEntrypoint() throws Throwable {
@@ -160,7 +241,6 @@ public class WorkflowOrchestratorTest {
 		Project project = new Project();
 		project.setId(projectId);
 		synapse.deleteEntity(project, true);
-
 	}
 
 }
