@@ -175,4 +175,31 @@ public class EvaluationUtilsTest {
 		applyModifications(actual, statusMods);
 		assertEquals(expected, actual);
 	}
+
+	@Test
+	public void testRemoveAnnotationsStringV2() throws Exception {
+		SubmissionStatus expected = new SubmissionStatus();
+		SubmissionStatus actual = new SubmissionStatus();
+		setAnnotationStringV2(actual, "foo1", "baz1", false);
+		removeAnnotation(actual, "foo1");
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testRemoveAnnotationsLongV2() throws Exception {
+		SubmissionStatus expected = new SubmissionStatus();
+		SubmissionStatus actual = new SubmissionStatus();
+		setAnnotationLongV2(actual, "foo1", 1L, false);
+		removeAnnotation(actual, "foo1");
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testRemoveAnnotationsDoubleV2() throws Exception {
+		SubmissionStatus expected = new SubmissionStatus();
+		SubmissionStatus actual = new SubmissionStatus();
+		setAnnotationDoubleV2(actual, "foo1", 3.14D, false);
+		removeAnnotation(actual, "foo1");
+		assertEquals(expected, actual);
+	}
 }

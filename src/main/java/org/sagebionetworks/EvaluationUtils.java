@@ -385,48 +385,54 @@ public class EvaluationUtils {
 		}
 	}
 	
-	private static void removeAnnotation(SubmissionStatus status, String key) {
+	static void removeAnnotation(SubmissionStatus status, String key) {
 		Annotations annotations = status.getAnnotations();
-		if (annotations==null) return;
+		if (annotations!=null) {
 
-		List<StringAnnotation> sas = annotations.getStringAnnos();
-		if (sas!=null) {
-			for (Iterator<StringAnnotation> iterator = sas.iterator(); iterator.hasNext();) {
-				StringAnnotation existing = iterator.next();
-				if (existing.getKey().equals(key)) {
-					iterator.remove();
+			List<StringAnnotation> sas = annotations.getStringAnnos();
+			if (sas != null) {
+				for (Iterator<StringAnnotation> iterator = sas.iterator(); iterator.hasNext(); ) {
+					StringAnnotation existing = iterator.next();
+					if (existing.getKey().equals(key)) {
+						iterator.remove();
+					}
 				}
 			}
-		}
 
-		List<DoubleAnnotation> das = annotations.getDoubleAnnos();
-		if (das!=null) {
-			for (Iterator<DoubleAnnotation> iterator = das.iterator(); iterator.hasNext();) {
-				DoubleAnnotation existing = iterator.next();
-				if (existing.getKey().equals(key)) {
-					iterator.remove();
+			List<DoubleAnnotation> das = annotations.getDoubleAnnos();
+			if (das != null) {
+				for (Iterator<DoubleAnnotation> iterator = das.iterator(); iterator.hasNext(); ) {
+					DoubleAnnotation existing = iterator.next();
+					if (existing.getKey().equals(key)) {
+						iterator.remove();
+					}
 				}
 			}
-		}
 
-		List<LongAnnotation> las = annotations.getLongAnnos();
-		if (las!=null) {
-			for (Iterator<LongAnnotation> iterator = las.iterator(); iterator.hasNext();) {
-				LongAnnotation existing = iterator.next();
-				if (existing.getKey().equals(key)) {
-					iterator.remove();
+			List<LongAnnotation> las = annotations.getLongAnnos();
+			if (las != null) {
+				for (Iterator<LongAnnotation> iterator = las.iterator(); iterator.hasNext(); ) {
+					LongAnnotation existing = iterator.next();
+					if (existing.getKey().equals(key)) {
+						iterator.remove();
+					}
 				}
 			}
 		}
 
 		org.sagebionetworks.repo.model.annotation.v2.Annotations annotationsV2 = status.getSubmissionAnnotations();
-		if(annotationsV2 == null) return;
-		Map<String, AnnotationsValue> annotationsValueMap = annotationsV2.getAnnotations();
-		if (annotationsValueMap != null){
-			if (annotationsValueMap.containsKey(key)){
-				annotationsValueMap.remove(key);
-				annotationsV2.setAnnotations(annotationsValueMap);
-				status.setSubmissionAnnotations(annotationsV2);
+		if(annotationsV2 != null) {
+			Map<String, AnnotationsValue> annotationsValueMap = annotationsV2.getAnnotations();
+			if (annotationsValueMap != null) {
+				if (annotationsValueMap.containsKey(key)) {
+					annotationsValueMap.remove(key);
+					if (annotationsValueMap.size() == 0) {
+						status.setSubmissionAnnotations(null);
+					} else {
+						annotationsV2.setAnnotations(annotationsValueMap);
+						status.setSubmissionAnnotations(annotationsV2);
+					}
+				}
 			}
 		}
 	}
