@@ -78,11 +78,11 @@ public class SubmissionUtils {
 			return SUBMISSION_STATUS_UPDATE_RUNNER.execute(new Executable<SubmissionStatus,SubmissionStatus>(){
 				public SubmissionStatus execute(SubmissionStatus status) throws SynapseException {
 					applyModifications(status, statusMods);
-					log.info(status.getEntityId() + " entity id");
-					log.info(status.getId() + " id");
-					log.info(status.getAnnotations()+ " annotations");
-					log.info(status.getSubmissionAnnotations() + " annotations v2");
-					log.info(status.getReport() + " report");
+					log.info(status.getEntityId() + " entity id\n");
+					log.info(status.getId() + " id\n");
+					log.info(status.getAnnotations()+ " annotations\n");
+					log.info(status.getSubmissionAnnotations() + " annotations v2\n");
+					log.info(status.getReport() + " report\n");
 					return synapse.updateSubmissionStatus(status);
 				}
 				public SubmissionStatus refreshArgs(SubmissionStatus status) throws SynapseException {
