@@ -111,40 +111,45 @@ public class EvaluationUtils {
 	}
 
 	public static String getStringAnnotation(SubmissionStatus status, String key) {
+		Annotations annotations = status.getAnnotations();
+		if (annotations == null) return null;
+		List<StringAnnotation> sas = annotations.getStringAnnos();
+		if (sas == null) return null;
+		for (StringAnnotation sa : sas) {
+			if (sa.getKey().equals(key)) return sa.getValue();
+		}
+		return null;
+	}
+
+	public static String getStringAnnotationV2(SubmissionStatus status, String key) {
 		org.sagebionetworks.repo.model.annotation.v2.Annotations annotationsV2 = status.getSubmissionAnnotations();
 		if (annotationsV2 != null && annotationsV2.getAnnotations() != null) {
 			Map<String, AnnotationsValue> mapValues = annotationsV2.getAnnotations();
-			if (mapValues.containsKey(key)) {
-				return mapValues.get(key).getValue().toString();
+			if (mapValues.containsKey(key) && mapValues.get(key).getValue().size() > 0) {
+				return mapValues.get(key).getValue().get(0);
 			}
 		}
-			Annotations annotations = status.getAnnotations();
-			if (annotations == null) return null;
-			List<StringAnnotation> sas = annotations.getStringAnnos();
-			if (sas == null) return null;
-			for (StringAnnotation sa : sas) {
-				if (sa.getKey().equals(key)) return sa.getValue();
-			}
-			return null;
+		return null;
 	}
 
 	public static Long getLongAnnotation(SubmissionStatus status, String key) {
-		org.sagebionetworks.repo.model.annotation.v2.Annotations annotationsV2 = status.getSubmissionAnnotations();
-		if (annotationsV2 != null && annotationsV2.getAnnotations() != null) {
-			Map<String, AnnotationsValue> mapValues = annotationsV2.getAnnotations();
-			if (mapValues.containsKey(key)) {
-				if(mapValues.size() > 0) {
-					return Long.parseLong(mapValues.get(key).getValue().get(0));
-				}
-			}
-		}
-
 		Annotations annotations = status.getAnnotations();
 		if (annotations==null) return null;
 		List<LongAnnotation> las = annotations.getLongAnnos();
 		if (las==null) return null;
 		for (LongAnnotation la : las) {
 			if (la.getKey().equals(key)) return la.getValue();
+		}
+		return null;
+	}
+
+	public static Long getLongAnnotationV2(SubmissionStatus status, String key) {
+		org.sagebionetworks.repo.model.annotation.v2.Annotations annotationsV2 = status.getSubmissionAnnotations();
+		if (annotationsV2 != null && annotationsV2.getAnnotations() != null) {
+			Map<String, AnnotationsValue> mapValues = annotationsV2.getAnnotations();
+			if (mapValues.containsKey(key) && mapValues.get(key).getValue().size() > 0) {
+				return Long.parseLong(mapValues.get(key).getValue().get(0));
+			}
 		}
 		return null;
 	}
@@ -443,15 +448,6 @@ public class EvaluationUtils {
 		}
 	}
 
-	public static void setAnnotationStringV2(SubmissionStatusModifications statusMods, String key, String value, boolean isPrivate) {
-		removeAnnotationIntern(statusMods, key); // make sure the key is not in the list
-		AnnotationsValue annotationsValue = new AnnotationsValue();
-		annotationsValue.setType(AnnotationsValueType.STRING);
-		List<String> stringList = new ArrayList<>();
-		stringList.add(value);
-		annotationsValue.setValue(stringList);
-		//statusMods.getAnnotationsToAdd().add(annotationsValue);
-	}
 
 	public static void setAnnotation(SubmissionStatusModifications statusMods, String key, String value, boolean isPrivate) {
 		removeAnnotationIntern(statusMods, key); // make sure the key is not in the list
@@ -553,7 +549,12 @@ public class EvaluationUtils {
 	}
 
 	public static Long getTimeRemaining(SubmissionStatus ss) {
-		return getLongAnnotation(ss, TIME_REMAINING);
+		Long longV2 = getLongAnnotationV2(ss, TIME_REMAINING);
+		if (longV2 != null) {
+			return longV2;
+		}else{
+			return getLongAnnotation(ss, TIME_REMAINING);
+		}
 	}
 
 	/*

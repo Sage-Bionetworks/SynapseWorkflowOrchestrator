@@ -105,14 +105,8 @@ public class WorkflowAdmin {
 		fileEntity.setDataFileHandleId(efh.getId());
 		fileEntity.setParentId(parentId);
 		fileEntity = synapseAdmin.createEntity(fileEntity);
-		//Annotations annotations = synapseAdmin.getAnnotations(fileEntity.getId());
 		Annotations annotations = synapseAdmin.getAnnotationsV2(fileEntity.getId());
-		//Map<String, List<String>> stringAnnotations = new HashMap<String, List<String>>();
-		//annotations.setStringAnnotations(stringAnnotations);
-		//stringAnnotations.put(ROOT_TEMPLATE_ANNOTATION_NAME, Collections.singletonList(rootTemplate));
-		//annotations = synapseAdmin.updateAnnotations(fileEntity.getId(), annotations);
 		Map<String, AnnotationsValue> updatedAnnotations = annotations.getAnnotations();
-		//JSONObjectAdapterImpl adapter = new JSONObjectAdapterImpl("{\"" + ROOT_TEMPLATE_ANNOTATION_NAME + "\":\"" + rootTemplate + "\"}");
 		AnnotationsValue value = new AnnotationsValue();
 		List<String> list = new ArrayList<String>();
 		list.add(rootTemplate);

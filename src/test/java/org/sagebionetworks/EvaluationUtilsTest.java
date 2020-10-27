@@ -12,6 +12,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.sagebionetworks.Constants.EXECUTION_STAGE_PROPERTY_NAME;
 import static org.sagebionetworks.EvaluationUtils.applyModifications;
+import static org.sagebionetworks.EvaluationUtils.getLongAnnotation;
+import static org.sagebionetworks.EvaluationUtils.getLongAnnotationV2;
+import static org.sagebionetworks.EvaluationUtils.getStringAnnotation;
+import static org.sagebionetworks.EvaluationUtils.getStringAnnotationV2;
 import static org.sagebionetworks.EvaluationUtils.removeAnnotation;
 import static org.sagebionetworks.EvaluationUtils.setAnnotation;
 import static org.sagebionetworks.EvaluationUtils.setAnnotationDoubleV2;
@@ -181,6 +185,7 @@ public class EvaluationUtilsTest {
 		SubmissionStatus expected = new SubmissionStatus();
 		SubmissionStatus actual = new SubmissionStatus();
 		setAnnotationStringV2(actual, "foo1", "baz1", false);
+		// Call under test
 		removeAnnotation(actual, "foo1");
 		assertEquals(expected, actual);
 	}
@@ -199,7 +204,52 @@ public class EvaluationUtilsTest {
 		SubmissionStatus expected = new SubmissionStatus();
 		SubmissionStatus actual = new SubmissionStatus();
 		setAnnotationDoubleV2(actual, "foo1", 3.14D, false);
+		// Call under test
 		removeAnnotation(actual, "foo1");
 		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testGetStringAnnotation() throws Exception {
+		SubmissionStatus status = new SubmissionStatus();
+		String expectedValue = "bar1";
+		String key = "foo1";
+		setAnnotation(status, key, expectedValue, false);
+		// Call under test
+		String actualValue = getStringAnnotation(status, key);
+		assertEquals(expectedValue, actualValue);
+	}
+
+	@Test
+	public void testGetStringAnnotationV2() throws Exception {
+		SubmissionStatus status = new SubmissionStatus();
+		String expectedValue = "bar1";
+		String key = "foo1";
+		setAnnotationStringV2(status, key, expectedValue, false);
+		// Call under test
+		String actualValue = getStringAnnotationV2(status, key);
+		assertEquals(expectedValue, actualValue);
+	}
+
+	@Test
+	public void testGetLongAnnotation() throws Exception {
+		SubmissionStatus status = new SubmissionStatus();
+		Long expectedValue = 1L;
+		String key = "foo1";
+		setAnnotation(status, key, expectedValue, false);
+		// Call under test
+		Long actualValue = getLongAnnotation(status, key);
+		assertEquals(expectedValue, actualValue);
+	}
+
+	@Test
+	public void testGetLongAnnotationV2() throws Exception {
+		SubmissionStatus status = new SubmissionStatus();
+		Long expectedValue = 1L;
+		String key = "foo1";
+		setAnnotationLongV2(status, key, expectedValue, false);
+		// Call under test
+		Long actualValue = getLongAnnotationV2(status, key);
+		assertEquals(expectedValue, actualValue);
 	}
 }

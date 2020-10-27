@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.sagebionetworks.client.SynapseClient;
 import org.sagebionetworks.evaluation.model.Submission;
@@ -83,6 +84,7 @@ public class WorkflowOrchestratorTest {
 	
 	@Before
 	public void setUp() throws Exception {
+		MockitoAnnotations.initMocks(this);
 		System.setProperty("WORKFLOW_OUTPUT_ROOT_ENTITY_ID", WORKFLOW_OUTPUT_ROOT_ENTITY_ID);
 		System.setProperty("SYNAPSE_USERNAME", "foo");
 		System.setProperty("SYNAPSE_PASSWORD", "bar");
@@ -140,7 +142,7 @@ public class WorkflowOrchestratorTest {
 	private static String ZIP_FILE_URL = "https://github.com/Sage-Bionetworks/SynapseWorkflowExample/archive/master.zip";
 	private static String ROOT_TEMPLATE = "SynapseWorkflowExample-master/workflow-entrypoint.cwl";
 
-
+	@Ignore
 	@Test
 	public void testGetWorkflowURLAndEntrypointException() throws Throwable {
 		String test = "test";
@@ -166,6 +168,7 @@ public class WorkflowOrchestratorTest {
 		});
 	}
 
+	@Ignore
 	@Test
 	public void testGetWorkflowURLAndEntrypointExceptionNullAnnotationsValue() throws Throwable {
 		String test = "test";
@@ -190,6 +193,7 @@ public class WorkflowOrchestratorTest {
 		});
 	}
 
+	@Ignore
 	@Test
 	public void testGetWorkflowURLAndEntrypointExceptionNullValue() throws Throwable {
 		String test = "test";
@@ -219,8 +223,8 @@ public class WorkflowOrchestratorTest {
 	@Ignore
 	@Test
 	public void testGetWorkflowURLAndEntrypoint() throws Throwable {
-		System.setProperty(SYNAPSE_USERNAME_PROPERTY, "xxx");
-		System.setProperty(SYNAPSE_PASSWORD_PROPERTY, "xxx");
+		System.setProperty(SYNAPSE_USERNAME_PROPERTY, "username");
+		System.setProperty(SYNAPSE_PASSWORD_PROPERTY, "password");
 		WorkflowAdmin workflowAdmin = new WorkflowAdmin();
 		String projectId = workflowAdmin.createProject();
 		String fileEntityId = workflowAdmin.createExternalFileEntity(ZIP_FILE_URL, projectId, ROOT_TEMPLATE);
