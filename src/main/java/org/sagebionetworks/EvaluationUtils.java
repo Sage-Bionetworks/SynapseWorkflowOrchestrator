@@ -195,6 +195,7 @@ public class EvaluationUtils {
 
 		if (annotations.getAnnotations().containsKey(key)) {
 			AnnotationsValue annotationsValue  = annotations.getAnnotations().get(key);
+			annotationsValue.getValue().clear();
 			annotationsValue.getValue().add(value);
 			annotations.getAnnotations().put(key, annotationsValue);
 		} else {
@@ -219,6 +220,7 @@ public class EvaluationUtils {
 
 		if (annotations.getAnnotations().containsKey(key)) {
 			AnnotationsValue annotationsValue  = annotations.getAnnotations().get(key);
+			annotationsValue.getValue().clear();
 			annotationsValue.getValue().add(value.toString());
 			annotations.getAnnotations().put(key, annotationsValue);
 		} else {
@@ -243,6 +245,7 @@ public class EvaluationUtils {
 
 		if (annotations.getAnnotations().containsKey(key)) {
 			AnnotationsValue annotationsValue  = annotations.getAnnotations().get(key);
+			annotationsValue.getValue().clear();
 			annotationsValue.getValue().add(value.toString());
 			annotations.getAnnotations().put(key, annotationsValue);
 		} else {
