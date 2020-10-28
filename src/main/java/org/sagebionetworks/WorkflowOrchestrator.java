@@ -421,7 +421,7 @@ public class WorkflowOrchestrator  {
 
 			String submissionFolderIdAnnotation = EvaluationUtils.getStringAnnotationV2(submissionStatus, SUBMISSION_ARTIFACTS_FOLDER);
 			if (submissionFolderIdAnnotation == null) {
-				EvaluationUtils.getStringAnnotation(submissionStatus, SUBMISSION_ARTIFACTS_FOLDER);
+				submissionFolderIdAnnotation = EvaluationUtils.getStringAnnotation(submissionStatus, SUBMISSION_ARTIFACTS_FOLDER);
 			}
 			String sharedSubmissionFolderId = shareImmediately ? submissionFolderIdAnnotation : null;
 
@@ -556,12 +556,12 @@ public class WorkflowOrchestrator  {
 				updatedStatus = SubmissionStatusEnum.CLOSED;
 			}
 		}
-// BEGIN NEW ANNOTATION CODE
+
 		Long lastLogUploadTimeStamp = EvaluationUtils.getLongAnnotationV2(submissionStatus, LAST_LOG_UPLOAD);
 		if (lastLogUploadTimeStamp == null) {
 			lastLogUploadTimeStamp = EvaluationUtils.getLongAnnotation(submissionStatus, LAST_LOG_UPLOAD);
 		}
-// END NEW ANNOTATION CODE
+
 		boolean timeToUploadLogs = lastLogUploadTimeStamp==null ||
 				lastLogUploadTimeStamp+UPLOAD_PERIOD_MILLIS<System.currentTimeMillis();
 

@@ -1,5 +1,6 @@
 package org.sagebionetworks;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.sagebionetworks.evaluation.model.SubmissionStatus;
 import org.sagebionetworks.evaluation.model.SubmissionStatusEnum;
@@ -180,6 +181,7 @@ public class EvaluationUtilsTest {
 		assertEquals(expected, actual);
 	}
 
+	@Ignore
 	@Test
 	public void testRemoveAnnotationsStringV2() throws Exception {
 		SubmissionStatus expected = new SubmissionStatus();
@@ -190,6 +192,7 @@ public class EvaluationUtilsTest {
 		assertEquals(expected, actual);
 	}
 
+	@Ignore
 	@Test
 	public void testRemoveAnnotationsLongV2() throws Exception {
 		SubmissionStatus expected = new SubmissionStatus();
@@ -199,6 +202,7 @@ public class EvaluationUtilsTest {
 		assertEquals(expected, actual);
 	}
 
+	@Ignore
 	@Test
 	public void testRemoveAnnotationsDoubleV2() throws Exception {
 		SubmissionStatus expected = new SubmissionStatus();

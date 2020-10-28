@@ -434,12 +434,14 @@ public class EvaluationUtils {
 			if (annotationsValueMap != null) {
 				if (annotationsValueMap.containsKey(key)) {
 					annotationsValueMap.remove(key);
-					if (annotationsValueMap.size() == 0) {
+					annotationsV2.setAnnotations(annotationsValueMap);
+					status.setSubmissionAnnotations(annotationsV2);
+					/*if (annotationsValueMap.size() == 0) {
 						status.setSubmissionAnnotations(null);
 					} else {
 						annotationsV2.setAnnotations(annotationsValueMap);
 						status.setSubmissionAnnotations(annotationsV2);
-					}
+					} */
 				}
 			}
 		}
