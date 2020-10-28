@@ -144,23 +144,5 @@ public class SubmissionUtilsTest {
 		assertFalse(mods.getAnnotationsToAdd().isEmpty());
 	}
 
-	/*
-	@Test
-	public void updateSubmissionForCancelRequest() throws Exception {
-		SubmissionStatusModifications statusMods = new SubmissionStatusModifications();
-		assertNotNull(statusMods.getAnnotationsToAdd());
-		assertEquals(0, statusMods.getAnnotationsToAdd().size());
-		SubmissionStatusEnum submissionStatusEnum = SubmissionStatusEnum.INVALID;
-		WorkflowUpdateStatus containerStatus = WorkflowUpdateStatus.STOPPED_UPON_REQUEST;
-		setStatus(statusMods, submissionStatusEnum, containerStatus);
-		assertNotNull(statusMods);
-		assertEquals(submissionStatusEnum, statusMods.getStatus());
-		assertNotNull(statusMods.getAnnotationsToAdd());
-		assertEquals(1, statusMods.getAnnotationsToAdd().size());
-		String expectedKey = "orgSagebionetworksSynapseWorkflowOrchestratorStatusDescription";
-		assertNotNull(expectedKey, statusMods.getAnnotationsToAdd().get(0).getKey());
-
-
-	} */
 
 }
