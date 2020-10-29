@@ -121,15 +121,7 @@ public class EvaluationUtilsTest {
 		setAnnotationStringV2(expected, "foo1", "bar", false);
 		setAnnotation(statusMods, "foo1", "bar", false);
 
-		expected.setCanCancel(true);
-		statusMods.setCanCancel(true);
-
-		expected.setCancelRequested(false);
-		statusMods.setCancelRequested(false);
-
-		expected.setStatus(SubmissionStatusEnum.VALIDATED);
-		statusMods.setStatus(SubmissionStatusEnum.VALIDATED);
-
+		// Call under test
 		applyModifications(actual, statusMods);
 		assertEquals(expected, actual);
 	}
@@ -144,15 +136,7 @@ public class EvaluationUtilsTest {
 		setAnnotationLongV2(expected, "foo2", 1L, false);
 		setAnnotation(statusMods, "foo2", 1L, false);
 
-		expected.setCanCancel(true);
-		statusMods.setCanCancel(true);
-
-		expected.setCancelRequested(false);
-		statusMods.setCancelRequested(false);
-
-		expected.setStatus(SubmissionStatusEnum.VALIDATED);
-		statusMods.setStatus(SubmissionStatusEnum.VALIDATED);
-
+		// Call under test
 		applyModifications(actual, statusMods);
 		assertEquals(expected, actual);
 	}
@@ -167,15 +151,7 @@ public class EvaluationUtilsTest {
 		setAnnotationDoubleV2(expected, "foo3", 3.14D, false);
 		setAnnotation(statusMods, "foo3", 3.14D, true);
 
-		expected.setCanCancel(true);
-		statusMods.setCanCancel(true);
-
-		expected.setCancelRequested(false);
-		statusMods.setCancelRequested(false);
-
-		expected.setStatus(SubmissionStatusEnum.VALIDATED);
-		statusMods.setStatus(SubmissionStatusEnum.VALIDATED);
-
+		// Call under test
 		applyModifications(actual, statusMods);
 		assertEquals(expected, actual);
 	}
@@ -196,6 +172,7 @@ public class EvaluationUtilsTest {
 	public void testRemoveAnnotationsLongV2() throws Exception {
 		SubmissionStatus actual = new SubmissionStatus();
 		setAnnotationLongV2(actual, "foo1", 1L, false);
+		// Call under test
 		removeAnnotation(actual, "foo1");
 		assertNotNull(actual);
 		assertNotNull(actual.getSubmissionAnnotations());

@@ -224,12 +224,10 @@ public class WorkflowOrchestrator  {
 			String acceptNewSubmissionsString = getProperty(ACCEPT_NEW_SUBMISSIONS_PROPERTY_NAME, false);
 			if (StringUtils.isEmpty(acceptNewSubmissionsString) || Boolean.getBoolean(acceptNewSubmissionsString)) {
 				for (String evaluationId : getEvaluationIds()) {
-					log.info("createNewWorkflowjobs");
 					WorkflowURLEntrypointAndSynapseRef workflow = evaluationIdToTemplateMap.get(evaluationId);
 					createNewWorkflowJobs(evaluationId, workflow);
 				}
 			}
-			log.info("updateworkflowjobs");
 			updateWorkflowJobs(getEvaluationIds());
 
 			try {
@@ -251,7 +249,6 @@ public class WorkflowOrchestrator  {
 		int maxConcurrentWorkflows = getMaxConcurrentWorkflows();
 		List<SubmissionBundle> receivedSubmissions=null;
 		try {
-			log.info("selectSubmissions");
 			receivedSubmissions = 
 					evaluationUtils.selectSubmissions(evaluationId, getInitialSubmissionState() );
 		} catch (IllegalStateException e ) {
@@ -260,11 +257,6 @@ public class WorkflowOrchestrator  {
 		for (SubmissionBundle sb : receivedSubmissions) {
 			String submissionId=sb.getSubmission().getId();
 			SubmissionStatus submissionStatus = sb.getSubmissionStatus();
-			log.info(submissionStatus.getEntityId() + " entity id b4\n");
-			log.info(submissionStatus.getId() + " id b4 \n");
-			log.info(submissionStatus.getAnnotations()+ " annotations b4\n");
-			log.info(submissionStatus.getSubmissionAnnotations() + " annotations v2 b4\n");
-			log.info(submissionStatus.getReport() + " report b4\n");
 			try {
 				if (BooleanUtils.isTrue(submissionStatus.getCancelRequested())) {
 					SubmissionStatusModifications statusMods = new SubmissionStatusModifications();
