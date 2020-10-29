@@ -1,6 +1,5 @@
 package org.sagebionetworks;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.sagebionetworks.evaluation.model.SubmissionStatus;
 import org.sagebionetworks.evaluation.model.SubmissionStatusEnum;
@@ -181,36 +180,39 @@ public class EvaluationUtilsTest {
 		assertEquals(expected, actual);
 	}
 
-	@Ignore
 	@Test
 	public void testRemoveAnnotationsStringV2() throws Exception {
-		SubmissionStatus expected = new SubmissionStatus();
 		SubmissionStatus actual = new SubmissionStatus();
 		setAnnotationStringV2(actual, "foo1", "baz1", false);
 		// Call under test
 		removeAnnotation(actual, "foo1");
-		assertEquals(expected, actual);
+		assertNotNull(actual);
+		assertNotNull(actual.getSubmissionAnnotations());
+		assertNotNull(actual.getSubmissionAnnotations().getAnnotations());
+		assertEquals(0, actual.getSubmissionAnnotations().getAnnotations().size());
 	}
 
-	@Ignore
 	@Test
 	public void testRemoveAnnotationsLongV2() throws Exception {
-		SubmissionStatus expected = new SubmissionStatus();
 		SubmissionStatus actual = new SubmissionStatus();
 		setAnnotationLongV2(actual, "foo1", 1L, false);
 		removeAnnotation(actual, "foo1");
-		assertEquals(expected, actual);
+		assertNotNull(actual);
+		assertNotNull(actual.getSubmissionAnnotations());
+		assertNotNull(actual.getSubmissionAnnotations().getAnnotations());
+		assertEquals(0, actual.getSubmissionAnnotations().getAnnotations().size());
 	}
 
-	@Ignore
 	@Test
 	public void testRemoveAnnotationsDoubleV2() throws Exception {
-		SubmissionStatus expected = new SubmissionStatus();
 		SubmissionStatus actual = new SubmissionStatus();
 		setAnnotationDoubleV2(actual, "foo1", 3.14D, false);
 		// Call under test
 		removeAnnotation(actual, "foo1");
-		assertEquals(expected, actual);
+		assertNotNull(actual);
+		assertNotNull(actual.getSubmissionAnnotations());
+		assertNotNull(actual.getSubmissionAnnotations().getAnnotations());
+		assertEquals(0, actual.getSubmissionAnnotations().getAnnotations().size());
 	}
 
 	@Test

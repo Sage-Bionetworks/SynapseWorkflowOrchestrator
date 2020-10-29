@@ -196,6 +196,7 @@ public class EvaluationUtils {
 		if (annotations.getAnnotations().containsKey(key)) {
 			AnnotationsValue annotationsValue  = annotations.getAnnotations().get(key);
 			annotationsValue.getValue().clear();
+			annotationsValue.setType(AnnotationsValueType.STRING);
 			annotationsValue.getValue().add(value);
 			annotations.getAnnotations().put(key, annotationsValue);
 		} else {
@@ -220,6 +221,7 @@ public class EvaluationUtils {
 
 		if (annotations.getAnnotations().containsKey(key)) {
 			AnnotationsValue annotationsValue  = annotations.getAnnotations().get(key);
+			annotationsValue.setType(AnnotationsValueType.LONG);
 			annotationsValue.getValue().clear();
 			annotationsValue.getValue().add(value.toString());
 			annotations.getAnnotations().put(key, annotationsValue);
@@ -245,6 +247,7 @@ public class EvaluationUtils {
 
 		if (annotations.getAnnotations().containsKey(key)) {
 			AnnotationsValue annotationsValue  = annotations.getAnnotations().get(key);
+			annotationsValue.setType(AnnotationsValueType.DOUBLE);
 			annotationsValue.getValue().clear();
 			annotationsValue.getValue().add(value.toString());
 			annotations.getAnnotations().put(key, annotationsValue);
@@ -392,42 +395,59 @@ public class EvaluationUtils {
 			statusMods.setCanCancel(false);    		
 		}
 	}
-	
-	static void removeAnnotation(SubmissionStatus status, String key) {
+
+	static boolean removeStringAnnotation(SubmissionStatus status, String key) {
 		Annotations annotations = status.getAnnotations();
 		if (annotations!=null) {
-
 			List<StringAnnotation> sas = annotations.getStringAnnos();
 			if (sas != null) {
 				for (Iterator<StringAnnotation> iterator = sas.iterator(); iterator.hasNext(); ) {
 					StringAnnotation existing = iterator.next();
 					if (existing.getKey().equals(key)) {
 						iterator.remove();
+						return true;
 					}
 				}
 			}
+		}
+		return false;
+	}
 
-			List<DoubleAnnotation> das = annotations.getDoubleAnnos();
-			if (das != null) {
-				for (Iterator<DoubleAnnotation> iterator = das.iterator(); iterator.hasNext(); ) {
-					DoubleAnnotation existing = iterator.next();
-					if (existing.getKey().equals(key)) {
-						iterator.remove();
-					}
-				}
-			}
-
+	static boolean removeLongAnnotation(SubmissionStatus status, String key) {
+		Annotations annotations = status.getAnnotations();
+		if (annotations!=null) {
 			List<LongAnnotation> las = annotations.getLongAnnos();
 			if (las != null) {
 				for (Iterator<LongAnnotation> iterator = las.iterator(); iterator.hasNext(); ) {
 					LongAnnotation existing = iterator.next();
 					if (existing.getKey().equals(key)) {
 						iterator.remove();
+						return true;
 					}
 				}
 			}
 		}
+		return false;
+	}
 
+	static boolean removeDoubleAnnotation(SubmissionStatus status, String key) {
+		Annotations annotations = status.getAnnotations();
+		if (annotations!=null) {
+			List<DoubleAnnotation> das = annotations.getDoubleAnnos();
+			if (das != null) {
+				for (Iterator<DoubleAnnotation> iterator = das.iterator(); iterator.hasNext(); ) {
+					DoubleAnnotation existing = iterator.next();
+					if (existing.getKey().equals(key)) {
+						iterator.remove();
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	static boolean removeV2Annotation(SubmissionStatus status, String key) {
 		org.sagebionetworks.repo.model.annotation.v2.Annotations annotationsV2 = status.getSubmissionAnnotations();
 		if(annotationsV2 != null) {
 			Map<String, AnnotationsValue> annotationsValueMap = annotationsV2.getAnnotations();
@@ -436,15 +456,18 @@ public class EvaluationUtils {
 					annotationsValueMap.remove(key);
 					annotationsV2.setAnnotations(annotationsValueMap);
 					status.setSubmissionAnnotations(annotationsV2);
-					/*if (annotationsValueMap.size() == 0) {
-						status.setSubmissionAnnotations(null);
-					} else {
-						annotationsV2.setAnnotations(annotationsValueMap);
-						status.setSubmissionAnnotations(annotationsV2);
-					} */
+					return true;
 				}
 			}
 		}
+		return false;
+	}
+	
+	static void removeAnnotation(SubmissionStatus status, String key) {
+		removeStringAnnotation(status, key);
+		removeDoubleAnnotation(status, key);
+		removeLongAnnotation(status, key);
+		removeV2Annotation(status, key);
 	}
 	
 	private static void removeAnnotationIntern(SubmissionStatusModifications statusMods, String key) {
