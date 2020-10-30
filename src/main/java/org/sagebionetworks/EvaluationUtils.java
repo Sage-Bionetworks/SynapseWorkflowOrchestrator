@@ -168,21 +168,6 @@ public class EvaluationUtils {
 		return false;
 	}
 
-	public static void setAnnotation(SubmissionStatus status, String key, boolean isPrivate, AnnotationsValue value) {
-		org.sagebionetworks.repo.model.annotation.v2.Annotations annotationsV2 = status.getSubmissionAnnotations();
-		if ( annotationsV2 == null) {
-			annotationsV2 = new org.sagebionetworks.repo.model.annotation.v2.Annotations();
-			status.setSubmissionAnnotations(annotationsV2);
-		}
-		Map<String, AnnotationsValue> annotationValueMap = annotationsV2.getAnnotations();
-		if ( annotationValueMap == null ) {
-			annotationValueMap = new HashMap<String, AnnotationsValue>();
-			annotationsV2.setAnnotations(annotationValueMap);
-		}
-
-		annotationValueMap.put(key, value);
-	}
-
 	public static void setAnnotationStringV2(SubmissionStatus status, String key, String value, boolean isPrivate) {
 		org.sagebionetworks.repo.model.annotation.v2.Annotations annotations = status.getSubmissionAnnotations();
 		if (annotations == null) {
