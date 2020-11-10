@@ -57,7 +57,7 @@ public class AnnotationsTranslatorTest {
 		assertNotNull(newAnnotations.getAnnotations().get(expectedKey));
 		assertEquals(AnnotationsValueType.LONG, newAnnotations.getAnnotations().get(expectedKey).getType());
 		assertEquals(1, newAnnotations.getAnnotations().get(expectedKey).getValue().size());
-		assertEquals(expectedValue, Long.parseLong(newAnnotations.getAnnotations().get(expectedKey).getValue().get(0)));
+		assertEquals(expectedValue, (Long)Long.parseLong(newAnnotations.getAnnotations().get(expectedKey).getValue().get(0)));
 	}
 
 	@Test
@@ -125,8 +125,8 @@ public class AnnotationsTranslatorTest {
 		assertEquals(1, mapValues.get(key2).getValue().size());
 		assertEquals(AnnotationsValueType.LONG, mapValues.get(key1).getType());
 		assertEquals(AnnotationsValueType.LONG, mapValues.get(key2).getType());
-		assertEquals(expectedLong, Long.parseLong(mapValues.get(key1).getValue().get(0)));
-		assertEquals(expectedLong2, Long.parseLong(mapValues.get(key2).getValue().get(0)));
+		assertEquals(expectedLong, (Long)Long.parseLong(mapValues.get(key1).getValue().get(0)));
+		assertEquals(expectedLong2, (Long)Long.parseLong(mapValues.get(key2).getValue().get(0)));
 	}
 
 	@Test
@@ -160,8 +160,8 @@ public class AnnotationsTranslatorTest {
 		assertEquals(1, mapValues.get(key2).getValue().size());
 		assertEquals(AnnotationsValueType.DOUBLE, mapValues.get(key1).getType());
 		assertEquals(AnnotationsValueType.DOUBLE, mapValues.get(key2).getType());
-		assertEquals(expectedDouble, Double.parseDouble(mapValues.get(key1).getValue().get(0)));
-		assertEquals(expectedDouble2, Double.parseDouble(mapValues.get(key2).getValue().get(0)));
+		assertEquals(expectedDouble, (Double)Double.parseDouble(mapValues.get(key1).getValue().get(0)));
+		assertEquals(expectedDouble2, (Double)Double.parseDouble(mapValues.get(key2).getValue().get(0)));
 
 	}
 
