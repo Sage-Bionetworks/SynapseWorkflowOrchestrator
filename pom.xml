@@ -17,6 +17,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<synapseVersion>329.0</synapseVersion>
 		<entryPoint>org.sagebionetworks.WorkflowOrchestrator</entryPoint>
+		<junit.jupiter.version>5.4.1</junit.jupiter.version>
+		<junit.vintage.version>5.4.1</junit.vintage.version>
+		<junit.platform.version>1.4.1</junit.platform.version>
+		<mockito.version>2.27.0</mockito.version>
 	</properties>
 
 	<build>
@@ -72,22 +76,6 @@
 					</execution>
 				</executions>
 			</plugin>
-				<plugin>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.19</version>
-					<dependencies>
-						<dependency>
-							<groupId>org.junit.platform</groupId>
-							<artifactId>junit-platform-surefire-provider</artifactId>
-							<version>1.0.0-M4</version>
-						</dependency>
-						<dependency>
-							<groupId>org.junit.vintage</groupId>
-							<artifactId>junit-vintage-engine</artifactId>
-							<version>4.12.0-M4</version>
-						</dependency>
-					</dependencies>
-				</plugin>
 		</plugins>
 
 	</build>
@@ -143,13 +131,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-junit-jupiter</artifactId>
-			<version>2.23.0</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>org.sagebionetworks</groupId>
 			<artifactId>synapseJavaClient</artifactId>
 			<version>${synapseVersion}</version>
@@ -167,31 +148,10 @@
 			<version>${synapseVersion}</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-lambda-java-core -->
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-lambda-java-core</artifactId>
-			<version>1.1.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
-
 		<dependency>
 			<groupId>org.fuin</groupId>
 			<artifactId>utils4j</artifactId>
 			<version>0.6.9</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.9.5</version>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -212,39 +172,54 @@
             <version>4.5.10</version>
         </dependency>
 
+		<!--interface between junit5 and programmatic clients, such as IDEs and
+				build tools, for running tests -->
 		<dependency>
-			<artifactId>junit-jupiter</artifactId>
-			<groupId>org.junit.jupiter</groupId>
-			<version>RELEASE</version>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-launcher</artifactId>
+			<version>${junit.platform.version}</version>
 			<scope>test</scope>
 		</dependency>
-
+		<!--adds a subset of junit5 functionality to tests currently running under
+            junit4. should be REMOVED once fully converted to junit5 -->
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-runner</artifactId>
+			<version>${junit.platform.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!--junit5 engine -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.3.1</version>
+			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!--junit4 engine for backwards compatibility -->
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<version>${junit.vintage.version}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>2.21.0</version>
+			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.junit.platform/junit-platform-commons -->
 		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-commons</artifactId>
-			<version>1.4.0</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.junit.platform/junit-platform-launcher -->
-		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-launcher</artifactId>
-			<version>1.4.0</version>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 
