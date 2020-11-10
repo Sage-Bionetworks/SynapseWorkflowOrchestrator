@@ -1,4 +1,21 @@
 package org.sagebionetworks;
+
+import static org.sagebionetworks.Utils.getProperty;
+import static org.sagebionetworks.Utils.getSynIdProperty;
+import static org.sagebionetworks.Utils.getTempDir;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 import org.fuin.utils4j.Utils4J;
 import org.sagebionetworks.client.SynapseClient;
@@ -14,22 +31,6 @@ import org.sagebionetworks.repo.model.file.CloudProviderFileHandleInterface;
 import org.sagebionetworks.repo.model.util.ModelConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static org.sagebionetworks.Utils.getProperty;
-import static org.sagebionetworks.Utils.getSynIdProperty;
-import static org.sagebionetworks.Utils.getTempDir;
 
 public class Archiver {
 	private SynapseClient synapse;

@@ -1,23 +1,4 @@
 package org.sagebionetworks;
-import com.github.dockerjava.api.command.InspectContainerResponse.ContainerState;
-import com.github.dockerjava.api.model.Container;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import static org.sagebionetworks.Constants.AGENT_SHARED_DIR_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.DOCKER_CERT_PATH_HOST_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.DOCKER_ENGINE_URL_PROPERTY_NAME;
@@ -35,6 +16,26 @@ import static org.sagebionetworks.Utils.createTempFile;
 import static org.sagebionetworks.Utils.dockerComposeName;
 import static org.sagebionetworks.Utils.findRunningWorkflowJobs;
 import static org.sagebionetworks.Utils.getProperty;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import com.github.dockerjava.api.command.InspectContainerResponse.ContainerState;
+import com.github.dockerjava.api.model.Container;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class WorkflowManagerDocker implements WorkflowManager {
@@ -65,11 +66,11 @@ public class WorkflowManagerDocker implements WorkflowManager {
 			File hostSynapseConfig) throws IOException {
 		File workflowParameters = createTempFile(".yaml", targetFolder.getContainerPath());
 		try (FileOutputStream fos = new FileOutputStream(workflowParameters)) {
-			IOUtils.write("submissionId: "+params.getSubmissionId()+"\n", fos, "UTF-8");
-			IOUtils.write("workflowSynapseId: "+params.getSynapseWorkflowReference()+"\n", fos, "UTF-8");
-			IOUtils.write("submitterUploadSynId: "+params.getSubmitterUploadSynId()+"\n", fos, "UTF-8");
-			IOUtils.write("adminUploadSynId: "+params.getAdminUploadSynId()+"\n", fos, "UTF-8");
-			IOUtils.write("synapseConfig:\n  class: File\n  path: "+hostSynapseConfig.getAbsolutePath()+"\n", fos, "UTF-8");
+			IOUtils.write("submissionId: "+params.getSubmissionId()+"\n", fos, StandardCharsets.UTF_8);
+			IOUtils.write("workflowSynapseId: "+params.getSynapseWorkflowReference()+"\n", fos, StandardCharsets.UTF_8);
+			IOUtils.write("submitterUploadSynId: "+params.getSubmitterUploadSynId()+"\n", fos, StandardCharsets.UTF_8);
+			IOUtils.write("adminUploadSynId: "+params.getAdminUploadSynId()+"\n", fos, StandardCharsets.UTF_8);
+			IOUtils.write("synapseConfig:\n  class: File\n  path: "+hostSynapseConfig.getAbsolutePath()+"\n", fos, StandardCharsets.UTF_8);
 		}
 		return new ContainerRelativeFile(workflowParameters.getName(), targetFolder.getContainerPath(), targetFolder.getHostPath());
 	}

@@ -1,27 +1,28 @@
 package org.sagebionetworks;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.sagebionetworks.Constants.EXECUTION_STAGE_PROPERTY_NAME;
+import static org.sagebionetworks.EvaluationUtils.TIME_REMAINING;
+import static org.sagebionetworks.EvaluationUtils.applyModifications;
+import static org.sagebionetworks.EvaluationUtils.getLongAnnotation;
+import static org.sagebionetworks.EvaluationUtils.getStringAnnotation;
+import static org.sagebionetworks.EvaluationUtils.getTimeRemaining;
+import static org.sagebionetworks.EvaluationUtils.removeAnnotation;
+import static org.sagebionetworks.EvaluationUtils.setAnnotation;
+import static org.sagebionetworks.EvaluationUtils.setStatus;
+
+import java.util.ArrayList;
+import java.util.Collections;
+
 import org.junit.Test;
 import org.sagebionetworks.evaluation.model.SubmissionStatus;
 import org.sagebionetworks.evaluation.model.SubmissionStatusEnum;
 import org.sagebionetworks.repo.model.annotation.Annotations;
+import org.sagebionetworks.repo.model.annotation.LongAnnotation;
 import org.sagebionetworks.repo.model.annotation.StringAnnotation;
-
-import java.util.Collections;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.sagebionetworks.Constants.EXECUTION_STAGE_PROPERTY_NAME;
-import static org.sagebionetworks.EvaluationUtils.applyModifications;
-import static org.sagebionetworks.EvaluationUtils.getLongAnnotation;
-import static org.sagebionetworks.EvaluationUtils.getLongAnnotationV2;
-import static org.sagebionetworks.EvaluationUtils.getStringAnnotation;
-import static org.sagebionetworks.EvaluationUtils.getStringAnnotationV2;
-import static org.sagebionetworks.EvaluationUtils.removeAnnotation;
-import static org.sagebionetworks.EvaluationUtils.setAnnotation;
-import static org.sagebionetworks.EvaluationUtils.setAnnotationDoubleV2;
-import static org.sagebionetworks.EvaluationUtils.setAnnotationLongV2;
-import static org.sagebionetworks.EvaluationUtils.setAnnotationStringV2;
-import static org.sagebionetworks.EvaluationUtils.setStatus;
 
 
 public class EvaluationUtilsTest {
@@ -39,16 +40,16 @@ public class EvaluationUtilsTest {
 		SubmissionStatus actual = new SubmissionStatus();
 		
 		setAnnotation(expected, "foo1", "bar", false);
-		setAnnotationStringV2(expected, "foo1", "bar", false);
 		setAnnotation(statusMods, "foo1", "bar", false);
 
 		setAnnotation(expected, "foo2", 1L, false);
-		setAnnotationLongV2(expected, "foo2", 1L, false);;
 		setAnnotation(statusMods, "foo2", 1L, false);
 
 		setAnnotation(expected, "foo3", 3.14D, true);
-		setAnnotationDoubleV2(expected, "foo3", 3.14D, false);;
 		setAnnotation(statusMods, "foo3", 3.14D, true);
+
+		expected.setSubmissionAnnotations(AnnotationsTranslator.translateToAnnotationsV2(expected.getAnnotations()));
+
 		
 		expected.setCanCancel(true);
 		statusMods.setCanCancel(true);
@@ -75,7 +76,6 @@ public class EvaluationUtilsTest {
 
 		setAnnotation(statusMods, "foo1", "bar", true);
 		setAnnotation(statusMods, "foo2", "bar", false);
-		setAnnotationStringV2(expected, "foo2", "bar", false);
 		applyModifications(actual, statusMods);
 		
 		statusMods = new SubmissionStatusModifications();
@@ -90,7 +90,7 @@ public class EvaluationUtilsTest {
 		sa.setIsPrivate(false);
 		annotations.setStringAnnos(Collections.singletonList(sa));
 		expected.setAnnotations(annotations);
-		setAnnotationStringV2(expected, "foo2", "baz", false);
+		expected.setSubmissionAnnotations(AnnotationsTranslator.translateToAnnotationsV2(expected.getAnnotations()));
 		
 		assertEquals(expected, actual);
 	}
@@ -118,7 +118,8 @@ public class EvaluationUtilsTest {
 		SubmissionStatus actual = new SubmissionStatus();
 
 		setAnnotation(expected, "foo1", "bar", false);
-		setAnnotationStringV2(expected, "foo1", "bar", false);
+		org.sagebionetworks.repo.model.annotation.v2.Annotations annot2 = AnnotationsTranslator.translateToAnnotationsV2(expected.getAnnotations());
+		expected.setSubmissionAnnotations(annot2);
 		setAnnotation(statusMods, "foo1", "bar", false);
 
 		// Call under test
@@ -133,7 +134,8 @@ public class EvaluationUtilsTest {
 		SubmissionStatus actual = new SubmissionStatus();
 
 		setAnnotation(expected, "foo2", 1L, false);
-		setAnnotationLongV2(expected, "foo2", 1L, false);
+		org.sagebionetworks.repo.model.annotation.v2.Annotations annot2 = AnnotationsTranslator.translateToAnnotationsV2(expected.getAnnotations());
+		expected.setSubmissionAnnotations(annot2);
 		setAnnotation(statusMods, "foo2", 1L, false);
 
 		// Call under test
@@ -148,7 +150,8 @@ public class EvaluationUtilsTest {
 		SubmissionStatus actual = new SubmissionStatus();
 
 		setAnnotation(expected, "foo3", 3.14D, true);
-		setAnnotationDoubleV2(expected, "foo3", 3.14D, false);
+		org.sagebionetworks.repo.model.annotation.v2.Annotations annot2 = AnnotationsTranslator.translateToAnnotationsV2(expected.getAnnotations());
+		expected.setSubmissionAnnotations(annot2);
 		setAnnotation(statusMods, "foo3", 3.14D, true);
 
 		// Call under test
@@ -157,39 +160,39 @@ public class EvaluationUtilsTest {
 	}
 
 	@Test
-	public void testRemoveAnnotationsStringV2() throws Exception {
+	public void testRemoveAnnotationsV2OneValue() throws Exception {
 		SubmissionStatus actual = new SubmissionStatus();
-		setAnnotationStringV2(actual, "foo1", "baz1", false);
+		setAnnotation(actual, "foo1", "baz1", false);
+		org.sagebionetworks.repo.model.annotation.v2.Annotations annot2 = AnnotationsTranslator.translateToAnnotationsV2(actual.getAnnotations());
+		actual.setSubmissionAnnotations(annot2);
 		// Call under test
 		removeAnnotation(actual, "foo1");
 		assertNotNull(actual);
 		assertNotNull(actual.getSubmissionAnnotations());
 		assertNotNull(actual.getSubmissionAnnotations().getAnnotations());
 		assertEquals(0, actual.getSubmissionAnnotations().getAnnotations().size());
+		assertNotNull(actual.getAnnotations());
+		assertNotNull(actual.getAnnotations().getStringAnnos());
+		assertEquals(0, actual.getAnnotations().getStringAnnos().size());
 	}
 
 	@Test
-	public void testRemoveAnnotationsLongV2() throws Exception {
+	public void testRemoveAnnotationsMultipleValuesV2() throws Exception {
 		SubmissionStatus actual = new SubmissionStatus();
-		setAnnotationLongV2(actual, "foo1", 1L, false);
+		Long valueToRemove = 1L;
+		Long secondValue = 2L;
+		setAnnotation(actual, "foo1", valueToRemove, false);
+		setAnnotation(actual, "foo2", secondValue, false);
+		actual.setSubmissionAnnotations(AnnotationsTranslator.translateToAnnotationsV2(actual.getAnnotations()));
 		// Call under test
 		removeAnnotation(actual, "foo1");
 		assertNotNull(actual);
 		assertNotNull(actual.getSubmissionAnnotations());
 		assertNotNull(actual.getSubmissionAnnotations().getAnnotations());
-		assertEquals(0, actual.getSubmissionAnnotations().getAnnotations().size());
-	}
-
-	@Test
-	public void testRemoveAnnotationsDoubleV2() throws Exception {
-		SubmissionStatus actual = new SubmissionStatus();
-		setAnnotationDoubleV2(actual, "foo1", 3.14D, false);
-		// Call under test
-		removeAnnotation(actual, "foo1");
-		assertNotNull(actual);
-		assertNotNull(actual.getSubmissionAnnotations());
-		assertNotNull(actual.getSubmissionAnnotations().getAnnotations());
-		assertEquals(0, actual.getSubmissionAnnotations().getAnnotations().size());
+		assertEquals(1, actual.getSubmissionAnnotations().getAnnotations().size());
+		assertFalse(actual.getSubmissionAnnotations().getAnnotations().containsKey("foo1"));
+		assertTrue(actual.getSubmissionAnnotations().getAnnotations().containsKey("foo2"));
+		assertEquals(secondValue.toString(), actual.getSubmissionAnnotations().getAnnotations().get("foo2").getValue().get(0));
 	}
 
 	@Test
@@ -200,17 +203,6 @@ public class EvaluationUtilsTest {
 		setAnnotation(status, key, expectedValue, false);
 		// Call under test
 		String actualValue = getStringAnnotation(status, key);
-		assertEquals(expectedValue, actualValue);
-	}
-
-	@Test
-	public void testGetStringAnnotationV2() throws Exception {
-		SubmissionStatus status = new SubmissionStatus();
-		String expectedValue = "bar1";
-		String key = "foo1";
-		setAnnotationStringV2(status, key, expectedValue, false);
-		// Call under test
-		String actualValue = getStringAnnotationV2(status, key);
 		assertEquals(expectedValue, actualValue);
 	}
 
@@ -226,13 +218,17 @@ public class EvaluationUtilsTest {
 	}
 
 	@Test
-	public void testGetLongAnnotationV2() throws Exception {
+	public void testTimeRemaining() throws Exception {
 		SubmissionStatus status = new SubmissionStatus();
-		Long expectedValue = 1L;
-		String key = "foo1";
-		setAnnotationLongV2(status, key, expectedValue, false);
-		// Call under test
-		Long actualValue = getLongAnnotationV2(status, key);
-		assertEquals(expectedValue, actualValue);
+		org.sagebionetworks.repo.model.annotation.Annotations annotations = new org.sagebionetworks.repo.model.annotation.Annotations();
+		Long expectedTime = 5L;
+		LongAnnotation longAnnotation = new LongAnnotation();
+		longAnnotation.setKey(TIME_REMAINING);
+		longAnnotation.setValue(expectedTime);
+		annotations.setLongAnnos(new ArrayList<LongAnnotation>());
+		annotations.getLongAnnos().add(longAnnotation);
+		status.setAnnotations(annotations);
+		Long result = getTimeRemaining(status);
+		assertEquals(expectedTime, result);
 	}
 }

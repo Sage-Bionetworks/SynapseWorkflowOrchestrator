@@ -1,5 +1,17 @@
 package org.sagebionetworks;
 
+import static org.sagebionetworks.Constants.EXECUTION_STAGE_PROPERTY_NAME;
+import static org.sagebionetworks.Utils.getProperty;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang.StringUtils;
 import org.sagebionetworks.client.SynapseClient;
 import org.sagebionetworks.client.exceptions.SynapseException;
@@ -14,21 +26,7 @@ import org.sagebionetworks.repo.model.annotation.DoubleAnnotation;
 import org.sagebionetworks.repo.model.annotation.LongAnnotation;
 import org.sagebionetworks.repo.model.annotation.StringAnnotation;
 import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValue;
-import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValueType;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import static org.sagebionetworks.Constants.EXECUTION_STAGE_PROPERTY_NAME;
-import static org.sagebionetworks.Utils.getProperty;
 
 public class EvaluationUtils {
 	private static final int PAGE_SIZE = 10;
@@ -121,17 +119,6 @@ public class EvaluationUtils {
 		return null;
 	}
 
-	public static String getStringAnnotationV2(SubmissionStatus status, String key) {
-		org.sagebionetworks.repo.model.annotation.v2.Annotations annotationsV2 = status.getSubmissionAnnotations();
-		if (annotationsV2 != null && annotationsV2.getAnnotations() != null) {
-			Map<String, AnnotationsValue> mapValues = annotationsV2.getAnnotations();
-			if (mapValues.containsKey(key) && mapValues.get(key).getValue().size() > 0) {
-				return mapValues.get(key).getValue().get(0);
-			}
-		}
-		return null;
-	}
-
 	public static Long getLongAnnotation(SubmissionStatus status, String key) {
 		Annotations annotations = status.getAnnotations();
 		if (annotations==null) return null;
@@ -139,17 +126,6 @@ public class EvaluationUtils {
 		if (las==null) return null;
 		for (LongAnnotation la : las) {
 			if (la.getKey().equals(key)) return la.getValue();
-		}
-		return null;
-	}
-
-	public static Long getLongAnnotationV2(SubmissionStatus status, String key) {
-		org.sagebionetworks.repo.model.annotation.v2.Annotations annotationsV2 = status.getSubmissionAnnotations();
-		if (annotationsV2 != null && annotationsV2.getAnnotations() != null) {
-			Map<String, AnnotationsValue> mapValues = annotationsV2.getAnnotations();
-			if (mapValues.containsKey(key) && mapValues.get(key).getValue().size() > 0) {
-				return Long.parseLong(mapValues.get(key).getValue().get(0));
-			}
 		}
 		return null;
 	}
@@ -166,84 +142,6 @@ public class EvaluationUtils {
 			if (sa.getKey().equals(key)) return new Boolean(sa.getValue());
 		}
 		return false;
-	}
-
-	public static void setAnnotationStringV2(SubmissionStatus status, String key, String value, boolean isPrivate) {
-		org.sagebionetworks.repo.model.annotation.v2.Annotations annotations = status.getSubmissionAnnotations();
-		if (annotations == null) {
-			annotations = new org.sagebionetworks.repo.model.annotation.v2.Annotations();
-			status.setSubmissionAnnotations(annotations);
-		}
-		if (annotations.getAnnotations() == null) {
-			annotations.setAnnotations(new HashMap<String, AnnotationsValue>());
-		}
-
-		if (annotations.getAnnotations().containsKey(key)) {
-			AnnotationsValue annotationsValue  = annotations.getAnnotations().get(key);
-			annotationsValue.getValue().clear();
-			annotationsValue.setType(AnnotationsValueType.STRING);
-			annotationsValue.getValue().add(value);
-			annotations.getAnnotations().put(key, annotationsValue);
-		} else {
-			AnnotationsValue annotationsValue = new AnnotationsValue();
-			annotationsValue.setType(AnnotationsValueType.STRING);
-			List<String> stringList = new ArrayList<>();
-			stringList.add(value);
-			annotationsValue.setValue(stringList);
-			annotations.getAnnotations().put(key, annotationsValue);
-		}
-	}
-
-	public static void setAnnotationLongV2(SubmissionStatus status, String key, Long value, boolean isPrivate) {
-		org.sagebionetworks.repo.model.annotation.v2.Annotations annotations = status.getSubmissionAnnotations();
-		if (annotations == null) {
-			annotations = new org.sagebionetworks.repo.model.annotation.v2.Annotations();
-			status.setSubmissionAnnotations(annotations);
-		}
-		if (annotations.getAnnotations() == null) {
-			annotations.setAnnotations(new HashMap<String, AnnotationsValue>());
-		}
-
-		if (annotations.getAnnotations().containsKey(key)) {
-			AnnotationsValue annotationsValue  = annotations.getAnnotations().get(key);
-			annotationsValue.setType(AnnotationsValueType.LONG);
-			annotationsValue.getValue().clear();
-			annotationsValue.getValue().add(value.toString());
-			annotations.getAnnotations().put(key, annotationsValue);
-		} else {
-			AnnotationsValue annotationsValue = new AnnotationsValue();
-			annotationsValue.setType(AnnotationsValueType.LONG);
-			List<String> stringList = new ArrayList<>();
-			stringList.add(value.toString());
-			annotationsValue.setValue(stringList);
-			annotations.getAnnotations().put(key, annotationsValue);
-		}
-	}
-
-	public static void setAnnotationDoubleV2(SubmissionStatus status, String key, Double value, boolean isPrivate) {
-		org.sagebionetworks.repo.model.annotation.v2.Annotations annotations = status.getSubmissionAnnotations();
-		if (annotations == null) {
-			annotations = new org.sagebionetworks.repo.model.annotation.v2.Annotations();
-			status.setSubmissionAnnotations(annotations);
-		}
-		if (annotations.getAnnotations() == null) {
-			annotations.setAnnotations(new HashMap<String, AnnotationsValue>());
-		}
-
-		if (annotations.getAnnotations().containsKey(key)) {
-			AnnotationsValue annotationsValue  = annotations.getAnnotations().get(key);
-			annotationsValue.setType(AnnotationsValueType.DOUBLE);
-			annotationsValue.getValue().clear();
-			annotationsValue.getValue().add(value.toString());
-			annotations.getAnnotations().put(key, annotationsValue);
-		} else {
-			AnnotationsValue annotationsValue = new AnnotationsValue();
-			annotationsValue.setType(AnnotationsValueType.DOUBLE);
-			List<String> stringList = new ArrayList<>();
-			stringList.add(value.toString());
-			annotationsValue.setValue(stringList);
-			annotations.getAnnotations().put(key, annotationsValue);
-		}
 	}
 
 	public static void setAnnotation(SubmissionStatus status, String key, String value, boolean isPrivate) {
@@ -502,17 +400,17 @@ public class EvaluationUtils {
 		for (AnnotationBase annot : statusMods.getAnnotationsToAdd()) {
 			if (annot instanceof StringAnnotation) {
 				setAnnotation(submissionStatus, annot.getKey(), ((StringAnnotation) annot).getValue(), annot.getIsPrivate());
-				setAnnotationStringV2(submissionStatus, annot.getKey(), ((StringAnnotation) annot).getValue(), annot.getIsPrivate());
 			}
 			if (annot instanceof LongAnnotation) {
 				setAnnotation(submissionStatus, annot.getKey(), ((LongAnnotation) annot).getValue(), annot.getIsPrivate());
-				setAnnotationLongV2(submissionStatus, annot.getKey(), ((LongAnnotation) annot).getValue(), annot.getIsPrivate());
 			}
 			if (annot instanceof DoubleAnnotation) {
 				setAnnotation(submissionStatus, annot.getKey(), ((DoubleAnnotation) annot).getValue(), annot.getIsPrivate());
-				setAnnotationDoubleV2(submissionStatus, annot.getKey(), ((DoubleAnnotation) annot).getValue(), annot.getIsPrivate());
 			}
 		}
+
+		org.sagebionetworks.repo.model.annotation.v2.Annotations annotations = AnnotationsTranslator.translateToAnnotationsV2(submissionStatus.getAnnotations());
+		submissionStatus.setSubmissionAnnotations(annotations);
 
 		for (String key : statusMods.getAnnotationNamesToRemove()) removeAnnotation(submissionStatus, key);
 		if (statusMods.getStatus()!=null) submissionStatus.setStatus(statusMods.getStatus());
@@ -562,12 +460,7 @@ public class EvaluationUtils {
 	}
 
 	public static Long getTimeRemaining(SubmissionStatus ss) {
-		Long longV2 = getLongAnnotationV2(ss, TIME_REMAINING);
-		if (longV2 != null) {
-			return longV2;
-		}else{
-			return getLongAnnotation(ss, TIME_REMAINING);
-		}
+		return getLongAnnotation(ss, TIME_REMAINING);
 	}
 
 	/*

@@ -1,44 +1,12 @@
 package org.sagebionetworks;
 
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.sagebionetworks.client.SynapseClient;
-import org.sagebionetworks.client.exceptions.SynapseConflictingUpdateException;
-import org.sagebionetworks.client.exceptions.SynapseException;
-import org.sagebionetworks.evaluation.model.Evaluation;
-import org.sagebionetworks.evaluation.model.Submission;
-import org.sagebionetworks.evaluation.model.SubmissionBundle;
-import org.sagebionetworks.evaluation.model.SubmissionStatus;
-import org.sagebionetworks.evaluation.model.SubmissionStatusEnum;
-import org.sagebionetworks.repo.model.Folder;
-import org.sagebionetworks.repo.model.annotation.v2.Annotations;
-import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValue;
-import org.sagebionetworks.repo.model.auth.LoginRequest;
-import org.sagebionetworks.repo.model.file.ExternalFileHandle;
-import org.sagebionetworks.repo.model.file.FileHandle;
-import org.sagebionetworks.repo.model.file.FileHandleResults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayOutputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import static org.sagebionetworks.Constants.ACCEPT_NEW_SUBMISSIONS_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.DEFAULT_MAX_CONCURRENT_WORKFLOWS;
 import static org.sagebionetworks.Constants.DOCKER_ENGINE_URL_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.MAX_CONCURRENT_WORKFLOWS_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.MAX_LOG_ANNOTATION_CHARS;
 import static org.sagebionetworks.Constants.NOTIFICATION_PRINCIPAL_ID;
+import static org.sagebionetworks.Constants.ROOT_TEMPLATE_ANNOTATION_NAME;
 import static org.sagebionetworks.Constants.SUBMISSION_COMPLETED;
 import static org.sagebionetworks.Constants.SUBMISSION_FAILED;
 import static org.sagebionetworks.Constants.SUBMISSION_STARTED;
@@ -47,7 +15,6 @@ import static org.sagebionetworks.Constants.SUBMISSION_TIMED_OUT;
 import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
 import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
 import static org.sagebionetworks.Constants.WES_ENDPOINT_PROPERTY_NAME;
-import static org.sagebionetworks.Constants.ROOT_TEMPLATE_ANNOTATION_NAME;
 import static org.sagebionetworks.EvaluationUtils.ADMIN_ANNOTS_ARE_PRIVATE;
 import static org.sagebionetworks.EvaluationUtils.FAILURE_REASON;
 import static org.sagebionetworks.EvaluationUtils.JOB_LAST_UPDATED_TIME_STAMP;
@@ -80,6 +47,39 @@ import static org.sagebionetworks.WorkflowUpdateStatus.ERROR_ENCOUNTERED_DURING_
 import static org.sagebionetworks.WorkflowUpdateStatus.IN_PROGRESS;
 import static org.sagebionetworks.WorkflowUpdateStatus.STOPPED_TIME_OUT;
 import static org.sagebionetworks.WorkflowUpdateStatus.STOPPED_UPON_REQUEST;
+
+import java.io.ByteArrayOutputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.sagebionetworks.client.SynapseClient;
+import org.sagebionetworks.client.exceptions.SynapseConflictingUpdateException;
+import org.sagebionetworks.client.exceptions.SynapseException;
+import org.sagebionetworks.evaluation.model.Evaluation;
+import org.sagebionetworks.evaluation.model.Submission;
+import org.sagebionetworks.evaluation.model.SubmissionBundle;
+import org.sagebionetworks.evaluation.model.SubmissionStatus;
+import org.sagebionetworks.evaluation.model.SubmissionStatusEnum;
+import org.sagebionetworks.repo.model.Folder;
+import org.sagebionetworks.repo.model.annotation.v2.Annotations;
+import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValue;
+import org.sagebionetworks.repo.model.auth.LoginRequest;
+import org.sagebionetworks.repo.model.file.ExternalFileHandle;
+import org.sagebionetworks.repo.model.file.FileHandle;
+import org.sagebionetworks.repo.model.file.FileHandleResults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class WorkflowOrchestrator  {
@@ -189,7 +189,6 @@ public class WorkflowOrchestrator  {
 			String urlString = efh.getExternalURL();
 			URL url = new URL(urlString);
 			// get annotation for the CWL entry point.  Does the file exist?
-
 			Annotations annotations = synapse.getAnnotationsV2(entityId);
 			Map<String, AnnotationsValue> annotationsMap = annotations.getAnnotations();
 			if (annotationsMap==null) throw
@@ -218,7 +217,7 @@ public class WorkflowOrchestrator  {
 	public void execute() throws Throwable {
 		Map<String,WorkflowURLEntrypointAndSynapseRef> evaluationIdToTemplateMap = getWorkflowURLAndEntrypoint();
 		while (!shutdownHook.shouldShutDown()) { // this allows a system shut down to shut down the agent
-			log.info("Top level loop: checking progress or starting new job.");
+			log.info("Top level loop: checking progress or starting new job. NewCode");
 			login();
 			
 			String acceptNewSubmissionsString = getProperty(ACCEPT_NEW_SUBMISSIONS_PROPERTY_NAME, false);
@@ -326,10 +325,7 @@ public class WorkflowOrchestrator  {
 	public static Map<String, SubmissionBundle> workflowIdsForSubmissions(List<SubmissionBundle> bundles) {
 		Map<String, SubmissionBundle> result = new HashMap<String, SubmissionBundle>();
 		for (SubmissionBundle b : bundles) {
-			String workflowId = EvaluationUtils.getStringAnnotationV2(b.getSubmissionStatus(), WORKFLOW_JOB_ID);
-			if (workflowId == null) {
-				workflowId = EvaluationUtils.getStringAnnotation(b.getSubmissionStatus(), WORKFLOW_JOB_ID);
-			}
+			String workflowId = EvaluationUtils.getStringAnnotation(b.getSubmissionStatus(), WORKFLOW_JOB_ID);
 			if (workflowId==null) throw new IllegalStateException("Submission "+b.getSubmission().getId()+" has no workflow job ID.");
 			result.put(workflowId, b);
 		}
@@ -411,10 +407,7 @@ public class WorkflowOrchestrator  {
 			final SubmissionStatus submissionStatus = submissionBundle.getSubmissionStatus();
 			final SubmissionStatusModifications statusMods = new SubmissionStatusModifications();
 
-			String submissionFolderIdAnnotation = EvaluationUtils.getStringAnnotationV2(submissionStatus, SUBMISSION_ARTIFACTS_FOLDER);
-			if (submissionFolderIdAnnotation == null) {
-				submissionFolderIdAnnotation = EvaluationUtils.getStringAnnotation(submissionStatus, SUBMISSION_ARTIFACTS_FOLDER);
-			}
+			String submissionFolderIdAnnotation = EvaluationUtils.getStringAnnotation(submissionStatus, SUBMISSION_ARTIFACTS_FOLDER);
 			String sharedSubmissionFolderId = shareImmediately ? submissionFolderIdAnnotation : null;
 
 			try {
@@ -454,12 +447,8 @@ public class WorkflowOrchestrator  {
 						containerCompletionStatus==STOPPED_UPON_REQUEST && notificationEnabled(SUBMISSION_STOPPED_BY_USER) || 
 						containerCompletionStatus==STOPPED_TIME_OUT && notificationEnabled(SUBMISSION_TIMED_OUT)) {
 						Submitter submitter = submissionUtils.getSubmitter(submission);
-						String annotString = EvaluationUtils.getStringAnnotationV2(submissionStatus, FAILURE_REASON);
-						if (annotString == null) {
-							annotString = EvaluationUtils.getStringAnnotation(submissionStatus, FAILURE_REASON);
-						}
-						String messageBody = createWorkflowFailedMessage(submitter.getName(), submission.getId(), 
-								annotString,
+						String messageBody = createWorkflowFailedMessage(submitter.getName(), submission.getId(),
+								EvaluationUtils.getStringAnnotation(submissionStatus, FAILURE_REASON),
 								null, sharedSubmissionFolderId);
 						messageUtils.sendMessage(submitter.getId(), WORKFLOW_FAILURE_SUBJECT,  messageBody);
 					}
@@ -549,10 +538,7 @@ public class WorkflowOrchestrator  {
 			}
 		}
 
-		Long lastLogUploadTimeStamp = EvaluationUtils.getLongAnnotationV2(submissionStatus, LAST_LOG_UPLOAD);
-		if (lastLogUploadTimeStamp == null) {
-			lastLogUploadTimeStamp = EvaluationUtils.getLongAnnotation(submissionStatus, LAST_LOG_UPLOAD);
-		}
+		Long lastLogUploadTimeStamp = EvaluationUtils.getLongAnnotation(submissionStatus, LAST_LOG_UPLOAD);
 
 		boolean timeToUploadLogs = lastLogUploadTimeStamp==null ||
 				lastLogUploadTimeStamp+UPLOAD_PERIOD_MILLIS<System.currentTimeMillis();
@@ -580,10 +566,7 @@ public class WorkflowOrchestrator  {
 				failureReason = logTail;
 			}
 
-			String hasSubmissionStartedMessageBeenSentString = EvaluationUtils.getStringAnnotationV2(submissionStatus, SUBMISSION_PROCESSING_STARTED_SENT);
-			if (hasSubmissionStartedMessageBeenSentString == null) {
-				hasSubmissionStartedMessageBeenSentString = EvaluationUtils.getStringAnnotation(submissionStatus, SUBMISSION_PROCESSING_STARTED_SENT);
-			}
+			String hasSubmissionStartedMessageBeenSentString = EvaluationUtils.getStringAnnotation(submissionStatus, SUBMISSION_PROCESSING_STARTED_SENT);
 
 			boolean hasSubmissionStartedMessageBeenSent = hasSubmissionStartedMessageBeenSentString!=null && new Boolean(hasSubmissionStartedMessageBeenSentString);
 			if (isRunning && !hasSubmissionStartedMessageBeenSent && notificationEnabled(SUBMISSION_STARTED)) {

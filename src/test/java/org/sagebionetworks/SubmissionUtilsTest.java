@@ -1,5 +1,15 @@
 package org.sagebionetworks;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.sagebionetworks.SubmissionUtils.getRepoSuffixFromImage;
+
+import java.io.File;
+
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,18 +22,9 @@ import org.sagebionetworks.evaluation.model.Submission;
 import org.sagebionetworks.evaluation.model.SubmissionStatus;
 import org.sagebionetworks.repo.model.EntityBundle;
 import org.sagebionetworks.repo.model.FileEntity;
+import org.sagebionetworks.repo.model.annotation.v2.Annotations;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
-
-import java.io.File;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.sagebionetworks.SubmissionUtils.getRepoSuffixFromImage;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -89,6 +90,7 @@ public class SubmissionUtilsTest {
 		expected.setId(SUBMISSION_ID);
 		expected.setCanCancel(false);
 		expected.setEtag("1");
+		expected.setSubmissionAnnotations(new Annotations());
 		assertEquals(expected, updateStatusCaptor.getValue());
 		
 		// no need to refresh
@@ -125,6 +127,7 @@ public class SubmissionUtilsTest {
 		expected.setId(SUBMISSION_ID);
 		expected.setCanCancel(false);
 		expected.setEtag("2");
+		expected.setSubmissionAnnotations(new Annotations());
 		assertEquals(expected, updateStatusCaptor.getValue());
 		
 		// no need to refresh

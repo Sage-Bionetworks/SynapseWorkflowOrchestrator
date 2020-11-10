@@ -1,5 +1,28 @@
 package org.sagebionetworks;
 
+import static org.sagebionetworks.Constants.COMPOSE_PROJECT_NAME_ENV_VAR;
+import static org.sagebionetworks.Constants.SUBMITTER_NOTIFICATION_MASK_DEFAULT;
+import static org.sagebionetworks.Constants.SUBMITTER_NOTIFICATION_MASK_PARAM_NAME;
+import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
+import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
+import java.util.regex.Pattern;
+
 import com.github.dockerjava.api.model.Container;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -16,28 +39,6 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.EntityFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
-import java.util.regex.Pattern;
-
-import static org.sagebionetworks.Constants.COMPOSE_PROJECT_NAME_ENV_VAR;
-import static org.sagebionetworks.Constants.SUBMITTER_NOTIFICATION_MASK_DEFAULT;
-import static org.sagebionetworks.Constants.SUBMITTER_NOTIFICATION_MASK_PARAM_NAME;
-import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
-import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
 
 public class Utils {
 	private static Logger log = LoggerFactory.getLogger(Utils.class);
@@ -236,7 +237,7 @@ public class Utils {
 	public static void writeSynapseConfigFile(OutputStream os) throws IOException {
 		String username=getProperty(SYNAPSE_USERNAME_PROPERTY);
 		String password=getProperty(SYNAPSE_PASSWORD_PROPERTY);;
-		IOUtils.write("[authentication]\nusername="+username+"\npassword="+password+"\n", os, "UTF-8");
+		IOUtils.write("[authentication]\nusername="+username+"\npassword="+password+"\n", os, StandardCharsets.UTF_8);
 	}
 	
 	public static boolean notificationEnabled(int mask) {
@@ -334,7 +335,7 @@ public class Utils {
 				String descriptorContent = downloadWebDocument(descriptorUrl);
 				JSONObject descriptor = new JSONObject(descriptorContent);
 				try (OutputStream os = new FileOutputStream(new File(targetDir, filePath))) {
-					IOUtils.write(descriptor.getString("content"), os, "Utf-8");
+					IOUtils.write(descriptor.getString("content"), os, StandardCharsets.UTF_8);
 				}
 			}
 			
