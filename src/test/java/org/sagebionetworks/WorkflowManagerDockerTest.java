@@ -15,13 +15,15 @@ public class WorkflowManagerDockerTest {
 
 	@Test
 	public void testDownloadWorkflowFromURL() throws Exception {
-		URL workflowUrl = new URL("https://dockstore.org:8443/api/ga4gh/v2/tools/%23workflow%2Fgithub.com%2Fdenis-yuen%2Fhello-dockstore-workflow%2Fhello-world/versions/1.0/CWL");
+		URL workflowUrl = new URL("https://dockstore.org/api/api/ga4gh/v2/tools/%23workflow%2Fgithub.com%2FBarski-lab%2Fga4gh_challenge/versions/v0.0.4/CWL");
 		File folder = Files.createTempDir();
-		Utils.downloadWorkflowFromURL(workflowUrl, "Dockstore.cwl", folder);
+		String entryPoint = "biowardrobe_chipseq_se.cwl";
+		Utils.downloadWorkflowFromURL(workflowUrl, entryPoint, folder);
 		List<String> workflowFiles = Arrays.asList(folder.list());
-		assertTrue(workflowFiles.contains("Dockstore.cwl"));
-		assertTrue(workflowFiles.contains("grep.cwl"));
-		assertTrue(workflowFiles.contains("wc.cwl"));
+		assertTrue(workflowFiles.contains(entryPoint));
+		assertTrue(workflowFiles.contains("subworkflows"));
+		assertTrue(workflowFiles.contains("tools"));
 	}
 
 }
+

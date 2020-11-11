@@ -326,16 +326,18 @@ public class Utils {
 				String fileType = file.getString("file_type");
 				String filePath = file.getString("path");
 				if (PRIMARY_DESCRIPTOR_TYPE.equals(fileType)) {
-					if (!filePath.equals(entrypoint)) throw new RuntimeException("Expected entryPoint "+entrypoint+" but found "+path);
+					if (!filePath.equals(entrypoint)) throw new RuntimeException("Expected entryPoint "+entrypoint+" but found "+filePath);
 				} else if (SECONDARY_DESCRIPTOR_TYPE.equals(fileType)) {
 					// OK
 				} else {
-					throw new RuntimeException("Unexpected file_type "+fileType);
+					continue;
 				}
 				URL descriptorUrl = new URL(workflowUrl.toString()+"/descriptor/"+filePath);
 				String descriptorContent = downloadWebDocument(descriptorUrl);
 				JSONObject descriptor = new JSONObject(descriptorContent);
-				try (OutputStream os = new FileOutputStream(new File(targetDir, filePath))) {
+				File targetFile = new File(targetDir, filePath);
+				targetFile.getParentFile().mkdirs();
+				try (OutputStream os = new FileOutputStream(targetFile)) {
 					IOUtils.write(descriptor.getString("content"), os, Charset.forName("utf-8"));
 				}
 			}
