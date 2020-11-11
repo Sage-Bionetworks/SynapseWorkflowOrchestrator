@@ -19,13 +19,13 @@ public interface WorkflowManager {
 
 	/**
 	 * Create a workflow
-	 * @param workflowUrl the URL to the archive of workflow files
+	 * @param workflowUrlString the URL to the archive of workflow files
 	 * @param entrypoint the entry point (a file path) within an unzipped workflow archive
 	 * @param workflowParameters the parameters to be passed to the workflow
 	 * @return the created workflow job
 	 * @throws IOException
 	 */
-	WorkflowJob createWorkflowJob(URL workflowUrl, String entrypoint, WorkflowParameters workflowParameters,
+	WorkflowJob createWorkflowJob(String workflowUrlString, String entrypoint, WorkflowParameters workflowParameters,
 			byte[] synapseConfigFileContent) throws IOException;
 
 	/*

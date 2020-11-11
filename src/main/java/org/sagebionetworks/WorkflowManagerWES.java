@@ -59,6 +59,12 @@ public class WorkflowManagerWES implements WorkflowManager {
 			"CANCELED"
 	});
 	
+	private Utils utils;
+	
+	public WorkflowManagerWES() {
+		this.utils = new Utils();
+	}
+	
 	
 	private void addAllDirToHttpEntity(File dir, File rootDir, MultipartEntityBuilder requestBuilder) throws IOException {
 		if (!dir.isDirectory()) throw new IllegalArgumentException(dir.getPath()+" must be a directory.");
@@ -86,7 +92,7 @@ public class WorkflowManagerWES implements WorkflowManager {
 		}
 	}
 	@Override
-	public WorkflowJob createWorkflowJob(URL workflowUrl, String entrypoint, WorkflowParameters workflowParameters,
+	public WorkflowJob createWorkflowJob(String workflowUrlString, String entrypoint, WorkflowParameters workflowParameters,
 			byte[] synapseConfigFileContent) throws IOException {
 		MultipartEntityBuilder requestBuilder = MultipartEntityBuilder.create()
                 .setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
@@ -96,7 +102,7 @@ public class WorkflowManagerWES implements WorkflowManager {
 		if (!templateRoot.mkdir()) {
 			throw new RuntimeException("Could not create "+templateRoot.getAbsolutePath());
 		}
-		Utils.downloadWorkflowFromURL(workflowUrl, entrypoint, templateRoot);
+		utils.downloadWorkflowFromURL(workflowUrlString, entrypoint, templateRoot);
 		
 		// NOTE: WES Service constrains entrypoint to be at the top level
 		// TODO throw exception if any .cwl files are at higher level than entrypoint
