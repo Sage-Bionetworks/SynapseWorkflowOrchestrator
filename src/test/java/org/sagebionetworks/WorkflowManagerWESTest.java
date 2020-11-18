@@ -3,7 +3,6 @@ package org.sagebionetworks;
 import static org.sagebionetworks.Utils.getTempDir;
 
 import java.io.ByteArrayOutputStream;
-import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.List;
@@ -31,7 +30,7 @@ public class WorkflowManagerWESTest {
 	@Test
 	public void testCreateJob() throws Exception {
 		WorkflowManagerWES wdm = new WorkflowManagerWES();
-		URL workflowUrl = new URL("https://github.com/Sage-Bionetworks/SynapseWorkflowExample/archive/master.zip");
+		String workflowUrlString = "https://github.com/Sage-Bionetworks/SynapseWorkflowExample/archive/master.zip";
 		String entrypoint = "SynapseWorkflowExample-master/workflow-entrypoint.cwl";
 		String submissionId = "9687029";
 		String adminUploadSynId = "syn16936498";
@@ -45,7 +44,7 @@ public class WorkflowManagerWESTest {
 			Utils.writeSynapseConfigFile(baos);
 			synapseConfigFileContent = baos.toByteArray();
 		}
-		wdm.createWorkflowJob(workflowUrl, entrypoint, workflowParameters, synapseConfigFileContent);
+		wdm.createWorkflowJob(workflowUrlString, entrypoint, workflowParameters, synapseConfigFileContent);
 	}
 
 	@Ignore

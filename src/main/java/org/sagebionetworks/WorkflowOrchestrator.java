@@ -287,7 +287,7 @@ public class WorkflowOrchestrator  {
 					Utils.writeSynapseConfigFile(baos);
 					synapseConfigFileContent = baos.toByteArray();
 				}
-				WorkflowJob newJob = workflowManager.createWorkflowJob(workflow.getWorkflowUrl(), workflow.getEntryPoint(), workflowParameters, synapseConfigFileContent);
+				WorkflowJob newJob = workflowManager.createWorkflowJob(workflow.getWorkflowUrl().toString(), workflow.getEntryPoint(), workflowParameters, synapseConfigFileContent);
 				workflowId = newJob.getWorkflowId();
 				EvaluationUtils.setAnnotation(statusMods, WORKFLOW_JOB_ID, workflowId, PUBLIC_ANNOTATION_SETTING);
 

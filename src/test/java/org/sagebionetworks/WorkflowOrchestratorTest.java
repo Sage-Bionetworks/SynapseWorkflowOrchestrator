@@ -60,9 +60,6 @@ public class WorkflowOrchestratorTest {
 	
 	@Mock
 	SubmissionUtils mockSubmissionUtils;
-
-	@Mock
-	WorkflowAdmin mockWorkflowAdmin;
 	
 	private WorkflowOrchestrator workflowOrchestrator;
 	
@@ -212,8 +209,8 @@ public class WorkflowOrchestratorTest {
 		assertEquals(ZIP_FILE_URL, result.getWorkflowUrl().toString());
 		assertEquals(ROOT_TEMPLATE, result.getEntryPoint());
 
-		Project project = new Project();
-		project.setId(projectId);
-		mockSynapse.deleteEntity(project, true);
+		Project project2 = new Project();
+		project2.setId(projectId);
+		mockSynapse.deleteEntity(project2, true);
 	}
 }

@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +60,16 @@ public class Utils {
 	private static final String GA4GH_TRS_FILE_FRAGMENT = "/api/ga4gh/v2/tools";
 	
 	private static Properties properties = null;
+
+	private static URLFactory urlFactory;
+
+	public Utils(URLFactory urlFactory) {
+		this.urlFactory=urlFactory;
+	}
+
+	public Utils() {
+		this.urlFactory=new URLFactoryImpl();
+	}
 	
 	public static void initProperties() {
 		if (properties!=null) return;
@@ -281,7 +290,7 @@ public class Utils {
 	}
 
 
-	private static void downloadZip(final URL url, File tempDir, File target) throws IOException {
+	private static void downloadZip(final URLInterface url, File tempDir, File target) throws IOException {
 		File tempZipFile = createTempFile(".zip", tempDir);
 		try {
 			(new ExponentialBackoffRunner()).execute(new NoRefreshExecutableAdapter<Void,Void>() {
@@ -299,7 +308,7 @@ public class Utils {
 		tempZipFile.delete();
 	}
 	
-	private static String downloadWebDocument(URL url) throws IOException {
+	private static String downloadWebDocument(URLInterface url) throws IOException {
 		String result;
 		try (InputStream is = url.openStream(); ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 			IOUtils.copy(is, os);
@@ -308,7 +317,8 @@ public class Utils {
 		return result;
 	}
 	
-	public static void downloadWorkflowFromURL(URL workflowUrl, String entrypoint, File targetDir) throws IOException {
+	public static void downloadWorkflowFromURL(String workflowUrlString, String entrypoint, File targetDir) throws IOException {
+		URLInterface workflowUrl = urlFactory.createURL(workflowUrlString);
 		String path = workflowUrl.getPath();
 		if (path.toLowerCase().endsWith(ZIP_SUFFIX)) {
 			downloadZip(workflowUrl, getTempDir(), targetDir);
@@ -317,7 +327,7 @@ public class Utils {
    				throw new IllegalStateException(entrypoint+" is not in the unzipped archive downloaded from "+workflowUrl);
    			}
 		} else if (path.contains(GA4GH_TRS_FILE_FRAGMENT)) {
-			URL filesUrl = new URL(workflowUrl.toString()+"/files");
+			URLInterface filesUrl = urlFactory.createURL(workflowUrl.toString()+"/files");
 			String filesContent = downloadWebDocument(filesUrl);
 			JSONArray files = new JSONArray(filesContent);
 			for (int i=0; i<files.length(); i++) {
@@ -325,16 +335,19 @@ public class Utils {
 				String fileType = file.getString("file_type");
 				String filePath = file.getString("path");
 				if (PRIMARY_DESCRIPTOR_TYPE.equals(fileType)) {
-					if (!filePath.equals(entrypoint)) throw new RuntimeException("Expected entryPoint "+entrypoint+" but found "+path);
+					if (!filePath.equals(entrypoint)) throw new RuntimeException("Expected entryPoint "+entrypoint+" but found "+filePath);
 				} else if (SECONDARY_DESCRIPTOR_TYPE.equals(fileType)) {
 					// OK
 				} else {
-					throw new RuntimeException("Unexpected file_type "+fileType);
+					continue;
 				}
-				URL descriptorUrl = new URL(workflowUrl.toString()+"/descriptor/"+filePath);
+
+				URLInterface descriptorUrl = urlFactory.createURL(workflowUrl.toString()+ "/descriptor/" +filePath);
 				String descriptorContent = downloadWebDocument(descriptorUrl);
 				JSONObject descriptor = new JSONObject(descriptorContent);
-				try (OutputStream os = new FileOutputStream(new File(targetDir, filePath))) {
+				File targetFile = new File(targetDir, filePath);
+				targetFile.getParentFile().mkdirs();
+				try (OutputStream os = new FileOutputStream(targetFile)) {
 					IOUtils.write(descriptor.getString("content"), os, StandardCharsets.UTF_8);
 				}
 			}
