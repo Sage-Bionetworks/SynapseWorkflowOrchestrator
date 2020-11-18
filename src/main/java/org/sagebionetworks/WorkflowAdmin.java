@@ -50,15 +50,7 @@ public class WorkflowAdmin {
 	// SET_UP template-file-path
 	// SUBMIT file-path parentID, evaluation queue ID
 	public static void main( String[] args ) throws Throwable {
-		SynapseClient synapseAdmin = SynapseClientFactory.createSynapseClient();
-		String userName = getProperty(SYNAPSE_USERNAME_PROPERTY);
-		String password = getProperty(SYNAPSE_PASSWORD_PROPERTY);
-		LoginRequest loginRequest = new LoginRequest();
-		loginRequest.setUsername(userName);
-		loginRequest.setPassword(password);
-		synapseAdmin.login(loginRequest);
-		Archiver archiver = new Archiver(synapseAdmin, null);
-		WorkflowAdmin workflowAdmin = new WorkflowAdmin(synapseAdmin, archiver);
+		WorkflowAdmin workflowAdmin = new WorkflowAdmin();
 		
 		TASK task = TASK.valueOf(args[0]);
 		switch(task) {
@@ -95,7 +87,6 @@ public class WorkflowAdmin {
 		this.synapseAdmin = synapseAdmin;
 	}
 
-	// Used for testing
 	public WorkflowAdmin() throws SynapseException {
 		SynapseClient synapseAdmin = SynapseClientFactory.createSynapseClient();
 		String userName = getProperty(SYNAPSE_USERNAME_PROPERTY);
