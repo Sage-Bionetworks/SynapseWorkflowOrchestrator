@@ -88,7 +88,6 @@ public class AnnotationsTranslatorTest {
 		stringValues.setValue(Collections.singletonList(expectedString));
 		expectedMap.put(stringKey, stringValues);
 
-
 		// Call under test
 		org.sagebionetworks.repo.model.annotation.v2.Annotations newAnnotations = AnnotationsTranslator.translateToAnnotationsV2(oldAnnotations);
 

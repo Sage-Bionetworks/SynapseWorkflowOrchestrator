@@ -143,12 +143,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.sagebionetworks</groupId>
-			<artifactId>lib-auto-generated</artifactId>
-			<version>${synapseVersion}</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.fuin</groupId>
 			<artifactId>utils4j</artifactId>
 			<version>0.6.9</version>

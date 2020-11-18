@@ -209,8 +209,8 @@ public class WorkflowOrchestratorTest {
 		assertEquals(ZIP_FILE_URL, result.getWorkflowUrl().toString());
 		assertEquals(ROOT_TEMPLATE, result.getEntryPoint());
 
-		Project project2 = new Project();
-		project2.setId(projectId);
-		mockSynapse.deleteEntity(project2, true);
+		Project project = new Project();
+		project.setId(projectId);
+		mockSynapse.deleteEntity(project, true);
 	}
 }

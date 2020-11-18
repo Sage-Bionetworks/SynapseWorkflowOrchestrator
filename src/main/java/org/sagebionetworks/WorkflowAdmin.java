@@ -88,7 +88,7 @@ public class WorkflowAdmin {
 	}
 
 	public WorkflowAdmin() throws SynapseException {
-		SynapseClient synapseAdmin = SynapseClientFactory.createSynapseClient();
+		synapseAdmin = SynapseClientFactory.createSynapseClient();
 		String userName = getProperty(SYNAPSE_USERNAME_PROPERTY);
 		String password = getProperty(SYNAPSE_PASSWORD_PROPERTY);
 		LoginRequest loginRequest = new LoginRequest();
@@ -98,7 +98,6 @@ public class WorkflowAdmin {
 		archiver = new Archiver(synapseAdmin, null);
 	}
 
-	
 	public String createFileEntityForFile(String path, String parentId) throws Throwable {
 		return archiver.uploadToSynapse(new File(path), parentId);
 	}
