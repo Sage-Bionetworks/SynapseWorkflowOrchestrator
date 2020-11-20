@@ -2,7 +2,6 @@ package org.sagebionetworks;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,13 +20,13 @@ import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValueType;
 public class AnnotationsTranslatorTest {
 
 	@Test
-	public void testNullParameter() {
+	public void testTranslateToAnnotationsV2NullInput() {
 		org.sagebionetworks.repo.model.annotation.v2.Annotations newAnnotations = AnnotationsTranslator.translateToAnnotationsV2(null);
 		assertNotNull(newAnnotations);
 	}
 
 	@Test
-	public void testEmptyAnnotations() throws Exception {
+	public void testTranslateToAnnotationsV2EmptyAnnotations() throws Exception {
 		Annotations oldAnnotations = new Annotations();
 		// Call under test
 		org.sagebionetworks.repo.model.annotation.v2.Annotations newAnnotations = AnnotationsTranslator.translateToAnnotationsV2(oldAnnotations);
@@ -37,7 +36,7 @@ public class AnnotationsTranslatorTest {
 	}
 
 	@Test
-	public void testOneAnnotationValue () throws Exception {
+	public void testTranslateToAnnotationsV2OneAnnotationValue () throws Exception {
 		Annotations oldAnnotations = new Annotations();
 		Long expectedValue = 1L;
 		String expectedKey = "key";
@@ -47,26 +46,28 @@ public class AnnotationsTranslatorTest {
 		longAnnotation.setValue(expectedValue);
 		oldAnnotations.setLongAnnos(Collections.singletonList(longAnnotation));
 
+		org.sagebionetworks.repo.model.annotation.v2.Annotations expected = new org.sagebionetworks.repo.model.annotation.v2.Annotations();
+		Map<String, AnnotationsValue> map = new HashMap<>();
+		AnnotationsValue value = new AnnotationsValue();
+		value.setValue(Collections.singletonList(expectedValue.toString()));
+		value.setType(AnnotationsValueType.LONG);
+		map.put(expectedKey, value);
+		expected.setAnnotations(map);
+
 		// Call under test
 		org.sagebionetworks.repo.model.annotation.v2.Annotations newAnnotations = AnnotationsTranslator.translateToAnnotationsV2(oldAnnotations);
 
-		assertNotNull(newAnnotations);
-		assertNotNull(newAnnotations.getAnnotations());
-		assertEquals(1, newAnnotations.getAnnotations().size());
-		assertTrue(newAnnotations.getAnnotations().containsKey(expectedKey));
-		assertNotNull(newAnnotations.getAnnotations().get(expectedKey));
-		assertEquals(AnnotationsValueType.LONG, newAnnotations.getAnnotations().get(expectedKey).getType());
-		assertEquals(1, newAnnotations.getAnnotations().get(expectedKey).getValue().size());
-		assertEquals(expectedValue, (Long)Long.parseLong(newAnnotations.getAnnotations().get(expectedKey).getValue().get(0)));
+		assertEquals(expected, newAnnotations);
 	}
 
 	@Test
-	public void testMultipleAnnotationValue () throws Exception {
+	public void testTranslateToAnnotationsV2MultipleAnnotationValues() throws Exception {
 		Annotations oldAnnotations = new Annotations();
 		Double expectedDouble = 123.3D;
 		String doubleKey = "doubleKey";
 		String expectedString = "value";
 		String stringKey = "stringKey";
+		String id = "123";
 
 		DoubleAnnotation doubleAnnotation = new DoubleAnnotation();
 		doubleAnnotation.setKey(doubleKey);
@@ -77,6 +78,7 @@ public class AnnotationsTranslatorTest {
 		stringAnnotation.setKey(stringKey);
 		stringAnnotation.setValue(expectedString);
 		oldAnnotations.setStringAnnos(Collections.singletonList(stringAnnotation));
+		oldAnnotations.setObjectId(id);
 
 		Map<String, AnnotationsValue> expectedMap = new HashMap<>();
 		AnnotationsValue doubleValues = new AnnotationsValue();
@@ -92,6 +94,7 @@ public class AnnotationsTranslatorTest {
 		org.sagebionetworks.repo.model.annotation.v2.Annotations newAnnotations = AnnotationsTranslator.translateToAnnotationsV2(oldAnnotations);
 
 		assertEquals(expectedMap, newAnnotations.getAnnotations());
+		assertEquals(id, newAnnotations.getId());
 	}
 
 	@Test
@@ -113,19 +116,21 @@ public class AnnotationsTranslatorTest {
 		list.add(longAnnotation2);
 		oldAnnotations.setLongAnnos(list);
 
+		Map<String, AnnotationsValue> expectedMap = new HashMap<>();
+		AnnotationsValue value = new AnnotationsValue();
+		value.setValue(Collections.singletonList(expectedLong.toString()));
+		value.setType(AnnotationsValueType.LONG);
+		AnnotationsValue value2 = new AnnotationsValue();
+		value2.setValue(Collections.singletonList(expectedLong2.toString()));
+		value2.setType(AnnotationsValueType.LONG);
+		expectedMap.put(key1, value);
+		expectedMap.put(key2, value2);
+
 		Map<String, AnnotationsValue> mapValues = new HashMap<>();
 		// Call under test
 		AnnotationsTranslator.translateLongAnnotations(oldAnnotations, mapValues);
 
-		assertEquals(2, mapValues.size());
-		assertNotNull(mapValues.get(key1));
-		assertNotNull(mapValues.get(key2));
-		assertEquals(1, mapValues.get(key1).getValue().size());
-		assertEquals(1, mapValues.get(key2).getValue().size());
-		assertEquals(AnnotationsValueType.LONG, mapValues.get(key1).getType());
-		assertEquals(AnnotationsValueType.LONG, mapValues.get(key2).getType());
-		assertEquals(expectedLong, (Long)Long.parseLong(mapValues.get(key1).getValue().get(0)));
-		assertEquals(expectedLong2, (Long)Long.parseLong(mapValues.get(key2).getValue().get(0)));
+		assertEquals(expectedMap, mapValues);
 	}
 
 	@Test
@@ -148,20 +153,21 @@ public class AnnotationsTranslatorTest {
 		list.add(doubleAnnotation2);
 		oldAnnotations.setDoubleAnnos(list);
 
+		Map<String, AnnotationsValue> expectedMap = new HashMap<>();
+		AnnotationsValue value = new AnnotationsValue();
+		value.setValue(Collections.singletonList(expectedDouble.toString()));
+		value.setType(AnnotationsValueType.DOUBLE);
+		AnnotationsValue value2 = new AnnotationsValue();
+		value2.setValue(Collections.singletonList(expectedDouble2.toString()));
+		value2.setType(AnnotationsValueType.DOUBLE);
+		expectedMap.put(key1, value);
+		expectedMap.put(key2, value2);
+
 		Map<String, AnnotationsValue> mapValues = new HashMap<>();
 		// Call under test
 		AnnotationsTranslator.translateDoubleAnnotations(oldAnnotations, mapValues);
 
-		assertEquals(2, mapValues.size());
-		assertNotNull(mapValues.get(key1));
-		assertNotNull(mapValues.get(key2));
-		assertEquals(1, mapValues.get(key1).getValue().size());
-		assertEquals(1, mapValues.get(key2).getValue().size());
-		assertEquals(AnnotationsValueType.DOUBLE, mapValues.get(key1).getType());
-		assertEquals(AnnotationsValueType.DOUBLE, mapValues.get(key2).getType());
-		assertEquals(expectedDouble, (Double)Double.parseDouble(mapValues.get(key1).getValue().get(0)));
-		assertEquals(expectedDouble2, (Double)Double.parseDouble(mapValues.get(key2).getValue().get(0)));
-
+		assertEquals(expectedMap, mapValues);
 	}
 
 	@Test
@@ -185,74 +191,20 @@ public class AnnotationsTranslatorTest {
 		list.add(stringAnnotation2);
 		oldAnnotations.setStringAnnos(list);
 
-		Map<String, AnnotationsValue> mapValues = new HashMap<>();
-		// Call under test
-		AnnotationsTranslator.translateStringAnnotations(oldAnnotations, mapValues);
-
-		assertEquals(2, mapValues.size());
-		assertNotNull(mapValues.get(key1));
-		assertNotNull(mapValues.get(key2));
-		assertEquals(1, mapValues.get(key1).getValue().size());
-		assertEquals(1, mapValues.get(key2).getValue().size());
-		assertEquals(AnnotationsValueType.STRING, mapValues.get(key1).getType());
-		assertEquals(AnnotationsValueType.STRING, mapValues.get(key2).getType());
-		assertEquals(expectedString, mapValues.get(key1).getValue().get(0));
-		assertEquals(expectedString2, mapValues.get(key2).getValue().get(0));
-	}
-
-	@Test
-	public void testLongAnnotationsTranslatorNoLongValues() throws Exception {
-		Annotations oldAnnotations = new Annotations();
-
-		String expectedString = "one";
-		String key1 = "key1";
-
-		StringAnnotation stringAnnotation = new StringAnnotation();
-		stringAnnotation.setKey(key1);
-		stringAnnotation.setValue(expectedString);
-		oldAnnotations.setStringAnnos(Collections.singletonList(stringAnnotation));
-
-		Map<String, AnnotationsValue> mapValues = new HashMap<>();
-		// Call under test
-		AnnotationsTranslator.translateLongAnnotations(oldAnnotations, mapValues);
-		assertEquals(0, mapValues.size());
-	}
-
-	@Test
-	public void testDoubleAnnotationsTranslatorNoDoubleValues() throws Exception {
-		Annotations oldAnnotations = new Annotations();
-
-		String expectedString = "one";
-		String key1 = "key1";
-
-		StringAnnotation stringAnnotation = new StringAnnotation();
-		stringAnnotation.setKey(key1);
-		stringAnnotation.setValue(expectedString);
-		oldAnnotations.setStringAnnos(Collections.singletonList(stringAnnotation));
-
-		Map<String, AnnotationsValue> mapValues = new HashMap<>();
-		// Call under test
-		AnnotationsTranslator.translateDoubleAnnotations(oldAnnotations, mapValues);
-		assertEquals(0, mapValues.size());
-	}
-
-	@Test
-	public void testStringAnnotationsTranslatorNoStringValues() throws Exception {
-		Annotations oldAnnotations = new Annotations();
-
-		Double expectedDouble = 1.0D;
-		String key1 = "key1";
-
-		DoubleAnnotation doubleAnnotation = new DoubleAnnotation();
-		doubleAnnotation.setKey(key1);
-		doubleAnnotation.setValue(expectedDouble);
-		oldAnnotations.setDoubleAnnos(Collections.singletonList(doubleAnnotation));
+		Map<String, AnnotationsValue> expectedMap = new HashMap<>();
+		AnnotationsValue value = new AnnotationsValue();
+		value.setValue(Collections.singletonList(expectedString));
+		value.setType(AnnotationsValueType.STRING);
+		AnnotationsValue value2 = new AnnotationsValue();
+		value2.setValue(Collections.singletonList(expectedString2));
+		value2.setType(AnnotationsValueType.STRING);
+		expectedMap.put(key1, value);
+		expectedMap.put(key2, value2);
 
 		Map<String, AnnotationsValue> mapValues = new HashMap<>();
 		// Call under test
 		AnnotationsTranslator.translateStringAnnotations(oldAnnotations, mapValues);
-		assertEquals(0, mapValues.size());
+
+		assertEquals(expectedMap, mapValues);
 	}
-
-
 }

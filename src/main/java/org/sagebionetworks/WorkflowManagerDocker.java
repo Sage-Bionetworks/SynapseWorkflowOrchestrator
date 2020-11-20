@@ -94,7 +94,8 @@ public class WorkflowManagerDocker implements WorkflowManager {
 			WorkflowParameters workflowParameters, byte[] synapseConfigFileContent) throws IOException {
 		ContainerRelativeFile workflowFolder = createDirInHostMountedSharedDir();
 
-		utils.downloadWorkflowFromURL(workflowUrlString, entrypoint, workflowFolder.getContainerPath());
+		WorkflowURLDownloader downloader = new WorkflowURLDownloader();
+		downloader.downloadWorkflowFromURL(workflowUrlString, entrypoint, workflowFolder.getContainerPath());
 		
 		// The folder with the workflow and param's, from the POV of the host
 		File hostWorkflowFolder = workflowFolder.getHostPath();

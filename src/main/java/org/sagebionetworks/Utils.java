@@ -7,9 +7,7 @@ import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
 import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,8 +26,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.fuin.utils4j.Utils4J;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sagebionetworks.repo.model.EntityBundle;
@@ -61,16 +57,6 @@ public class Utils {
 	
 	private static Properties properties = null;
 
-	private static URLFactory urlFactory;
-
-	public Utils(URLFactory urlFactory) {
-		this.urlFactory=urlFactory;
-	}
-
-	public Utils() {
-		this.urlFactory=new URLFactoryImpl();
-	}
-	
 	public static void initProperties() {
 		if (properties!=null) return;
 		properties = new Properties();
@@ -287,74 +273,6 @@ public class Utils {
 		if (expected!=response.getStatusLine().getStatusCode()) 
 			throw new RuntimeException("Expected "+expected+" but received "+
 					response.getStatusLine().getStatusCode());		
-	}
-
-
-	private static void downloadZip(final URLInterface url, File tempDir, File target) throws IOException {
-		File tempZipFile = createTempFile(".zip", tempDir);
-		try {
-			(new ExponentialBackoffRunner()).execute(new NoRefreshExecutableAdapter<Void,Void>() {
-				@Override
-				public Void execute(Void args) throws Throwable {
-					try (InputStream is = url.openStream(); OutputStream os = new FileOutputStream(tempZipFile)) {
-						IOUtils.copy(is, os);
-					}
-					return null;
-				}}, null);
-		} catch (Throwable t) {
-			throw new RuntimeException(t);
-		}
-		Utils4J.unzip(tempZipFile, target);
-		tempZipFile.delete();
-	}
-	
-	private static String downloadWebDocument(URLInterface url) throws IOException {
-		String result;
-		try (InputStream is = url.openStream(); ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-			IOUtils.copy(is, os);
-			result = os.toString();
-		}
-		return result;
-	}
-	
-	public static void downloadWorkflowFromURL(String workflowUrlString, String entrypoint, File targetDir) throws IOException {
-		URLInterface workflowUrl = urlFactory.createURL(workflowUrlString);
-		String path = workflowUrl.getPath();
-		if (path.toLowerCase().endsWith(ZIP_SUFFIX)) {
-			downloadZip(workflowUrl, getTempDir(), targetDir);
-   			// root file should be relative to unzip location
-   			if (!(new File(targetDir,entrypoint)).exists()) {
-   				throw new IllegalStateException(entrypoint+" is not in the unzipped archive downloaded from "+workflowUrl);
-   			}
-		} else if (path.contains(GA4GH_TRS_FILE_FRAGMENT)) {
-			URLInterface filesUrl = urlFactory.createURL(workflowUrl.toString()+"/files");
-			String filesContent = downloadWebDocument(filesUrl);
-			JSONArray files = new JSONArray(filesContent);
-			for (int i=0; i<files.length(); i++) {
-				JSONObject file = files.getJSONObject(i);
-				String fileType = file.getString("file_type");
-				String filePath = file.getString("path");
-				if (PRIMARY_DESCRIPTOR_TYPE.equals(fileType)) {
-					if (!filePath.equals(entrypoint)) throw new RuntimeException("Expected entryPoint "+entrypoint+" but found "+filePath);
-				} else if (SECONDARY_DESCRIPTOR_TYPE.equals(fileType)) {
-					// OK
-				} else {
-					continue;
-				}
-
-				URLInterface descriptorUrl = urlFactory.createURL(workflowUrl.toString()+ "/descriptor/" +filePath);
-				String descriptorContent = downloadWebDocument(descriptorUrl);
-				JSONObject descriptor = new JSONObject(descriptorContent);
-				File targetFile = new File(targetDir, filePath);
-				targetFile.getParentFile().mkdirs();
-				try (OutputStream os = new FileOutputStream(targetFile)) {
-					IOUtils.write(descriptor.getString("content"), os, StandardCharsets.UTF_8);
-				}
-			}
-			
-		} else {
-			throw new RuntimeException("Expected template to be a zip archive or TRS files URL, but found "+path);
-		}
 	}
 
 }

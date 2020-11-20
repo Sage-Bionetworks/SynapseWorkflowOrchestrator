@@ -74,6 +74,7 @@ import org.sagebionetworks.evaluation.model.SubmissionStatusEnum;
 import org.sagebionetworks.repo.model.Folder;
 import org.sagebionetworks.repo.model.annotation.v2.Annotations;
 import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValue;
+import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValueType;
 import org.sagebionetworks.repo.model.auth.LoginRequest;
 import org.sagebionetworks.repo.model.file.ExternalFileHandle;
 import org.sagebionetworks.repo.model.file.FileHandle;
@@ -191,12 +192,18 @@ public class WorkflowOrchestrator  {
 			// get annotation for the CWL entry point.  Does the file exist?
 			Annotations annotations = synapse.getAnnotationsV2(entityId);
 			Map<String, AnnotationsValue> annotationsMap = annotations.getAnnotations();
-			if (annotationsMap==null) throw
-					new IllegalStateException("Expected string annotation called "+
-							ROOT_TEMPLATE_ANNOTATION_NAME+" for "+entityId+" but the entity has no string annotations.");
+			if ( annotationsMap == null || annotationsMap.isEmpty() ) {
+				throw new IllegalStateException("Expected annotation called "+
+							ROOT_TEMPLATE_ANNOTATION_NAME+" for "+entityId+" but the entity has null or empty annotation map.");
+			}
 			AnnotationsValue valueAnnotations = annotationsMap.get(ROOT_TEMPLATE_ANNOTATION_NAME);
-			if (valueAnnotations == null || valueAnnotations.getValue() == null || valueAnnotations.getValue().size() == 0 ) throw
-					new IllegalStateException(entityId+" has no AnnotationValue called "+ROOT_TEMPLATE_ANNOTATION_NAME);
+			if (valueAnnotations == null || valueAnnotations.getValue() == null
+					|| valueAnnotations.getValue().isEmpty()) {
+				throw new IllegalStateException(entityId + " has no annotation called " + ROOT_TEMPLATE_ANNOTATION_NAME);
+			}
+			if (!valueAnnotations.getType().equals(AnnotationsValueType.STRING)) {
+				throw new IllegalStateException(ROOT_TEMPLATE_ANNOTATION_NAME + " has wrong annotation type");
+			}
 				String rootTemplateString = valueAnnotations.getValue().get(0);
 				result.put(evaluationId, new WorkflowURLEntrypointAndSynapseRef(url, rootTemplateString, entityId));
 		}

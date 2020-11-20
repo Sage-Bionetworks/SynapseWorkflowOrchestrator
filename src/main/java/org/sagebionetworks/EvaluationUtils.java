@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -25,7 +24,6 @@ import org.sagebionetworks.repo.model.annotation.Annotations;
 import org.sagebionetworks.repo.model.annotation.DoubleAnnotation;
 import org.sagebionetworks.repo.model.annotation.LongAnnotation;
 import org.sagebionetworks.repo.model.annotation.StringAnnotation;
-import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValue;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 
 public class EvaluationUtils {
@@ -279,8 +277,7 @@ public class EvaluationUtils {
 		}
 	}
 
-	static boolean removeStringAnnotation(SubmissionStatus status, String key) {
-		Annotations annotations = status.getAnnotations();
+	static void removeStringAnnotation(Annotations annotations, String key) {
 		if (annotations!=null) {
 			List<StringAnnotation> sas = annotations.getStringAnnos();
 			if (sas != null) {
@@ -288,16 +285,13 @@ public class EvaluationUtils {
 					StringAnnotation existing = iterator.next();
 					if (existing.getKey().equals(key)) {
 						iterator.remove();
-						return true;
 					}
 				}
 			}
 		}
-		return false;
 	}
 
-	static boolean removeLongAnnotation(SubmissionStatus status, String key) {
-		Annotations annotations = status.getAnnotations();
+	static void removeLongAnnotation(Annotations annotations, String key) {
 		if (annotations!=null) {
 			List<LongAnnotation> las = annotations.getLongAnnos();
 			if (las != null) {
@@ -305,16 +299,13 @@ public class EvaluationUtils {
 					LongAnnotation existing = iterator.next();
 					if (existing.getKey().equals(key)) {
 						iterator.remove();
-						return true;
 					}
 				}
 			}
 		}
-		return false;
 	}
 
-	static boolean removeDoubleAnnotation(SubmissionStatus status, String key) {
-		Annotations annotations = status.getAnnotations();
+	static void removeDoubleAnnotation(Annotations annotations, String key) {
 		if (annotations!=null) {
 			List<DoubleAnnotation> das = annotations.getDoubleAnnos();
 			if (das != null) {
@@ -322,35 +313,16 @@ public class EvaluationUtils {
 					DoubleAnnotation existing = iterator.next();
 					if (existing.getKey().equals(key)) {
 						iterator.remove();
-						return true;
 					}
 				}
 			}
 		}
-		return false;
-	}
-
-	static boolean removeV2Annotation(SubmissionStatus status, String key) {
-		org.sagebionetworks.repo.model.annotation.v2.Annotations annotationsV2 = status.getSubmissionAnnotations();
-		if(annotationsV2 != null) {
-			Map<String, AnnotationsValue> annotationsValueMap = annotationsV2.getAnnotations();
-			if (annotationsValueMap != null) {
-				if (annotationsValueMap.containsKey(key)) {
-					annotationsValueMap.remove(key);
-					annotationsV2.setAnnotations(annotationsValueMap);
-					status.setSubmissionAnnotations(annotationsV2);
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 	
-	static void removeAnnotation(SubmissionStatus status, String key) {
-		removeStringAnnotation(status, key);
-		removeDoubleAnnotation(status, key);
-		removeLongAnnotation(status, key);
-		removeV2Annotation(status, key);
+	static void removeAnnotation(Annotations annotations, String key) {
+		removeStringAnnotation(annotations, key);
+		removeDoubleAnnotation(annotations, key);
+		removeLongAnnotation(annotations, key);
 	}
 	
 	private static void removeAnnotationIntern(SubmissionStatusModifications statusMods, String key) {
@@ -409,10 +381,11 @@ public class EvaluationUtils {
 			}
 		}
 
+		for (String key : statusMods.getAnnotationNamesToRemove()) removeAnnotation(submissionStatus.getAnnotations(), key);
+
 		org.sagebionetworks.repo.model.annotation.v2.Annotations annotations = AnnotationsTranslator.translateToAnnotationsV2(submissionStatus.getAnnotations());
 		submissionStatus.setSubmissionAnnotations(annotations);
 
-		for (String key : statusMods.getAnnotationNamesToRemove()) removeAnnotation(submissionStatus, key);
 		if (statusMods.getStatus()!=null) submissionStatus.setStatus(statusMods.getStatus());
 		if (statusMods.getCanCancel()!=null) submissionStatus.setCanCancel(statusMods.getCanCancel());
 		if (statusMods.getCancelRequested()!=null) submissionStatus.setCancelRequested(statusMods.getCancelRequested());

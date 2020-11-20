@@ -42,6 +42,7 @@ import org.sagebionetworks.repo.model.Project;
 import org.sagebionetworks.repo.model.UserProfile;
 import org.sagebionetworks.repo.model.annotation.v2.Annotations;
 import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValue;
+import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValueType;
 import org.sagebionetworks.repo.model.file.ExternalFileHandle;
 import org.sagebionetworks.repo.model.file.FileHandle;
 import org.sagebionetworks.repo.model.file.FileHandleResults;
@@ -148,8 +149,8 @@ public class WorkflowOrchestratorTest {
 		results.setList(fileHandleList);
 		when(mockSynapse.getEntityFileHandlesForCurrentVersion(any())).thenReturn(results);
 		when(mockSynapse.getAnnotationsV2(any())).thenReturn(new Annotations());
-		String expectedErrorMessage = "Expected string annotation called "+
-				ROOT_TEMPLATE_ANNOTATION_NAME+" for "+ WORKFLOW_OUTPUT_ROOT_ENTITY_ID +" but the entity has no string annotations.";
+		String expectedErrorMessage = "Expected annotation called "+
+				ROOT_TEMPLATE_ANNOTATION_NAME+" for "+ WORKFLOW_OUTPUT_ROOT_ENTITY_ID +" but the entity has null or empty annotation map.";
 		IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
 			workflowOrchestrator.getWorkflowURLAndEntrypoint();
 		});
@@ -170,9 +171,37 @@ public class WorkflowOrchestratorTest {
 		when(mockSynapse.getEntityFileHandlesForCurrentVersion(any())).thenReturn(results);
 		Annotations annotations = new Annotations();
 		Map<String, AnnotationsValue> valueMap = new HashMap<>();
+		valueMap.put("otherAnnotation", new AnnotationsValue());
 		annotations.setAnnotations(valueMap);
  		when(mockSynapse.getAnnotationsV2(any())).thenReturn(annotations);
-		String expectedErrorMessage = WORKFLOW_OUTPUT_ROOT_ENTITY_ID + " has no AnnotationValue called "+ROOT_TEMPLATE_ANNOTATION_NAME;
+		String expectedErrorMessage = WORKFLOW_OUTPUT_ROOT_ENTITY_ID + " has no annotation called "+ROOT_TEMPLATE_ANNOTATION_NAME;
+		IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+			workflowOrchestrator.getWorkflowURLAndEntrypoint();
+		});
+		assertEquals(expectedErrorMessage, exception.getMessage());
+	}
+
+	@Test
+	public void getWorkflowURLAndEntrypointWrongAnnotationType() throws Exception {
+		JSONObject o = new JSONObject();
+		o.put(EVALUATION_ID,  WORKFLOW_OUTPUT_ROOT_ENTITY_ID);
+		System.setProperty("EVALUATION_TEMPLATES", o.toString());
+		FileHandleResults results = new FileHandleResults();
+		List<FileHandle> fileHandleList = new ArrayList<>();
+		ExternalFileHandle fileHandle = new ExternalFileHandle();
+		fileHandle.setExternalURL(WORKFLOW_URL.toString());
+		fileHandleList.add(fileHandle);
+		results.setList(fileHandleList);
+		when(mockSynapse.getEntityFileHandlesForCurrentVersion(any())).thenReturn(results);
+		Annotations annotations = new Annotations();
+		Map<String, AnnotationsValue> valueMap = new HashMap<>();
+		AnnotationsValue annotationsValue = new AnnotationsValue();
+		annotationsValue.setValue(Collections.singletonList("stringValue"));
+		annotationsValue.setType(AnnotationsValueType.DOUBLE);
+		valueMap.put(ROOT_TEMPLATE_ANNOTATION_NAME, annotationsValue );
+		annotations.setAnnotations(valueMap);
+		when(mockSynapse.getAnnotationsV2(any())).thenReturn(annotations);
+		String expectedErrorMessage = ROOT_TEMPLATE_ANNOTATION_NAME + " has wrong annotation type";
 		IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
 			workflowOrchestrator.getWorkflowURLAndEntrypoint();
 		});

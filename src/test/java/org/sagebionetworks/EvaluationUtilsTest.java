@@ -2,8 +2,7 @@ package org.sagebionetworks;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.sagebionetworks.Constants.EXECUTION_STAGE_PROPERTY_NAME;
 import static org.sagebionetworks.EvaluationUtils.TIME_REMAINING;
 import static org.sagebionetworks.EvaluationUtils.applyModifications;
@@ -14,7 +13,6 @@ import static org.sagebionetworks.EvaluationUtils.removeAnnotation;
 import static org.sagebionetworks.EvaluationUtils.setAnnotation;
 import static org.sagebionetworks.EvaluationUtils.setStatus;
 
-import java.util.ArrayList;
 import java.util.Collections;
 
 import org.junit.Test;
@@ -160,39 +158,40 @@ public class EvaluationUtilsTest {
 	}
 
 	@Test
-	public void testRemoveAnnotationsV2OneValue() throws Exception {
+	public void testRemoveAnnotationsOneValue() throws Exception {
 		SubmissionStatus actual = new SubmissionStatus();
 		setAnnotation(actual, "foo1", "baz1", false);
-		org.sagebionetworks.repo.model.annotation.v2.Annotations annot2 = AnnotationsTranslator.translateToAnnotationsV2(actual.getAnnotations());
-		actual.setSubmissionAnnotations(annot2);
+		assertEquals("foo1", actual.getAnnotations().getStringAnnos().get(0).getKey());
+		assertEquals("baz1", actual.getAnnotations().getStringAnnos().get(0).getValue());
 		// Call under test
-		removeAnnotation(actual, "foo1");
+		removeAnnotation(actual.getAnnotations(), "foo1");
 		assertNotNull(actual);
-		assertNotNull(actual.getSubmissionAnnotations());
-		assertNotNull(actual.getSubmissionAnnotations().getAnnotations());
-		assertEquals(0, actual.getSubmissionAnnotations().getAnnotations().size());
 		assertNotNull(actual.getAnnotations());
 		assertNotNull(actual.getAnnotations().getStringAnnos());
-		assertEquals(0, actual.getAnnotations().getStringAnnos().size());
+		assertTrue(actual.getAnnotations().getStringAnnos().isEmpty());
 	}
 
 	@Test
-	public void testRemoveAnnotationsMultipleValuesV2() throws Exception {
+	public void testRemoveAnnotationsMultipleValues() throws Exception {
 		SubmissionStatus actual = new SubmissionStatus();
 		Long valueToRemove = 1L;
-		Long secondValue = 2L;
+		Double secondValue = 2.0D;
 		setAnnotation(actual, "foo1", valueToRemove, false);
 		setAnnotation(actual, "foo2", secondValue, false);
-		actual.setSubmissionAnnotations(AnnotationsTranslator.translateToAnnotationsV2(actual.getAnnotations()));
+		assertEquals("foo1", actual.getAnnotations().getLongAnnos().get(0).getKey());
+		assertEquals(valueToRemove, actual.getAnnotations().getLongAnnos().get(0).getValue());
+		assertEquals("foo2", actual.getAnnotations().getDoubleAnnos().get(0).getKey());
+		assertEquals(secondValue, actual.getAnnotations().getDoubleAnnos().get(0).getValue());
+
 		// Call under test
-		removeAnnotation(actual, "foo1");
+		removeAnnotation(actual.getAnnotations(), "foo1");
+		removeAnnotation(actual.getAnnotations(), "foo2");
 		assertNotNull(actual);
-		assertNotNull(actual.getSubmissionAnnotations());
-		assertNotNull(actual.getSubmissionAnnotations().getAnnotations());
-		assertEquals(1, actual.getSubmissionAnnotations().getAnnotations().size());
-		assertFalse(actual.getSubmissionAnnotations().getAnnotations().containsKey("foo1"));
-		assertTrue(actual.getSubmissionAnnotations().getAnnotations().containsKey("foo2"));
-		assertEquals(secondValue.toString(), actual.getSubmissionAnnotations().getAnnotations().get("foo2").getValue().get(0));
+		assertNotNull(actual.getAnnotations());
+		assertNotNull(actual.getAnnotations().getDoubleAnnos());
+		assertNotNull(actual.getAnnotations().getLongAnnos());
+		assertTrue(actual.getAnnotations().getDoubleAnnos().isEmpty());
+		assertTrue(actual.getAnnotations().getLongAnnos().isEmpty());
 	}
 
 	@Test
@@ -225,9 +224,9 @@ public class EvaluationUtilsTest {
 		LongAnnotation longAnnotation = new LongAnnotation();
 		longAnnotation.setKey(TIME_REMAINING);
 		longAnnotation.setValue(expectedTime);
-		annotations.setLongAnnos(new ArrayList<LongAnnotation>());
-		annotations.getLongAnnos().add(longAnnotation);
+		annotations.setLongAnnos(Collections.singletonList(longAnnotation));
 		status.setAnnotations(annotations);
+		// Call under test
 		Long result = getTimeRemaining(status);
 		assertEquals(expectedTime, result);
 	}

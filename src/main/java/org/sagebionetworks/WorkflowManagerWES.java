@@ -100,7 +100,9 @@ public class WorkflowManagerWES implements WorkflowManager {
 		if (!templateRoot.mkdir()) {
 			throw new RuntimeException("Could not create "+templateRoot.getAbsolutePath());
 		}
-		utils.downloadWorkflowFromURL(workflowUrlString, entrypoint, templateRoot);
+
+		WorkflowURLDownloader downloader = new WorkflowURLDownloader();
+		downloader.downloadWorkflowFromURL(workflowUrlString, entrypoint, templateRoot);
 		
 		// NOTE: WES Service constrains entrypoint to be at the top level
 		// TODO throw exception if any .cwl files are at higher level than entrypoint

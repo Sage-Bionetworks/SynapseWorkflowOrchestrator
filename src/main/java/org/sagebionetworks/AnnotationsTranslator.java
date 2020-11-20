@@ -2,7 +2,6 @@ package org.sagebionetworks;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -36,13 +35,11 @@ public class AnnotationsTranslator {
 	public static void translateLongAnnotations(org.sagebionetworks.repo.model.annotation.Annotations oldAnnotations, Map<String, AnnotationsValue> mapValues) {
 		List<LongAnnotation> longList = oldAnnotations.getLongAnnos();
 		if (longList != null) {
-			Iterator<LongAnnotation> iterator = longList.iterator();
-			while (iterator.hasNext()) {
-				LongAnnotation longValue = iterator.next();
+			for (LongAnnotation annot : longList) {
 				AnnotationsValue annotationsValue = new AnnotationsValue();
 				annotationsValue.setType(AnnotationsValueType.LONG);
-				annotationsValue.setValue(Collections.singletonList(longValue.getValue().toString()));
-				mapValues.put(longValue.getKey(), annotationsValue);
+				annotationsValue.setValue(Collections.singletonList(annot.getValue().toString()));
+				mapValues.put(annot.getKey(), annotationsValue);
 			}
 		}
 	}
@@ -50,13 +47,11 @@ public class AnnotationsTranslator {
 	public static void translateDoubleAnnotations(org.sagebionetworks.repo.model.annotation.Annotations oldAnnotations, Map<String, AnnotationsValue> mapValues) {
 		List<DoubleAnnotation> doubleList = oldAnnotations.getDoubleAnnos();
 		if (doubleList != null) {
-			Iterator<DoubleAnnotation> iterator = doubleList.iterator();
-			while (iterator.hasNext()) {
-				DoubleAnnotation doubleValue = iterator.next();
+			for (DoubleAnnotation annot : doubleList) {
 				AnnotationsValue annotationsValue = new AnnotationsValue();
 				annotationsValue.setType(AnnotationsValueType.DOUBLE);
-				annotationsValue.setValue(Collections.singletonList(doubleValue.getValue().toString()));
-				mapValues.put(doubleValue.getKey(), annotationsValue);
+				annotationsValue.setValue(Collections.singletonList(annot.getValue().toString()));
+				mapValues.put(annot.getKey(), annotationsValue);
 			}
 		}
 	}
@@ -64,15 +59,11 @@ public class AnnotationsTranslator {
 	public static void translateStringAnnotations(org.sagebionetworks.repo.model.annotation.Annotations oldAnnotations, Map<String, AnnotationsValue> mapValues) {
 		List<StringAnnotation> stringList = oldAnnotations.getStringAnnos();
 		if (stringList != null) {
-			Iterator<StringAnnotation> iterator = stringList.iterator();
-			while (iterator.hasNext()) {
-				StringAnnotation stringValue = iterator.next();
+			for (StringAnnotation annot : stringList) {
 				AnnotationsValue annotationsValue = new AnnotationsValue();
 				annotationsValue.setType(AnnotationsValueType.STRING);
-				String value = stringValue.getValue();
-				if (value!=null && value.length()>499) value = value.substring(0, 499);  // same as old string annotations
-				annotationsValue.setValue(Collections.singletonList(value));
-				mapValues.put(stringValue.getKey(), annotationsValue);
+				annotationsValue.setValue(Collections.singletonList(annot.getValue()));
+				mapValues.put(annot.getKey(), annotationsValue);
 			}
 		}
 	}

@@ -11,9 +11,8 @@ import static org.sagebionetworks.Utils.getProperty;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -50,7 +49,15 @@ public class WorkflowAdmin {
 	// SET_UP template-file-path
 	// SUBMIT file-path parentID, evaluation queue ID
 	public static void main( String[] args ) throws Throwable {
-		WorkflowAdmin workflowAdmin = new WorkflowAdmin();
+		SynapseClient synapseAdmin = SynapseClientFactory.createSynapseClient();
+		String userName = getProperty(SYNAPSE_USERNAME_PROPERTY);
+		String password = getProperty(SYNAPSE_PASSWORD_PROPERTY);
+		LoginRequest loginRequest = new LoginRequest();
+		loginRequest.setUsername(userName);
+		loginRequest.setPassword(password);
+		synapseAdmin.login(loginRequest);
+		Archiver archiver = new Archiver(synapseAdmin, null);
+		WorkflowAdmin workflowAdmin = new WorkflowAdmin(synapseAdmin, archiver);
 		
 		TASK task = TASK.valueOf(args[0]);
 		switch(task) {
@@ -82,7 +89,7 @@ public class WorkflowAdmin {
 	
 	public SynapseClient getSynapseClient() {return synapseAdmin;}
 
-	public WorkflowAdmin(SynapseClient synapseAdmin, Archiver archiver) throws SynapseException {
+	public WorkflowAdmin(SynapseClient synapseAdmin, Archiver archiver) {
 		this.archiver = archiver;
 		this.synapseAdmin = synapseAdmin;
 	}
@@ -113,9 +120,7 @@ public class WorkflowAdmin {
 		Annotations annotations = synapseAdmin.getAnnotationsV2(fileEntity.getId());
 		Map<String, AnnotationsValue> updatedAnnotations = annotations.getAnnotations();
 		AnnotationsValue value = new AnnotationsValue();
-		List<String> list = new ArrayList<String>();
-		list.add(rootTemplate);
-		value.setValue(list);
+		value.setValue(Collections.singletonList(rootTemplate));
 		value.setType(AnnotationsValueType.STRING);
 		updatedAnnotations.put(ROOT_TEMPLATE_ANNOTATION_NAME, value);
 		annotations.setAnnotations(updatedAnnotations);
