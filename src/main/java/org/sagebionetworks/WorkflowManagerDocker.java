@@ -41,7 +41,6 @@ public class WorkflowManagerDocker implements WorkflowManager {
 	private static Logger log = LoggerFactory.getLogger(WorkflowManagerDocker.class);
 
 	private DockerUtils dockerUtils;
-	private Utils utils;
 	
 	static {
 		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2"); // needed for some https resources
@@ -49,7 +48,6 @@ public class WorkflowManagerDocker implements WorkflowManager {
 		
 	public WorkflowManagerDocker(DockerUtils dockerUtils) {
 		this.dockerUtils=dockerUtils;
-		this.utils = new Utils();
 	}
 	
 	private ContainerRelativeFile createDirInHostMountedSharedDir() {

@@ -58,10 +58,7 @@ public class WorkflowManagerWES implements WorkflowManager {
 			"CANCELED"
 	});
 
-	private Utils utils;
-
 	public WorkflowManagerWES() {
-		this.utils = new Utils();
 	}
 	
 	private void addAllDirToHttpEntity(File dir, File rootDir, MultipartEntityBuilder requestBuilder) throws IOException {
