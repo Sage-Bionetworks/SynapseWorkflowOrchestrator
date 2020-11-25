@@ -277,52 +277,48 @@ public class EvaluationUtils {
 		}
 	}
 
-	static void removeStringAnnotation(Annotations annotations, String key) {
-		if (annotations!=null) {
-			List<StringAnnotation> sas = annotations.getStringAnnos();
-			if (sas != null) {
-				for (Iterator<StringAnnotation> iterator = sas.iterator(); iterator.hasNext(); ) {
-					StringAnnotation existing = iterator.next();
-					if (existing.getKey().equals(key)) {
-						iterator.remove();
-					}
+	private static void removeStringAnnotation(Annotations annotations, String key) {
+		List<StringAnnotation> sas = annotations.getStringAnnos();
+		if (sas != null) {
+			for (Iterator<StringAnnotation> iterator = sas.iterator(); iterator.hasNext(); ) {
+				StringAnnotation existing = iterator.next();
+				if (existing.getKey().equals(key)) {
+					iterator.remove();
 				}
 			}
 		}
 	}
 
-	static void removeLongAnnotation(Annotations annotations, String key) {
-		if (annotations!=null) {
-			List<LongAnnotation> las = annotations.getLongAnnos();
-			if (las != null) {
-				for (Iterator<LongAnnotation> iterator = las.iterator(); iterator.hasNext(); ) {
-					LongAnnotation existing = iterator.next();
-					if (existing.getKey().equals(key)) {
-						iterator.remove();
-					}
+	private static void removeLongAnnotation(Annotations annotations, String key) {
+		List<LongAnnotation> las = annotations.getLongAnnos();
+		if (las != null) {
+			for (Iterator<LongAnnotation> iterator = las.iterator(); iterator.hasNext(); ) {
+				LongAnnotation existing = iterator.next();
+				if (existing.getKey().equals(key)) {
+					iterator.remove();
 				}
 			}
 		}
 	}
 
-	static void removeDoubleAnnotation(Annotations annotations, String key) {
-		if (annotations!=null) {
-			List<DoubleAnnotation> das = annotations.getDoubleAnnos();
-			if (das != null) {
-				for (Iterator<DoubleAnnotation> iterator = das.iterator(); iterator.hasNext(); ) {
-					DoubleAnnotation existing = iterator.next();
-					if (existing.getKey().equals(key)) {
-						iterator.remove();
-					}
+	private static void removeDoubleAnnotation(Annotations annotations, String key) {
+		List<DoubleAnnotation> das = annotations.getDoubleAnnos();
+		if (das != null) {
+			for (Iterator<DoubleAnnotation> iterator = das.iterator(); iterator.hasNext(); ) {
+				DoubleAnnotation existing = iterator.next();
+				if (existing.getKey().equals(key)) {
+					iterator.remove();
 				}
 			}
 		}
 	}
 	
-	static void removeAnnotation(Annotations annotations, String key) {
-		removeStringAnnotation(annotations, key);
-		removeDoubleAnnotation(annotations, key);
-		removeLongAnnotation(annotations, key);
+    static void removeAnnotation(Annotations annotations, String key) {
+		if (annotations != null) {
+			removeStringAnnotation(annotations, key);
+			removeDoubleAnnotation(annotations, key);
+			removeLongAnnotation(annotations, key);
+		}
 	}
 	
 	private static void removeAnnotationIntern(SubmissionStatusModifications statusMods, String key) {
