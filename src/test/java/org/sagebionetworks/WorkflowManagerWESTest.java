@@ -29,7 +29,7 @@ public class WorkflowManagerWESTest {
 	@Ignore
 	@Test
 	public void testCreateJob() throws Exception {
-		WorkflowManagerWES wdm = new WorkflowManagerWES();
+		WorkflowManagerWES wdm = new WorkflowManagerWES(new WorkflowURLDownloader());
 		String workflowUrlString = "https://github.com/Sage-Bionetworks/SynapseWorkflowExample/archive/master.zip";
 		String entrypoint = "SynapseWorkflowExample-master/workflow-entrypoint.cwl";
 		String submissionId = "9687029";
@@ -50,7 +50,7 @@ public class WorkflowManagerWESTest {
 	@Ignore
 	@Test
 	public void testCheckStatus() throws Exception {
-		WorkflowManagerWES wdm = new WorkflowManagerWES();
+		WorkflowManagerWES wdm = new WorkflowManagerWES(new WorkflowURLDownloader());
 		List<WorkflowJob> jobs = wdm.listWorkflowJobs(null);
 		System.out.println("Found "+jobs.size()+" jobs.");
 		for (WorkflowJob job : jobs) {
@@ -67,7 +67,7 @@ public class WorkflowManagerWESTest {
 	@Ignore
 	@Test
 	public void testDeleteAllJobs() throws Exception {
-		WorkflowManagerWES wdm = new WorkflowManagerWES();
+		WorkflowManagerWES wdm = new WorkflowManagerWES(new WorkflowURLDownloader());
 
 		List<WorkflowJob> jobs = wdm.listWorkflowJobs(null);
 		System.out.println("Found "+jobs.size()+" jobs.");

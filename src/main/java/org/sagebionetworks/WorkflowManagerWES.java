@@ -58,7 +58,10 @@ public class WorkflowManagerWES implements WorkflowManager {
 			"CANCELED"
 	});
 
-	public WorkflowManagerWES() {
+	private WorkflowURLDownloader workflowURLDownloader;
+
+	public WorkflowManagerWES(WorkflowURLDownloader downloader) {
+		this.workflowURLDownloader = downloader;
 	}
 	
 	private void addAllDirToHttpEntity(File dir, File rootDir, MultipartEntityBuilder requestBuilder) throws IOException {
@@ -98,8 +101,7 @@ public class WorkflowManagerWES implements WorkflowManager {
 			throw new RuntimeException("Could not create "+templateRoot.getAbsolutePath());
 		}
 
-		WorkflowURLDownloader downloader = new WorkflowURLDownloader();
-		downloader.downloadWorkflowFromURL(workflowUrlString, entrypoint, templateRoot);
+		workflowURLDownloader.downloadWorkflowFromURL(workflowUrlString, entrypoint, templateRoot);
 		
 		// NOTE: WES Service constrains entrypoint to be at the top level
 		// TODO throw exception if any .cwl files are at higher level than entrypoint

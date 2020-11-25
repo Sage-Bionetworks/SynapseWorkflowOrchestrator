@@ -41,13 +41,15 @@ public class WorkflowManagerDocker implements WorkflowManager {
 	private static Logger log = LoggerFactory.getLogger(WorkflowManagerDocker.class);
 
 	private DockerUtils dockerUtils;
+	private WorkflowURLDownloader workflowURLDownloader;
 	
 	static {
 		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2"); // needed for some https resources
 	}
 		
-	public WorkflowManagerDocker(DockerUtils dockerUtils) {
+	public WorkflowManagerDocker(DockerUtils dockerUtils, WorkflowURLDownloader downloader) {
 		this.dockerUtils=dockerUtils;
+		this.workflowURLDownloader = downloader;
 	}
 	
 	private ContainerRelativeFile createDirInHostMountedSharedDir() {
@@ -92,8 +94,7 @@ public class WorkflowManagerDocker implements WorkflowManager {
 			WorkflowParameters workflowParameters, byte[] synapseConfigFileContent) throws IOException {
 		ContainerRelativeFile workflowFolder = createDirInHostMountedSharedDir();
 
-		WorkflowURLDownloader downloader = new WorkflowURLDownloader();
-		downloader.downloadWorkflowFromURL(workflowUrlString, entrypoint, workflowFolder.getContainerPath());
+		workflowURLDownloader.downloadWorkflowFromURL(workflowUrlString, entrypoint, workflowFolder.getContainerPath());
 		
 		// The folder with the workflow and param's, from the POV of the host
 		File hostWorkflowFolder = workflowFolder.getHostPath();

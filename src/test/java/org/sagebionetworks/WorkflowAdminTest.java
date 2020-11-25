@@ -1,14 +1,13 @@
 package org.sagebionetworks;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.sagebionetworks.Constants.ROOT_TEMPLATE_ANNOTATION_NAME;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +18,7 @@ import org.sagebionetworks.client.SynapseClient;
 import org.sagebionetworks.repo.model.FileEntity;
 import org.sagebionetworks.repo.model.annotation.v2.Annotations;
 import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValue;
+import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValueType;
 import org.sagebionetworks.repo.model.file.ExternalFileHandle;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,7 +33,7 @@ public class WorkflowAdminTest {
 	@InjectMocks
 	private WorkflowAdmin workflowAdmin;
 
-	private String WORKFLOW_URL = "https://github.com/Sage-Bionetworks/SynapseWorkflowExample/archive/master.zip";
+	private static String WORKFLOW_URL = "https://github.com/Sage-Bionetworks/SynapseWorkflowExample/archive/master.zip";
 
 	@Test
 	public void testCreateExternalFileEntity() throws Exception, Throwable {
@@ -62,18 +62,22 @@ public class WorkflowAdminTest {
 		annotations.setAnnotations(new HashMap<String, AnnotationsValue>());
 		when(mockSynapseClient.getAnnotationsV2(fileEntityResult.getId())).thenReturn(annotations);
 
+		Annotations expectedAnnotations = new Annotations();
+		Map<String, AnnotationsValue> expectedMap = new HashMap<>();
+		AnnotationsValue annotationsValue = new AnnotationsValue();
+		annotationsValue.setValue(Collections.singletonList(rootTemplate));
+		annotationsValue.setType(AnnotationsValueType.STRING);
+		expectedMap.put(ROOT_TEMPLATE_ANNOTATION_NAME, annotationsValue);
+		expectedAnnotations.setAnnotations(expectedMap);
+
 		// Call under test
 		String entity = workflowAdmin.createExternalFileEntity(WORKFLOW_URL, parentId, rootTemplate);
-		verify(mockSynapseClient, times(1)).createExternalFileHandle(efh);
-		verify(mockSynapseClient, times(1)).createEntity(fileEntity);
-		verify(mockSynapseClient, times(1)).getAnnotationsV2(fileEntityResult.getId());
-		verify(mockSynapseClient, times(1)).updateAnnotationsV2(fileEntityResult.getId(), annotations);
+		verify(mockSynapseClient).createExternalFileHandle(efh);
+		verify(mockSynapseClient).createEntity(fileEntity);
+		verify(mockSynapseClient).getAnnotationsV2(fileEntityResult.getId());
+		verify(mockSynapseClient).updateAnnotationsV2(fileEntityResult.getId(), expectedAnnotations);
 		assertEquals(id, entity);
-		assertNotNull(annotations);
-		assertEquals(1, annotations.getAnnotations().size());
-		assertTrue(annotations.getAnnotations().containsKey(ROOT_TEMPLATE_ANNOTATION_NAME));
-		assertEquals(1,annotations.getAnnotations().get(ROOT_TEMPLATE_ANNOTATION_NAME).getValue().size());
-		assertEquals(rootTemplate, annotations.getAnnotations().get(ROOT_TEMPLATE_ANNOTATION_NAME).getValue().get(0));
+		assertEquals(expectedAnnotations, annotations);
 	}
 
 }

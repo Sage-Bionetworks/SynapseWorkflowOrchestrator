@@ -144,9 +144,9 @@ public class WorkflowOrchestrator  {
 			if (configuredForWES()) throw new IllegalStateException("Cannot configure both Docker Engine and WES Endpoint.");
 			// precheck
 			dockerUtils.getInfo();
-			this.workflowManager = new WorkflowManagerDocker(dockerUtils);
+			this.workflowManager = new WorkflowManagerDocker(dockerUtils, new WorkflowURLDownloader());
 		} else if (configuredForWES()) {
-			this.workflowManager = new WorkflowManagerWES();
+			this.workflowManager = new WorkflowManagerWES(new WorkflowURLDownloader());
 		} else {
 			throw new IllegalStateException("Must configure either Docker Engine or WES Endpoint.");
 		}
@@ -201,7 +201,7 @@ public class WorkflowOrchestrator  {
 					|| valueAnnotations.getValue().isEmpty()) {
 				throw new IllegalStateException(entityId + " has no annotation called " + ROOT_TEMPLATE_ANNOTATION_NAME);
 			}
-			if (!valueAnnotations.getType().equals(AnnotationsValueType.STRING)) {
+			if (!AnnotationsValueType.STRING.equals(valueAnnotations.getType())) {
 				throw new IllegalStateException(ROOT_TEMPLATE_ANNOTATION_NAME + " has wrong annotation type");
 			}
 				String rootTemplateString = valueAnnotations.getValue().get(0);

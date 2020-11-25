@@ -381,14 +381,22 @@ public class EvaluationUtils {
 			}
 		}
 
-		for (String key : statusMods.getAnnotationNamesToRemove()) removeAnnotation(submissionStatus.getAnnotations(), key);
+		for (String key : statusMods.getAnnotationNamesToRemove()) {
+			removeAnnotation(submissionStatus.getAnnotations(), key);
+		}
 
 		org.sagebionetworks.repo.model.annotation.v2.Annotations annotations = AnnotationsTranslator.translateToAnnotationsV2(submissionStatus.getAnnotations());
 		submissionStatus.setSubmissionAnnotations(annotations);
 
-		if (statusMods.getStatus()!=null) submissionStatus.setStatus(statusMods.getStatus());
-		if (statusMods.getCanCancel()!=null) submissionStatus.setCanCancel(statusMods.getCanCancel());
-		if (statusMods.getCancelRequested()!=null) submissionStatus.setCancelRequested(statusMods.getCancelRequested());
+		if (statusMods.getStatus()!=null){
+			submissionStatus.setStatus(statusMods.getStatus());
+		}
+		if (statusMods.getCanCancel()!=null) {
+			submissionStatus.setCanCancel(statusMods.getCanCancel());
+		}
+		if (statusMods.getCancelRequested()!=null) {
+			submissionStatus.setCancelRequested(statusMods.getCancelRequested());
+		}
 	}
 	
 	public Evaluation getEvaluation(String evaluationId) throws SynapseException {

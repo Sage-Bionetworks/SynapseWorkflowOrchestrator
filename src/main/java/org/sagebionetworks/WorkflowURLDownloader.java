@@ -1,17 +1,12 @@
 package org.sagebionetworks;
 
-import static org.sagebionetworks.Utils.createTempFile;
-
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
-import org.fuin.utils4j.Utils4J;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -36,14 +31,14 @@ public class WorkflowURLDownloader {
 		URLInterface workflowUrl = urlFactory.createURL(workflowUrlString);
 		String path = workflowUrl.getPath();
 		if (path.toLowerCase().endsWith(ZIP_SUFFIX)) {
-			downloadZip(workflowUrl, Utils.getTempDir(), targetDir);
+			Utils.downloadZip(workflowUrl, Utils.getTempDir(), targetDir);
 			// root file should be relative to unzip location
 			if (!(new File(targetDir,entrypoint)).exists()) {
 				throw new IllegalStateException(entrypoint+" is not in the unzipped archive downloaded from "+workflowUrl);
 			}
 		} else if (path.contains(GA4GH_TRS_FILE_FRAGMENT)) {
 			URLInterface filesUrl = urlFactory.createURL(workflowUrl.toString()+"/files");
-			String filesContent = downloadWebDocument(filesUrl);
+			String filesContent = Utils.downloadWebDocument(filesUrl);
 			JSONArray files = new JSONArray(filesContent);
 			for (int i=0; i<files.length(); i++) {
 				JSONObject file = files.getJSONObject(i);
@@ -58,7 +53,7 @@ public class WorkflowURLDownloader {
 				}
 
 				URLInterface descriptorUrl = urlFactory.createURL(workflowUrl.toString()+ "/descriptor/" +filePath);
-				String descriptorContent = downloadWebDocument(descriptorUrl);
+				String descriptorContent = Utils.downloadWebDocument(descriptorUrl);
 				JSONObject descriptor = new JSONObject(descriptorContent);
 				File targetFile = new File(targetDir, filePath);
 				targetFile.getParentFile().mkdirs();
@@ -70,33 +65,6 @@ public class WorkflowURLDownloader {
 		} else {
 			throw new RuntimeException("Expected template to be a zip archive or TRS files URL, but found "+path);
 		}
-	}
-
-	private void downloadZip(final URLInterface url, File tempDir, File target) throws IOException {
-		File tempZipFile = createTempFile(".zip", tempDir);
-		try {
-			(new ExponentialBackoffRunner()).execute(new NoRefreshExecutableAdapter<Void,Void>() {
-				@Override
-				public Void execute(Void args) throws Throwable {
-					try (InputStream is = url.openStream(); OutputStream os = new FileOutputStream(tempZipFile)) {
-						IOUtils.copy(is, os);
-					}
-					return null;
-				}}, null);
-		} catch (Throwable t) {
-			throw new RuntimeException(t);
-		}
-		Utils4J.unzip(tempZipFile, target);
-		tempZipFile.delete();
-	}
-
-	private String downloadWebDocument(URLInterface url) throws IOException {
-		String result;
-		try (InputStream is = url.openStream(); ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-			IOUtils.copy(is, os);
-			result = os.toString();
-		}
-		return result;
 	}
 
 }
