@@ -1,10 +1,10 @@
 package org.sagebionetworks;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.sagebionetworks.Constants.AGENT_SHARED_DIR_DEFAULT;
@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +33,9 @@ public class WorkflowManagerDockerTest {
 
 	@Mock
 	private WorkflowParameters mockWorkflowParameters;
+
+	@Mock
+	private WorkflowURLDownloader mockWorkflowURLDownloarder;
 
 	@InjectMocks
 	private WorkflowManagerDocker workflowManagerDocker;
@@ -49,7 +53,7 @@ public class WorkflowManagerDockerTest {
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	public void tearDown() {
 		System.clearProperty("WORKFLOW_OUTPUT_ROOT_ENTITY_ID");
 		System.clearProperty(DOCKER_ENGINE_URL_PROPERTY_NAME);
 		System.clearProperty("EVALUATION_TEMPLATES");
@@ -63,8 +67,12 @@ public class WorkflowManagerDockerTest {
 		String mountPoint = "mountpoint";
 		String imageReference = "sagebionetworks/synapse-workflow-orchestrator-toil";
         Boolean privileged = false;
+        String containerId = "123";
 
         when(mockDockerUtils.getVolumeMountPoint(Utils.dockerComposeName(SHARED_VOLUME_NAME))).thenReturn(mountPoint);
+		doNothing().when(mockWorkflowURLDownloarder).downloadWorkflowFromURL(eq(workflowUrlString), eq(entryPoint), Mockito.isNotNull());
+		when(mockDockerUtils.createModelContainer(eq(imageReference), anyString(), eq(new HashMap<File,String>()), anyMap(),
+				anyList(), anyList(), anyString(), eq(privileged))).thenReturn(containerId);
 
 		// Call under test
 		workflowManagerDocker.createWorkflowJob(workflowUrlString, entryPoint,
@@ -72,8 +80,9 @@ public class WorkflowManagerDockerTest {
 
 		verify(mockDockerUtils).createModelContainer(eq(imageReference), anyString(), eq(new HashMap<File,String>()), anyMap(),
 				anyList(), anyList(), anyString(), eq(privileged));
-		verify(mockDockerUtils).startContainer(any());
+		verify(mockDockerUtils).startContainer(containerId);
 		verify(mockDockerUtils).getVolumeMountPoint(Utils.dockerComposeName(SHARED_VOLUME_NAME));
+		verify(mockWorkflowURLDownloarder).downloadWorkflowFromURL(eq(workflowUrlString), eq(entryPoint), Mockito.isNotNull());
 
 	}
 
