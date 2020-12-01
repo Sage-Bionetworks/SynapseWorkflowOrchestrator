@@ -1,7 +1,7 @@
 package org.sagebionetworks;
 
-import static org.sagebionetworks.Constants.*;
 import static org.sagebionetworks.Constants.WES_ENDPOINT_PROPERTY_NAME;
+import static org.sagebionetworks.Constants.WES_SHARED_DIR_PROPERTY_NAME;
 import static org.sagebionetworks.Utils.checkHttpResponseCode;
 import static org.sagebionetworks.Utils.getHttpClient;
 import static org.sagebionetworks.Utils.getProperty;
@@ -12,7 +12,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,7 +57,12 @@ public class WorkflowManagerWES implements WorkflowManager {
 			"SYSTEM_ERROR",
 			"CANCELED"
 	});
-	
+
+	private WorkflowURLDownloader workflowURLDownloader;
+
+	public WorkflowManagerWES(WorkflowURLDownloader downloader) {
+		this.workflowURLDownloader = downloader;
+	}
 	
 	private void addAllDirToHttpEntity(File dir, File rootDir, MultipartEntityBuilder requestBuilder) throws IOException {
 		if (!dir.isDirectory()) throw new IllegalArgumentException(dir.getPath()+" must be a directory.");
@@ -86,7 +90,7 @@ public class WorkflowManagerWES implements WorkflowManager {
 		}
 	}
 	@Override
-	public WorkflowJob createWorkflowJob(URL workflowUrl, String entrypoint, WorkflowParameters workflowParameters,
+	public WorkflowJob createWorkflowJob(String workflowUrlString, String entrypoint, WorkflowParameters workflowParameters,
 			byte[] synapseConfigFileContent) throws IOException {
 		MultipartEntityBuilder requestBuilder = MultipartEntityBuilder.create()
                 .setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
@@ -96,7 +100,8 @@ public class WorkflowManagerWES implements WorkflowManager {
 		if (!templateRoot.mkdir()) {
 			throw new RuntimeException("Could not create "+templateRoot.getAbsolutePath());
 		}
-		Utils.downloadWorkflowFromURL(workflowUrl, entrypoint, templateRoot);
+
+		workflowURLDownloader.downloadWorkflowFromURL(workflowUrlString, entrypoint, templateRoot);
 		
 		// NOTE: WES Service constrains entrypoint to be at the top level
 		// TODO throw exception if any .cwl files are at higher level than entrypoint

@@ -13,8 +13,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -24,10 +22,12 @@ import org.sagebionetworks.client.exceptions.SynapseException;
 import org.sagebionetworks.evaluation.model.Evaluation;
 import org.sagebionetworks.evaluation.model.EvaluationStatus;
 import org.sagebionetworks.evaluation.model.Submission;
-import org.sagebionetworks.repo.model.Annotations;
 import org.sagebionetworks.repo.model.FileEntity;
 import org.sagebionetworks.repo.model.ObjectType;
 import org.sagebionetworks.repo.model.Project;
+import org.sagebionetworks.repo.model.annotation.v2.Annotations;
+import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValue;
+import org.sagebionetworks.repo.model.annotation.v2.AnnotationsValueType;
 import org.sagebionetworks.repo.model.auth.LoginRequest;
 import org.sagebionetworks.repo.model.file.ExternalFileHandle;
 import org.sagebionetworks.repo.model.wiki.WikiPage;
@@ -49,7 +49,15 @@ public class WorkflowAdmin {
 	// SET_UP template-file-path
 	// SUBMIT file-path parentID, evaluation queue ID
 	public static void main( String[] args ) throws Throwable {
-		WorkflowAdmin workflowAdmin = new WorkflowAdmin();
+		SynapseClient synapseAdmin = SynapseClientFactory.createSynapseClient();
+		String userName = getProperty(SYNAPSE_USERNAME_PROPERTY);
+		String password = getProperty(SYNAPSE_PASSWORD_PROPERTY);
+		LoginRequest loginRequest = new LoginRequest();
+		loginRequest.setUsername(userName);
+		loginRequest.setPassword(password);
+		synapseAdmin.login(loginRequest);
+		Archiver archiver = new Archiver(synapseAdmin, null);
+		WorkflowAdmin workflowAdmin = new WorkflowAdmin(synapseAdmin, archiver);
 		
 		TASK task = TASK.valueOf(args[0]);
 		switch(task) {
@@ -81,6 +89,11 @@ public class WorkflowAdmin {
 	
 	public SynapseClient getSynapseClient() {return synapseAdmin;}
 
+	public WorkflowAdmin(SynapseClient synapseAdmin, Archiver archiver) {
+		this.archiver = archiver;
+		this.synapseAdmin = synapseAdmin;
+	}
+
 	public WorkflowAdmin() throws SynapseException {
 		synapseAdmin = SynapseClientFactory.createSynapseClient();
 		String userName = getProperty(SYNAPSE_USERNAME_PROPERTY);
@@ -91,7 +104,7 @@ public class WorkflowAdmin {
 		synapseAdmin.login(loginRequest);
 		archiver = new Archiver(synapseAdmin, null);
 	}
-	
+
 	public String createFileEntityForFile(String path, String parentId) throws Throwable {
 		return archiver.uploadToSynapse(new File(path), parentId);
 	}
@@ -104,11 +117,14 @@ public class WorkflowAdmin {
 		fileEntity.setDataFileHandleId(efh.getId());
 		fileEntity.setParentId(parentId);
 		fileEntity = synapseAdmin.createEntity(fileEntity);
-		Annotations annotations = synapseAdmin.getAnnotations(fileEntity.getId());
-		Map<String, List<String>> stringAnnotations = new HashMap<String, List<String>>();
-		annotations.setStringAnnotations(stringAnnotations);
-		stringAnnotations.put(ROOT_TEMPLATE_ANNOTATION_NAME, Collections.singletonList(rootTemplate));
-		annotations = synapseAdmin.updateAnnotations(fileEntity.getId(), annotations);
+		Annotations annotations = synapseAdmin.getAnnotationsV2(fileEntity.getId());
+		Map<String, AnnotationsValue> updatedAnnotations = annotations.getAnnotations();
+		AnnotationsValue value = new AnnotationsValue();
+		value.setValue(Collections.singletonList(rootTemplate));
+		value.setType(AnnotationsValueType.STRING);
+		updatedAnnotations.put(ROOT_TEMPLATE_ANNOTATION_NAME, value);
+		annotations.setAnnotations(updatedAnnotations);
+		annotations = synapseAdmin.updateAnnotationsV2(fileEntity.getId(), annotations);
 		return fileEntity.getId();
 	}
 	

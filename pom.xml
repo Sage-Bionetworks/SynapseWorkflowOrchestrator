@@ -15,8 +15,12 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<synapseVersion>232.00-1-g697a598</synapseVersion>
+		<synapseVersion>329.0</synapseVersion>
 		<entryPoint>org.sagebionetworks.WorkflowOrchestrator</entryPoint>
+		<junit.jupiter.version>5.4.1</junit.jupiter.version>
+		<junit.vintage.version>5.4.1</junit.vintage.version>
+		<junit.platform.version>1.4.1</junit.platform.version>
+		<mockito.version>2.27.0</mockito.version>
 	</properties>
 
 	<build>
@@ -139,23 +143,15 @@
 		</dependency>
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
+			<groupId>org.sagebionetworks</groupId>
+			<artifactId>lib-auto-generated</artifactId>
+			<version>${synapseVersion}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.fuin</groupId>
 			<artifactId>utils4j</artifactId>
 			<version>0.6.9</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.9.5</version>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -169,12 +165,63 @@
 			<artifactId>activation</artifactId>
 			<version>1.1</version>
 		</dependency>
-		
+
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
             <version>4.5.10</version>
         </dependency>
+
+		<!--interface between junit5 and programmatic clients, such as IDEs and
+				build tools, for running tests -->
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-launcher</artifactId>
+			<version>${junit.platform.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!--adds a subset of junit5 functionality to tests currently running under
+            junit4. should be REMOVED once fully converted to junit5 -->
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-runner</artifactId>
+			<version>${junit.platform.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!--junit5 engine -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!--junit4 engine for backwards compatibility -->
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<version>${junit.vintage.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>${mockito.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>${mockito.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 </project>

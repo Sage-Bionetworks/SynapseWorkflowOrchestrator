@@ -14,8 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,13 +22,13 @@ import java.util.Properties;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import com.github.dockerjava.api.model.Container;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.fuin.utils4j.Utils4J;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sagebionetworks.repo.model.EntityBundle;
@@ -38,8 +37,6 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.EntityFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.github.dockerjava.api.model.Container;
 
 public class Utils {
 	private static Logger log = LoggerFactory.getLogger(Utils.class);
@@ -62,7 +59,7 @@ public class Utils {
 	private static final String GA4GH_TRS_FILE_FRAGMENT = "/api/ga4gh/v2/tools";
 	
 	private static Properties properties = null;
-	
+
 	public static void initProperties() {
 		if (properties!=null) return;
 		properties = new Properties();
@@ -238,7 +235,7 @@ public class Utils {
 	public static void writeSynapseConfigFile(OutputStream os) throws IOException {
 		String username=getProperty(SYNAPSE_USERNAME_PROPERTY);
 		String password=getProperty(SYNAPSE_PASSWORD_PROPERTY);;
-		IOUtils.write("[authentication]\nusername="+username+"\npassword="+password+"\n", os, Charset.forName("UTF-8"));
+		IOUtils.write("[authentication]\nusername="+username+"\npassword="+password+"\n", os, StandardCharsets.UTF_8);
 	}
 	
 	public static boolean notificationEnabled(int mask) {
@@ -281,8 +278,7 @@ public class Utils {
 					response.getStatusLine().getStatusCode());		
 	}
 
-
-	private static void downloadZip(final URL url, File tempDir, File target) throws IOException {
+	public static void downloadZip(final URLInterface url, File tempDir, File target) throws IOException {
 		File tempZipFile = createTempFile(".zip", tempDir);
 		try {
 			(new ExponentialBackoffRunner()).execute(new NoRefreshExecutableAdapter<Void,Void>() {
@@ -299,8 +295,8 @@ public class Utils {
 		Utils4J.unzip(tempZipFile, target);
 		tempZipFile.delete();
 	}
-	
-	private static String downloadWebDocument(URL url) throws IOException {
+
+	public static String downloadWebDocument(URLInterface url) throws IOException {
 		String result;
 		try (InputStream is = url.openStream(); ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 			IOUtils.copy(is, os);
@@ -308,41 +304,6 @@ public class Utils {
 		}
 		return result;
 	}
-	
-	public static void downloadWorkflowFromURL(URL workflowUrl, String entrypoint, File targetDir) throws IOException {
-		String path = workflowUrl.getPath();
-		if (path.toLowerCase().endsWith(ZIP_SUFFIX)) {
-			downloadZip(workflowUrl, getTempDir(), targetDir);
-   			// root file should be relative to unzip location
-   			if (!(new File(targetDir,entrypoint)).exists()) {
-   				throw new IllegalStateException(entrypoint+" is not in the unzipped archive downloaded from "+workflowUrl);
-   			}
-		} else if (path.contains(GA4GH_TRS_FILE_FRAGMENT)) {
-			URL filesUrl = new URL(workflowUrl.toString()+"/files");
-			String filesContent = downloadWebDocument(filesUrl);
-			JSONArray files = new JSONArray(filesContent);
-			for (int i=0; i<files.length(); i++) {
-				JSONObject file = files.getJSONObject(i);
-				String fileType = file.getString("file_type");
-				String filePath = file.getString("path");
-				if (PRIMARY_DESCRIPTOR_TYPE.equals(fileType)) {
-					if (!filePath.equals(entrypoint)) throw new RuntimeException("Expected entryPoint "+entrypoint+" but found "+path);
-				} else if (SECONDARY_DESCRIPTOR_TYPE.equals(fileType)) {
-					// OK
-				} else {
-					throw new RuntimeException("Unexpected file_type "+fileType);
-				}
-				URL descriptorUrl = new URL(workflowUrl.toString()+"/descriptor/"+filePath);
-				String descriptorContent = downloadWebDocument(descriptorUrl);
-				JSONObject descriptor = new JSONObject(descriptorContent);
-				try (OutputStream os = new FileOutputStream(new File(targetDir, filePath))) {
-					IOUtils.write(descriptor.getString("content"), os, Charset.forName("utf-8"));
-				}
-			}
-			
-		} else {
-			throw new RuntimeException("Expected template to be a zip archive or TRS files URL, but found "+path);
-		}
-	}
+
 
 }

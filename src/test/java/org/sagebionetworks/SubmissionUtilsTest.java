@@ -22,6 +22,7 @@ import org.sagebionetworks.evaluation.model.Submission;
 import org.sagebionetworks.evaluation.model.SubmissionStatus;
 import org.sagebionetworks.repo.model.EntityBundle;
 import org.sagebionetworks.repo.model.FileEntity;
+import org.sagebionetworks.repo.model.annotation.v2.Annotations;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 
@@ -89,6 +90,7 @@ public class SubmissionUtilsTest {
 		expected.setId(SUBMISSION_ID);
 		expected.setCanCancel(false);
 		expected.setEtag("1");
+		expected.setSubmissionAnnotations(new Annotations());
 		assertEquals(expected, updateStatusCaptor.getValue());
 		
 		// no need to refresh
@@ -125,10 +127,12 @@ public class SubmissionUtilsTest {
 		expected.setId(SUBMISSION_ID);
 		expected.setCanCancel(false);
 		expected.setEtag("2");
+		expected.setSubmissionAnnotations(new Annotations());
 		assertEquals(expected, updateStatusCaptor.getValue());
 		
 		// no need to refresh
 		verify(synapse).getSubmissionStatus(SUBMISSION_ID);
 	}
+
 
 }

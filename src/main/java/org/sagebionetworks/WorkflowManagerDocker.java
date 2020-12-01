@@ -16,16 +16,11 @@ import static org.sagebionetworks.Utils.createTempFile;
 import static org.sagebionetworks.Utils.dockerComposeName;
 import static org.sagebionetworks.Utils.findRunningWorkflowJobs;
 import static org.sagebionetworks.Utils.getProperty;
-import static org.sagebionetworks.Utils.getTempDir;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,29 +29,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.fuin.utils4j.Utils4J;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.dockerjava.api.command.InspectContainerResponse.ContainerState;
 import com.github.dockerjava.api.model.Container;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class WorkflowManagerDocker implements WorkflowManager {
 	private static Logger log = LoggerFactory.getLogger(WorkflowManagerDocker.class);
 
 	private DockerUtils dockerUtils;
+	private WorkflowURLDownloader workflowURLDownloader;
 	
 	static {
 		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2"); // needed for some https resources
 	}
 		
-	public WorkflowManagerDocker(DockerUtils dockerUtils) {
+	public WorkflowManagerDocker(DockerUtils dockerUtils, WorkflowURLDownloader downloader) {
 		this.dockerUtils=dockerUtils;
+		this.workflowURLDownloader = downloader;
 	}
 	
 	private ContainerRelativeFile createDirInHostMountedSharedDir() {
@@ -74,11 +67,11 @@ public class WorkflowManagerDocker implements WorkflowManager {
 			File hostSynapseConfig) throws IOException {
 		File workflowParameters = createTempFile(".yaml", targetFolder.getContainerPath());
 		try (FileOutputStream fos = new FileOutputStream(workflowParameters)) {
-			IOUtils.write("submissionId: "+params.getSubmissionId()+"\n", fos, Charset.forName("UTF-8"));
-			IOUtils.write("workflowSynapseId: "+params.getSynapseWorkflowReference()+"\n", fos, Charset.forName("UTF-8"));
-			IOUtils.write("submitterUploadSynId: "+params.getSubmitterUploadSynId()+"\n", fos, Charset.forName("UTF-8"));
-			IOUtils.write("adminUploadSynId: "+params.getAdminUploadSynId()+"\n", fos, Charset.forName("UTF-8"));
-			IOUtils.write("synapseConfig:\n  class: File\n  path: "+hostSynapseConfig.getAbsolutePath()+"\n", fos, Charset.forName("UTF-8"));
+			IOUtils.write("submissionId: "+params.getSubmissionId()+"\n", fos, StandardCharsets.UTF_8);
+			IOUtils.write("workflowSynapseId: "+params.getSynapseWorkflowReference()+"\n", fos, StandardCharsets.UTF_8);
+			IOUtils.write("submitterUploadSynId: "+params.getSubmitterUploadSynId()+"\n", fos, StandardCharsets.UTF_8);
+			IOUtils.write("adminUploadSynId: "+params.getAdminUploadSynId()+"\n", fos, StandardCharsets.UTF_8);
+			IOUtils.write("synapseConfig:\n  class: File\n  path: "+hostSynapseConfig.getAbsolutePath()+"\n", fos, StandardCharsets.UTF_8);
 		}
 		return new ContainerRelativeFile(workflowParameters.getName(), targetFolder.getContainerPath(), targetFolder.getHostPath());
 	}
@@ -90,18 +83,18 @@ public class WorkflowManagerDocker implements WorkflowManager {
 	
 	/**
 	 * This is analogous to POST /workflows in WES
-	 * @param workflowUrl the URL to the archive of workflow files
+	 * @param workflowUrlString the URL to the archive of workflow files
 	 * @param entrypoint the entry point (a file path) within an unzipped workflow archive
 	 * @param workflowParameters the parameters to be passed to the workflow
 	 * @return the created workflow job
 	 * @throws IOException
 	 */
 	@Override
-	public WorkflowJob createWorkflowJob(URL workflowUrl, String entrypoint, 
+	public WorkflowJob createWorkflowJob(String workflowUrlString, String entrypoint,
 			WorkflowParameters workflowParameters, byte[] synapseConfigFileContent) throws IOException {
 		ContainerRelativeFile workflowFolder = createDirInHostMountedSharedDir();
 
-		Utils.downloadWorkflowFromURL(workflowUrl, entrypoint, workflowFolder.getContainerPath());
+		workflowURLDownloader.downloadWorkflowFromURL(workflowUrlString, entrypoint, workflowFolder.getContainerPath());
 		
 		// The folder with the workflow and param's, from the POV of the host
 		File hostWorkflowFolder = workflowFolder.getHostPath();

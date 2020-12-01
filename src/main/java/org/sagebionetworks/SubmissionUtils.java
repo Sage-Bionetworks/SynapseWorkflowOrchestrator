@@ -1,19 +1,5 @@
 package org.sagebionetworks;
 
-import static org.sagebionetworks.Constants.DEFAULT_NUM_RETRY_ATTEMPTS;
-import static org.sagebionetworks.Constants.NO_RETRY_EXCEPTIONS;
-import static org.sagebionetworks.Constants.NO_RETRY_STATUSES;
-import static org.sagebionetworks.EvaluationUtils.FAILURE_REASON;
-import static org.sagebionetworks.EvaluationUtils.JOB_LAST_UPDATED_TIME_STAMP;
-import static org.sagebionetworks.EvaluationUtils.PUBLIC_ANNOTATION_SETTING;
-import static org.sagebionetworks.EvaluationUtils.applyModifications;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang.StringUtils;
 import org.sagebionetworks.client.SynapseClient;
 import org.sagebionetworks.client.exceptions.SynapseConflictingUpdateException;
@@ -36,6 +22,20 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.EntityFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import static org.sagebionetworks.Constants.DEFAULT_NUM_RETRY_ATTEMPTS;
+import static org.sagebionetworks.Constants.NO_RETRY_EXCEPTIONS;
+import static org.sagebionetworks.Constants.NO_RETRY_STATUSES;
+import static org.sagebionetworks.EvaluationUtils.FAILURE_REASON;
+import static org.sagebionetworks.EvaluationUtils.JOB_LAST_UPDATED_TIME_STAMP;
+import static org.sagebionetworks.EvaluationUtils.PUBLIC_ANNOTATION_SETTING;
+import static org.sagebionetworks.EvaluationUtils.applyModifications;
 
 public class SubmissionUtils {
 

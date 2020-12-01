@@ -108,9 +108,9 @@ public class EvaluationUtils {
 
 	public static String getStringAnnotation(SubmissionStatus status, String key) {
 		Annotations annotations = status.getAnnotations();
-		if (annotations==null) return null;
+		if (annotations == null) return null;
 		List<StringAnnotation> sas = annotations.getStringAnnos();
-		if (sas==null) return null;
+		if (sas == null) return null;
 		for (StringAnnotation sa : sas) {
 			if (sa.getKey().equals(key)) return sa.getValue();
 		}
@@ -276,39 +276,48 @@ public class EvaluationUtils {
 			statusMods.setCanCancel(false);    		
 		}
 	}
-	
-	private static void removeAnnotation(SubmissionStatus status, String key) {
-		Annotations annotations = status.getAnnotations();
-		if (annotations==null) return;
 
+	private static void removeStringAnnotation(Annotations annotations, String key) {
 		List<StringAnnotation> sas = annotations.getStringAnnos();
-		if (sas!=null) {
-			for (Iterator<StringAnnotation> iterator = sas.iterator(); iterator.hasNext();) {
+		if (sas != null) {
+			for (Iterator<StringAnnotation> iterator = sas.iterator(); iterator.hasNext(); ) {
 				StringAnnotation existing = iterator.next();
 				if (existing.getKey().equals(key)) {
 					iterator.remove();
 				}
 			}
 		}
+	}
 
+	private static void removeLongAnnotation(Annotations annotations, String key) {
+		List<LongAnnotation> las = annotations.getLongAnnos();
+		if (las != null) {
+			for (Iterator<LongAnnotation> iterator = las.iterator(); iterator.hasNext(); ) {
+				LongAnnotation existing = iterator.next();
+				if (existing.getKey().equals(key)) {
+					iterator.remove();
+				}
+			}
+		}
+	}
+
+	private static void removeDoubleAnnotation(Annotations annotations, String key) {
 		List<DoubleAnnotation> das = annotations.getDoubleAnnos();
-		if (das!=null) {
-			for (Iterator<DoubleAnnotation> iterator = das.iterator(); iterator.hasNext();) {
+		if (das != null) {
+			for (Iterator<DoubleAnnotation> iterator = das.iterator(); iterator.hasNext(); ) {
 				DoubleAnnotation existing = iterator.next();
 				if (existing.getKey().equals(key)) {
 					iterator.remove();
 				}
 			}
 		}
-
-		List<LongAnnotation> las = annotations.getLongAnnos();
-		if (las!=null) {
-			for (Iterator<LongAnnotation> iterator = las.iterator(); iterator.hasNext();) {
-				LongAnnotation existing = iterator.next();
-				if (existing.getKey().equals(key)) {
-					iterator.remove();
-				}
-			}
+	}
+	
+    static void removeAnnotation(Annotations annotations, String key) {
+		if (annotations != null) {
+			removeStringAnnotation(annotations, key);
+			removeDoubleAnnotation(annotations, key);
+			removeLongAnnotation(annotations, key);
 		}
 	}
 	
@@ -317,6 +326,7 @@ public class EvaluationUtils {
 			if (it.next().getKey().equals(key)) it.remove();
 		}
 	}
+
 
 	public static void setAnnotation(SubmissionStatusModifications statusMods, String key, String value, boolean isPrivate) {
 		removeAnnotationIntern(statusMods, key); // make sure the key is not in the list
@@ -354,20 +364,35 @@ public class EvaluationUtils {
 	}
 
 	public static void applyModifications(final SubmissionStatus submissionStatus, final SubmissionStatusModifications statusMods) {
+
 		for (AnnotationBase annot : statusMods.getAnnotationsToAdd()) {
-			if (annot instanceof StringAnnotation) 
+			if (annot instanceof StringAnnotation) {
 				setAnnotation(submissionStatus, annot.getKey(), ((StringAnnotation) annot).getValue(), annot.getIsPrivate());
-			if (annot instanceof LongAnnotation) 
+			}
+			if (annot instanceof LongAnnotation) {
 				setAnnotation(submissionStatus, annot.getKey(), ((LongAnnotation) annot).getValue(), annot.getIsPrivate());
-			if (annot instanceof DoubleAnnotation) 
+			}
+			if (annot instanceof DoubleAnnotation) {
 				setAnnotation(submissionStatus, annot.getKey(), ((DoubleAnnotation) annot).getValue(), annot.getIsPrivate());
+			}
 		}
-		
-		for (String key : statusMods.getAnnotationNamesToRemove()) removeAnnotation(submissionStatus, key);
-		
-		if (statusMods.getStatus()!=null) submissionStatus.setStatus(statusMods.getStatus());
-		if (statusMods.getCanCancel()!=null) submissionStatus.setCanCancel(statusMods.getCanCancel());
-		if (statusMods.getCancelRequested()!=null) submissionStatus.setCancelRequested(statusMods.getCancelRequested());
+
+		for (String key : statusMods.getAnnotationNamesToRemove()) {
+			removeAnnotation(submissionStatus.getAnnotations(), key);
+		}
+
+		org.sagebionetworks.repo.model.annotation.v2.Annotations annotations = AnnotationsTranslator.translateToAnnotationsV2(submissionStatus.getAnnotations());
+		submissionStatus.setSubmissionAnnotations(annotations);
+
+		if (statusMods.getStatus()!=null){
+			submissionStatus.setStatus(statusMods.getStatus());
+		}
+		if (statusMods.getCanCancel()!=null) {
+			submissionStatus.setCanCancel(statusMods.getCanCancel());
+		}
+		if (statusMods.getCancelRequested()!=null) {
+			submissionStatus.setCancelRequested(statusMods.getCancelRequested());
+		}
 	}
 	
 	public Evaluation getEvaluation(String evaluationId) throws SynapseException {

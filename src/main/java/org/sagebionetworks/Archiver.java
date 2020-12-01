@@ -1,4 +1,5 @@
 package org.sagebionetworks;
+
 import static org.sagebionetworks.Utils.getProperty;
 import static org.sagebionetworks.Utils.getSynIdProperty;
 import static org.sagebionetworks.Utils.getTempDir;
@@ -26,7 +27,7 @@ import org.sagebionetworks.repo.model.AccessControlList;
 import org.sagebionetworks.repo.model.FileEntity;
 import org.sagebionetworks.repo.model.Folder;
 import org.sagebionetworks.repo.model.ResourceAccess;
-import org.sagebionetworks.repo.model.file.S3FileHandle;
+import org.sagebionetworks.repo.model.file.CloudProviderFileHandleInterface;
 import org.sagebionetworks.repo.model.util.ModelConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +62,7 @@ public class Archiver {
 				ResourceAccess ra = new ResourceAccess();
 				ras.add(ra);
 				ra.setPrincipalId(Long.parseLong(synapse.getMyProfile().getOwnerId()));
-				ra.setAccessType(ModelConstants.ENITY_ADMIN_ACCESS_PERMISSIONS);
+				ra.setAccessType(ModelConstants.ENTITY_ADMIN_ACCESS_PERMISSIONS);
 			}
 			for (String principalId : principalAndPermissions.keySet()) {
 				ResourceAccess ra = new ResourceAccess();
@@ -87,8 +88,7 @@ public class Archiver {
 	public String uploadToSynapse(
 			final File file, 
 			String parentId) throws Throwable {
-		S3FileHandle uploadResult = synapse.multipartUpload(file, null, true, false);
-
+		CloudProviderFileHandleInterface uploadResult = synapse.multipartUpload(file, null, true, false);
 		FileEntity fileEntity = new FileEntity();
 		String fileName = file.getName();
 		fileEntity.setName(fileName);
