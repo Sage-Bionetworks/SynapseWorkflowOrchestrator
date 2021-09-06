@@ -7,7 +7,8 @@ volumes:
 services:
   workflow-orchestrator:
     image:
-      sagebionetworks/synapse-workflow-orchestrator:1.1
+      sagebionetworks/synapse-workflow-orchestrator:1.2
+    restart: always
     volumes:
     - shared:/shared:rw
     - /var/run/docker.sock:/var/run/docker.sock
