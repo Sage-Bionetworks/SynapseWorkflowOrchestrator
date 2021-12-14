@@ -20,7 +20,6 @@ import org.json.JSONObject;
 import org.sagebionetworks.client.SynapseClient;
 import org.sagebionetworks.client.exceptions.SynapseException;
 import org.sagebionetworks.evaluation.model.Evaluation;
-import org.sagebionetworks.evaluation.model.EvaluationStatus;
 import org.sagebionetworks.evaluation.model.Submission;
 import org.sagebionetworks.repo.model.FileEntity;
 import org.sagebionetworks.repo.model.ObjectType;
@@ -171,7 +170,6 @@ public class WorkflowAdmin {
 		evaluation = new Evaluation();
 		evaluation.setContentSource(projectId);
 		evaluation.setName(CHALLENGE_EVALUATION_NAME+projectId);
-		evaluation.setStatus(EvaluationStatus.OPEN);
 		evaluation.setSubmissionReceiptMessage("Your workflow submission has been received.   Further notifications will be sent by email.");
 		evaluation = synapseAdmin.createEvaluation(evaluation);
 		JSONObject json = new JSONObject();
