@@ -48,7 +48,7 @@ public class SubmissionUtilsTest {
 		assertEquals("foo/bar", getRepoSuffixFromImage("docker.synapse.org/syn12345/foo/bar@sha256:abcdefg"));
 		assertEquals("foo/bar", getRepoSuffixFromImage("docker.synapse.org/syn12345/foo/bar"));
 		assertEquals("foo", getRepoSuffixFromImage("docker.synapse.org/syn12345/foo@sha256:abcdefg"));
-		assertEquals("ubuntu", getRepoSuffixFromImage("fix/ubuntu@sha256:abcdefg"));
+		assertEquals("ubuntu", getRepoSuffixFromImage("ubuntu@sha256:abcdefg"));
 		assertEquals("foo/bar", getRepoSuffixFromImage("syn12345/foo/bar@sha256:abcdefg"));
 		assertEquals("foo/bar", getRepoSuffixFromImage("docker.synapse.org/foo/bar@sha256:abcdefg"));
 	}
