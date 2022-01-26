@@ -1,6 +1,7 @@
 package org.sagebionetworks;
 
 import static org.sagebionetworks.Constants.ROOT_TEMPLATE_ANNOTATION_NAME;
+import static org.sagebionetworks.Constants.SYNAPSE_PAT_PROPERTY;
 import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
 import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
 import static org.sagebionetworks.EvaluationUtils.JOB_LAST_UPDATED_TIME_STAMP;
@@ -49,12 +50,14 @@ public class WorkflowAdmin {
 	// SUBMIT file-path parentID, evaluation queue ID
 	public static void main( String[] args ) throws Throwable {
 		SynapseClient synapseAdmin = SynapseClientFactory.createSynapseClient();
-		String userName = getProperty(SYNAPSE_USERNAME_PROPERTY);
-		String password = getProperty(SYNAPSE_PASSWORD_PROPERTY);
-		LoginRequest loginRequest = new LoginRequest();
-		loginRequest.setUsername(userName);
-		loginRequest.setPassword(password);
-		synapseAdmin.login(loginRequest);
+		String userName = getProperty(SYNAPSE_USERNAME_PROPERTY, false);
+		String password = getProperty(SYNAPSE_PASSWORD_PROPERTY, false);
+		String authtoken = getProperty(SYNAPSE_PAT_PROPERTY);
+		// LoginRequest loginRequest = new LoginRequest();
+		// loginRequest.setUsername(userName);
+		// loginRequest.setPassword(password);
+		// synapseAdmin.login(loginRequest);
+		synapseAdmin.setBearerAuthorizationToken(authtoken);
 		Archiver archiver = new Archiver(synapseAdmin, null);
 		WorkflowAdmin workflowAdmin = new WorkflowAdmin(synapseAdmin, archiver);
 		
