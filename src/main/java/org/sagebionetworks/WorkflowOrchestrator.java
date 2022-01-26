@@ -107,7 +107,7 @@ public class WorkflowOrchestrator  {
 		// loginRequest.setUsername(userName);
 		// loginRequest.setPassword(password);
 		// synapse.login(loginRequest);
-		synapse.setBearerAuthorizationToken(authtoken)
+		synapse.setBearerAuthorizationToken(authtoken);
 	}
 
 	public static void main( String[] args ) throws Throwable {
