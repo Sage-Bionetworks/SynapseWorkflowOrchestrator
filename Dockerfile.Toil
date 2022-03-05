@@ -16,6 +16,8 @@ RUN apt-get update && \
         rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install toil[all]==4.1.0 boto pandas docker synapseclient
+# Do this because toil 4.1.0 pins a previous version of docker
+RUN pip3 install docker --upgrade
 # now install docker, following the instructions here: https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce-1
 
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
