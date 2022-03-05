@@ -1,0 +1,10 @@
+language: java
+
+deploy:
+  provider: releases
+  api_key: ${api_key}
+  file: "target/WorkflowOrchestrator-1.0-SNAPSHOT-jar-with-dependencies.jar"
+  skip_cleanup: true
+  on:
+    all_branches: true
+    condition: $TRAVIS_BRANCH =~ ^release-.+ 
