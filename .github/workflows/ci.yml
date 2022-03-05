@@ -2,6 +2,8 @@ name: Build plugin
 
 on:
   push:
+  release:
+    types: [created]
 
 jobs:
   build:
