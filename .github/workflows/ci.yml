@@ -1,9 +1,6 @@
 name: Build plugin
 
-on:
-  push:
-  release:
-    types: [created]
+on: push
 
 jobs:
   build:
@@ -26,3 +23,9 @@ jobs:
         name: SynapseWorkflowOrchestrator
         path: |
           target/*.jar
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: target/*.jar
+        draft: true
