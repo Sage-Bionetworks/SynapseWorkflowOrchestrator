@@ -4,6 +4,7 @@ import static org.sagebionetworks.Constants.DOCKER_CERT_PATH_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.DOCKER_ENGINE_URL_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
 import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
+import static org.sagebionetworks.Constants.SYNAPSE_PAT_PROPERTY;
 import static org.sagebionetworks.Constants.UNIX_SOCKET_PREFIX;
 import static org.sagebionetworks.Utils.checkHttpResponseCode;
 import static org.sagebionetworks.Utils.getHttpClient;
@@ -111,11 +112,13 @@ public class DockerUtils {
 				false);
 		String synapsePassword = getProperty(SYNAPSE_PASSWORD_PROPERTY, /* required */
 				false);
+		String authtoken = getProperty(SYNAPSE_PAT_PROPERTY, /* required */
+				false);
 		// https://groups.google.com/forum/?#!searchin/docker-java-dev/https$20protocol$20is$20not$20supported/docker-java-dev/6B13qxZ4eBM/UkyOCsYWBwAJ
 		Builder synapseConfigBuilder = DefaultDockerClientConfig
 				.createDefaultConfigBuilder().withDockerHost(dockerEngineURL)
 				.withRegistryUsername(synapseUsername)
-				.withRegistryPassword(synapsePassword)
+				.withRegistryPassword(authtoken)
 				.withRegistryEmail(SYNAPSE_EMAIL)
 				.withRegistryUrl(SYNAPSE_REGISTRY_ADDRESS);
 		
