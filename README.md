@@ -37,14 +37,14 @@ Links one or more Synapse Evaluation queues to a workflow engine. Each Evaluatio
 To run:
 
 ```
-docker run --rm -it -e SYNAPSE_USERNAME=xxxxx -e SYNAPSE_PASSWORD=xxxxx \
+docker run --rm -it -e SYNAPSE_USERNAME=xxxxx -e SYNAPSE_PAT=xxxxx \
 -e WORKFLOW_TEMPLATE_URL=http://xxxxxx -e ROOT_TEMPLATE=xxxxx sagebionetworks/synapseworkfloworchestrator /set_up.sh
 ```
 
 where `WORKFLOW_TEMPLATE_URL` is a link to a zip file and `ROOT_TEMPLATE` is a path within the zip where a workflow file can be found. To use a workflow in Dockstore:
 
 ```
-docker run --rm -it -e SYNAPSE_USERNAME=xxxxx -e SYNAPSE_PASSWORD=xxxxx \
+docker run --rm -it -e SYNAPSE_USERNAME=xxxxx -e SYNAPSE_PAT=xxxxx \
 -e WORKFLOW_TEMPLATE_URL=https://dockstore.org:8443/api/ga4gh/v2/tools/{id}/versions/{version_id}/CWL \
 -e ROOT_TEMPLATE=xxxxx sagebionetworks/synapseworkfloworchestrator /set_up.sh
 ```
@@ -96,7 +96,7 @@ This method is convenient if your environment supports Docker and you are author
 * `WES_ENDPOINT` - omit this parameter
 * `WES_SHARED_DIR_PROPERTY` - omit this parameter
 * `SYNAPSE_USERNAME` - Synapse credentials under which the Workflow Orchestrator will run. Must have access to evaluation queue(s) being serviced
-* `SYNAPSE_PASSWORD` - password for `SYNAPSE_USERNAME`
+* `SYNAPSE_PAT` - personal access token (PAT) for `SYNAPSE_USERNAME`
 * `WORKFLOW_OUTPUT_ROOT_ENTITY_ID` - root (Project or Folder) for uploaded doc's, like log files. Hierarchy is root/submitterId/submissionId/files. May be the ID of the project generated in the set-up step, above.
 * `EVALUATION_TEMPLATES` - JSON mapping evaluation ID(s) to URL(s) for workflow template archive. Returned by the set up step, above. Example:
 
@@ -169,7 +169,7 @@ screen -S orchestrator
 export WES_ENDPOINT=http://localhost:8082/ga4gh/wes/v1
 export WES_SHARED_DIR_PROPERTY=/path/to/something
 export SYNAPSE_USERNAME=xxxxxx
-export SYNAPSE_PASSWORD=xxxxxx
+export SYNAPSE_PAT=xxxxxx
 export WORKFLOW_OUTPUT_ROOT_ENTITY_ID=syn3333
 # Remember to put quotes around the EVALUATION_TEMPLATES
 export EVALUATION_TEMPLATES='{"111": "syn111"}'
@@ -187,7 +187,7 @@ java -jar  WorkflowOrchestrator-1.0-SNAPSHOT-jar-with-dependencies.jar
 Jobs can be submitted using the Synapse web portal.  Below is a command-line convenience for submitting using a Dockerized tool.
 
 ```
-docker run --rm -it -e SYNAPSE_USERNAME=xxxxx -e SYNAPSE_PASSWORD=xxxxx -e EVALUATION_ID=xxxxx \
+docker run --rm -it -e SYNAPSE_USERNAME=xxxxx -e SYNAPSE_PAT=xxxxx -e EVALUATION_ID=xxxxx \
 -v /path/to/workflow/job:/workflowjob sagebionetworks/synapse-workflow-orchestrator:1.0  /submit.sh
 ```
 where `EVALUATION_ID` is one of the keys in the `EVALUATION_TEMPLATES` map returned from the set-up step

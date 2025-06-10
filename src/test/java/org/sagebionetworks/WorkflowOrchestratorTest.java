@@ -12,7 +12,7 @@ import static org.sagebionetworks.Constants.COMPOSE_PROJECT_NAME_ENV_VAR;
 import static org.sagebionetworks.Constants.DOCKER_ENGINE_URL_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.ROOT_TEMPLATE_ANNOTATION_NAME;
 import static org.sagebionetworks.Constants.SHARED_VOLUME_NAME;
-import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
+import static org.sagebionetworks.Constants.SYNAPSE_PAT_PROPERTY;
 import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
 import static org.sagebionetworks.Utils.dockerComposeName;
 
@@ -91,7 +91,7 @@ public class WorkflowOrchestratorTest {
 	public void setUp() throws Exception {
 		System.setProperty("WORKFLOW_OUTPUT_ROOT_ENTITY_ID", WORKFLOW_OUTPUT_ROOT_ENTITY_ID);
 		System.setProperty("SYNAPSE_USERNAME", "foo");
-		System.setProperty("SYNAPSE_PASSWORD", "bar");
+		System.setProperty("SYNAPSE_PAT", "bar");
 		System.setProperty(DOCKER_ENGINE_URL_PROPERTY_NAME, "unix:///var/run/docker.sock");
 		System.setProperty(COMPOSE_PROJECT_NAME_ENV_VAR, "project");
 
@@ -108,7 +108,7 @@ public class WorkflowOrchestratorTest {
 	public void tearDown() throws Exception {
 		System.clearProperty("WORKFLOW_OUTPUT_ROOT_ENTITY_ID");
 		System.clearProperty("SYNAPSE_USERNAME");
-		System.clearProperty("SYNAPSE_PASSWORD");
+		System.clearProperty("SYNAPSE_PAT");
 		System.clearProperty(DOCKER_ENGINE_URL_PROPERTY_NAME);
 		System.clearProperty("EVALUATION_TEMPLATES");
 		System.setProperty(AGENT_SHARED_DIR_PROPERTY_NAME, AGENT_SHARED_DIR_DEFAULT);
@@ -220,7 +220,7 @@ public class WorkflowOrchestratorTest {
 	@Test
 	public void testGetWorkflowURLAndEntrypoint() throws Throwable {
 		System.setProperty(SYNAPSE_USERNAME_PROPERTY, "username");
-		System.setProperty(SYNAPSE_PASSWORD_PROPERTY, "password");
+		System.setProperty(SYNAPSE_PAT_PROPERTY, "AUTH_TOKEN");
 		WorkflowAdmin workflowAdmin = new WorkflowAdmin();
 		String projectId = workflowAdmin.createProject();
 		String fileEntityId = workflowAdmin.createExternalFileEntity(ZIP_FILE_URL, projectId, ROOT_TEMPLATE);

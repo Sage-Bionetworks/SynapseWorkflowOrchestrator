@@ -2,7 +2,7 @@ package org.sagebionetworks;
 
 import static org.sagebionetworks.Constants.DOCKER_CERT_PATH_PROPERTY_NAME;
 import static org.sagebionetworks.Constants.DOCKER_ENGINE_URL_PROPERTY_NAME;
-import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
+import static org.sagebionetworks.Constants.SYNAPSE_PAT_PROPERTY;
 import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
 import static org.sagebionetworks.Constants.UNIX_SOCKET_PREFIX;
 import static org.sagebionetworks.Utils.checkHttpResponseCode;
@@ -109,13 +109,13 @@ public class DockerUtils {
 		
 		String synapseUsername = getProperty(SYNAPSE_USERNAME_PROPERTY, /* required */
 				false);
-		String synapsePassword = getProperty(SYNAPSE_PASSWORD_PROPERTY, /* required */
+		String synapsePAT = getProperty(SYNAPSE_PAT_PROPERTY, /* required */
 				false);
 		// https://groups.google.com/forum/?#!searchin/docker-java-dev/https$20protocol$20is$20not$20supported/docker-java-dev/6B13qxZ4eBM/UkyOCsYWBwAJ
 		Builder synapseConfigBuilder = DefaultDockerClientConfig
 				.createDefaultConfigBuilder().withDockerHost(dockerEngineURL)
 				.withRegistryUsername(synapseUsername)
-				.withRegistryPassword(synapsePassword)
+				.withRegistryPassword(synapsePAT)
 				.withRegistryEmail(SYNAPSE_EMAIL)
 				.withRegistryUrl(SYNAPSE_REGISTRY_ADDRESS);
 		
@@ -247,7 +247,7 @@ public class DockerUtils {
 							.withUsername(getProperty(SYNAPSE_USERNAME_PROPERTY, false))
 							.withEmail(SYNAPSE_EMAIL)
 							.withRegistryAddress(SYNAPSE_REGISTRY_ADDRESS)
-							.withPassword(getProperty(SYNAPSE_PASSWORD_PROPERTY, false));
+							.withPassword(getProperty(SYNAPSE_PAT_PROPERTY, false));
 				}
 				PullImageResultCallback  callback = registrySpecificClient
 						.pullImageCmd(imageReference)
@@ -471,7 +471,7 @@ public class DockerUtils {
 					.withUsername(getProperty(SYNAPSE_USERNAME_PROPERTY, false))
 					.withEmail(SYNAPSE_EMAIL)
 					.withRegistryAddress(SYNAPSE_REGISTRY_ADDRESS)
-					.withPassword(getProperty(SYNAPSE_PASSWORD_PROPERTY, false));
+					.withPassword(getProperty(SYNAPSE_PAT_PROPERTY, false));
 		}
 
 		registrySpecificClient.tagImageCmd(imageId, repo, "latest").exec();
@@ -585,7 +585,7 @@ public class DockerUtils {
 		String password;
 		if (request.getURI().getHost().equals(SYNAPSE_REGISTRY_ADDRESS)) {
 			username = getProperty(SYNAPSE_USERNAME_PROPERTY);
-			password = getProperty(SYNAPSE_PASSWORD_PROPERTY);
+			password = getProperty(SYNAPSE_PAT_PROPERTY);
 		} else if (request.getURI().getHost().equals(DOCKERHUB_REGISTRY_ADDRESS)) {
 			username = getProperty(DOCKERHUB_USERNAME_PROPERTY);
 			password = getProperty(DOCKERHUB_PASSWORD_PROPERTY);
