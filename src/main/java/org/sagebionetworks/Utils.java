@@ -235,7 +235,7 @@ public class Utils {
 	public static void writeSynapseConfigFile(OutputStream os) throws IOException {
 		String username=getProperty(SYNAPSE_USERNAME_PROPERTY);
 		String pat=getProperty(SYNAPSE_PAT_PROPERTY);;
-		IOUtils.write("[authentication]\nusername="+username+"\nAUTH_TOKEN="+pat+"\n", os, StandardCharsets.UTF_8);
+		IOUtils.write("[authentication]\nusername="+username+"\nauthtoken="+pat+"\n", os, StandardCharsets.UTF_8);
 	}
 	
 	public static boolean notificationEnabled(int mask) {
