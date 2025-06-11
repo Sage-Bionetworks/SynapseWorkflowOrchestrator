@@ -3,7 +3,7 @@ package org.sagebionetworks;
 import static org.sagebionetworks.Constants.COMPOSE_PROJECT_NAME_ENV_VAR;
 import static org.sagebionetworks.Constants.SUBMITTER_NOTIFICATION_MASK_DEFAULT;
 import static org.sagebionetworks.Constants.SUBMITTER_NOTIFICATION_MASK_PARAM_NAME;
-import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
+import static org.sagebionetworks.Constants.SYNAPSE_PAT_PROPERTY;
 import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
 
 import java.io.BufferedReader;
@@ -234,8 +234,8 @@ public class Utils {
 	
 	public static void writeSynapseConfigFile(OutputStream os) throws IOException {
 		String username=getProperty(SYNAPSE_USERNAME_PROPERTY);
-		String password=getProperty(SYNAPSE_PASSWORD_PROPERTY);;
-		IOUtils.write("[authentication]\nusername="+username+"\npassword="+password+"\n", os, StandardCharsets.UTF_8);
+		String pat=getProperty(SYNAPSE_PAT_PROPERTY);;
+		IOUtils.write("[authentication]\nusername="+username+"\nauthtoken="+pat+"\n", os, StandardCharsets.UTF_8);
 	}
 	
 	public static boolean notificationEnabled(int mask) {

@@ -17,7 +17,7 @@ public class Constants {
 	
 	public static final String SYNAPSE_USERNAME_PROPERTY = "SYNAPSE_USERNAME";
 	
-	public static final String SYNAPSE_PASSWORD_PROPERTY = "SYNAPSE_PASSWORD";
+	public static final String SYNAPSE_PAT_PROPERTY = "SYNAPSE_PAT";
 	
 	// This the Synapse ID of the user or team to whom administrative notifications are sent
 	public static final String NOTIFICATION_PRINCIPAL_ID = "NOTIFICATION_PRINCIPAL_ID";

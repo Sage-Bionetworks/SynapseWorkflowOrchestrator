@@ -18,7 +18,7 @@ public class WorkflowManagerWESTest {
 	public void setUp() throws Exception {
 		System.setProperty("WES_ENDPOINT", "http://localhost:8082/ga4gh/wes/v1");
 		System.setProperty("SYNAPSE_USERNAME", "---------------");
-		System.setProperty("SYNAPSE_PASSWORD", "---------------");
+		System.setProperty("SYNAPSE_PAT", "---------------");
 	}
 	
 	@After

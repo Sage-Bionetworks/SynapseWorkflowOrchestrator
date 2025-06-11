@@ -12,7 +12,7 @@ import static org.sagebionetworks.Constants.SUBMISSION_FAILED;
 import static org.sagebionetworks.Constants.SUBMISSION_STARTED;
 import static org.sagebionetworks.Constants.SUBMISSION_STOPPED_BY_USER;
 import static org.sagebionetworks.Constants.SUBMISSION_TIMED_OUT;
-import static org.sagebionetworks.Constants.SYNAPSE_PASSWORD_PROPERTY;
+import static org.sagebionetworks.Constants.SYNAPSE_PAT_PROPERTY;
 import static org.sagebionetworks.Constants.SYNAPSE_USERNAME_PROPERTY;
 import static org.sagebionetworks.Constants.WES_ENDPOINT_PROPERTY_NAME;
 import static org.sagebionetworks.EvaluationUtils.ADMIN_ANNOTS_ARE_PRIVATE;
@@ -99,12 +99,8 @@ public class WorkflowOrchestrator  {
 	private WorkflowManager workflowManager;
 	
 	private void login() throws SynapseException {
-		String userName = getProperty(SYNAPSE_USERNAME_PROPERTY);
-		String password = getProperty(SYNAPSE_PASSWORD_PROPERTY);
-		LoginRequest loginRequest = new LoginRequest();
-		loginRequest.setUsername(userName);
-		loginRequest.setPassword(password);
-		synapse.login(loginRequest);		
+		String pat = getProperty(SYNAPSE_PAT_PROPERTY);
+		synapse.setBearerAuthorizationToken(pat);
 	}
 
 	public static void main( String[] args ) throws Throwable {
