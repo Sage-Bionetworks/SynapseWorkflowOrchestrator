@@ -21,7 +21,7 @@ jobs:
       run: mvn -B package --file pom.xml
 
     - name: Archive artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: SynapseWorkflowOrchestrator
         path: |
