@@ -1,15 +1,63 @@
-WES_ENDPOINT=http://localhost:8082/ga4gh/wes/v1
+# --- Workflow Engine Settings ---
+# Choose one of the following:
+
+## Option 1: Run workflows directly with Docker
 DOCKER_ENGINE_URL=unix:///var/run/docker.sock
+#DOCKER_CERT_PATH_HOST=/my/home/dir/.docker/machine/certs # Uncomment if connecting to a remote Docker engine over network
+
+## Option 2: Use a Workflow Execution Service (WES)
+#WES_ENDPOINT=http://localhost:8082/ga4gh/wes/v1
 #WES_SHARED_DIR_PROPERTY=
+
+
+# --- General Orchestrator Settings (required) ---
+## Project name for Docker Compose
+COMPOSE_PROJECT_NAME=workflow_orchestrator
+
+## Synapse credentials for account with "Admin" access to the Synapse Project and Evaluation Queue(s)
 SYNAPSE_USERNAME=
 SYNAPSE_PAT=
+
+## Folder synID where workflow log files and results will be stored
 WORKFLOW_OUTPUT_ROOT_ENTITY_ID=
-EVALUATION_TEMPLATES=
-TOIL_CLI_OPTIONS=--defaultMemory 100M --retryCount 0 --defaultDisk 1000000
-COMPOSE_PROJECT_NAME=workflow_orchestrator
+
+## JSON map of evaluationIDs to their associated workflow template synIDs
+## Example: {"9614045": "syn123", "9614046": "syn456"}
+EVALUATION_TEMPLATES={}
+
+## Controls resource limits and retry behavior for TOIL jobs (recommended for Docker-based workflows).
+TOIL_CLI_OPTIONS=--defaultMemory 100M --retryCount 0 --defaultDisk 1G
+
+
+# --- Optional Settings ---
+
+## Controls which events trigger notifications to the submitter.
+## Integer value is a union of triggers: 1=started, 2=completed, 4=failed, 8=stopped, 16=timed out
+## Default is 31 (all notifications).
+#SUBMITTER_NOTIFICATION_MASK=
+
+## User or team ID to notify about workflow errors.
+## If omitted, notifications are sent to the SYNAPSE_USERNAME account.
 #NOTIFICATION_PRINCIPAL_ID=
+
+## Set to 'false' if results should NOT be immediately accessible to the submitter.
+## If 'false', a separate process is needed to "unlock" files. Default is 'true'.
 #SHARE_RESULTS_IMMEDIATELY=
+
+## User ID authorized to "unlock" workflow output files.
+## Only required if SHARE_RESULTS_IMMEDIATELY is set to 'false'.
 #DATA_UNLOCK_SYNAPSE_PRINCIPAL_ID=
+
+## Docker image for the workflow engine when using Docker-based workflows.
+## Default is sagebionetworks/synapse-workflow-orchestrator-toil:1.0.
 #WORKFLOW_ENGINE_DOCKER_IMAGE=
-#MAX_CONCURRENT_WORKFLOWS=10
+
+## Maximum number of workflows allowed to run concurrently. Default is 10.
+#MAX_CONCURRENT_WORKFLOWS=
+
+## Set to 'true' if the containerized workflow needs to run in privileged mode.
 #RUN_WORKFLOW_CONTAINER_IN_PRIVILEGED_MODE=
+
+## Set to 'false' to stop the orchestrator from accepting new submissions.
+## This option is useful for graceful shutdowns.
+#ACCEPT_NEW_SUBMISSIONS=

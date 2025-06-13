@@ -1,7 +1,7 @@
 services:
   workflow-orchestrator:
     image:
-      sagebionetworks/synapse-workflow-orchestrator:1.0
+      ghcr.io/sage-bionetworks/synapseworkfloworchestrator:latest
     volumes:
     - ${WES_SHARED_DIR_PROPERTY}:${WES_SHARED_DIR_PROPERTY}:rw
     environment:
