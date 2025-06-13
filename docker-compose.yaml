@@ -5,7 +5,7 @@ volumes:
 services:
   workflow-orchestrator:
     image:
-      sagebionetworks/synapse-workflow-orchestrator:1.3
+      ghcr.io/sage-bionetworks/synapseworkfloworchestrator:latest
     restart: always
     volumes:
     - shared:/shared:rw
