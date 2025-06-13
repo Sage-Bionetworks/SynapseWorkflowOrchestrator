@@ -38,7 +38,7 @@ To run:
 
 ```
 docker run --rm -it -e SYNAPSE_USERNAME=xxxxx -e SYNAPSE_PAT=xxxxx \
--e WORKFLOW_TEMPLATE_URL=http://xxxxxx -e ROOT_TEMPLATE=xxxxx sagebionetworks/synapseworkfloworchestrator /set_up.sh
+-e WORKFLOW_TEMPLATE_URL=http://xxxxxx -e ROOT_TEMPLATE=xxxxx ghcr.io/sage-bionetworks/synapseworkfloworchestrator /set_up.sh
 ```
 
 where `WORKFLOW_TEMPLATE_URL` is a link to a zip file and `ROOT_TEMPLATE` is a path within the zip where a workflow file can be found. To use a workflow in Dockstore:
@@ -46,7 +46,7 @@ where `WORKFLOW_TEMPLATE_URL` is a link to a zip file and `ROOT_TEMPLATE` is a p
 ```
 docker run --rm -it -e SYNAPSE_USERNAME=xxxxx -e SYNAPSE_PAT=xxxxx \
 -e WORKFLOW_TEMPLATE_URL=https://dockstore.org:8443/api/ga4gh/v2/tools/{id}/versions/{version_id}/CWL \
--e ROOT_TEMPLATE=xxxxx sagebionetworks/synapseworkfloworchestrator /set_up.sh
+-e ROOT_TEMPLATE=xxxxx ghcr.io/sage-bionetworks/synapseworkfloworchestrator /set_up.sh
 ```
 
 Will print out created Project ID and the value for the `EVALUATION_TEMPLATES` in the following step.
