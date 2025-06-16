@@ -1,49 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="https://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
 
-	<groupId>org.sagebionetworks</groupId>
-	<artifactId>WorkflowOrchestrator</artifactId>
-	<version>1.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
+    <groupId>org.sagebionetworks</groupId>
+    <artifactId>WorkflowOrchestrator</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
-	<name>WorkflowOrchestrator</name>
-	<url>https://maven.apache.org</url>
+    <name>WorkflowOrchestrator</name>
+    <url>https://maven.apache.org</url>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<synapseVersion>546.0</synapseVersion>
-		<entryPoint>org.sagebionetworks.WorkflowOrchestrator</entryPoint>
-		<junit.jupiter.version>5.4.1</junit.jupiter.version>
-		<junit.vintage.version>5.4.1</junit.vintage.version>
-		<junit.platform.version>1.4.1</junit.platform.version>
-		<mockito.version>2.27.0</mockito.version>
-	</properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <synapseVersion>546.0</synapseVersion>
+        <entryPoint>org.sagebionetworks.WorkflowOrchestrator</entryPoint>
+        <junit.jupiter.version>5.4.1</junit.jupiter.version>
+        <junit.vintage.version>5.4.1</junit.vintage.version>
+        <junit.platform.version>1.4.1</junit.platform.version>
+        <mockito.version>2.27.0</mockito.version>
+    </properties>
 
-	<build>
-		<sourceDirectory>src/main/java</sourceDirectory>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2.1</version>
-				<configuration>
-					<mainClass>${entryPoint}</mainClass>
-				</configuration>
-			</plugin>
+    <build>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <configuration>
+                    <mainClass>${entryPoint}</mainClass>
+                </configuration>
+            </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -54,117 +54,117 @@
                 </configuration>
             </plugin>
 
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>${entryPoint}</mainClass>
-						</manifest>
-					</archive>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-				</configuration>
-				<executions>
-					<execution>
-						<id>make-assembly</id> <!-- this is used for inheritance merges -->
-						<phase>package</phase> <!-- bind to the packaging phase -->
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>${entryPoint}</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
 
-	</build>
+    </build>
 
-	<repositories>
-		<repository>
-			<id>central</id>
-			<url>https://repo1.maven.org/maven2/</url>
-		</repository>
-		<repository>
-			<id>sagebionetworks-releases-local</id>
-			<name>sagebionetworks-releases-local</name>
-			<url>https://sagebionetworks.jfrog.io/sagebionetworks/libs-releases-local
-			</url>
-		</repository>
-		<repository>
-			<id>sagebionetworks-ext</id>
-			<name>sagebionetworks-releases-ext</name>
-			<url>https://sagebionetworks.jfrog.io/sagebionetworks/ext-releases-local
-			</url>
-		</repository>
-		<repository>
-			<id>sun-maven-repository</id>
-			<url>https://download.java.net/maven/2/</url>
-		</repository>
-		<repository>
-			<id>apache-repo-releases</id>
-			<url>https://repository.apache.org/content/repositories/releases/
-			</url>
-		</repository>
-	</repositories>
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>sagebionetworks-releases-local</id>
+            <name>sagebionetworks-releases-local</name>
+            <url>https://sagebionetworks.jfrog.io/sagebionetworks/libs-releases-local
+            </url>
+        </repository>
+        <repository>
+            <id>sagebionetworks-ext</id>
+            <name>sagebionetworks-releases-ext</name>
+            <url>https://sagebionetworks.jfrog.io/sagebionetworks/ext-releases-local
+            </url>
+        </repository>
+        <repository>
+            <id>sun-maven-repository</id>
+            <url>https://download.java.net/maven/2/</url>
+        </repository>
+        <repository>
+            <id>apache-repo-releases</id>
+            <url>https://repository.apache.org/content/repositories/releases/
+            </url>
+        </repository>
+    </repositories>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>central</id>
-			<name>Maven Plugin Repository</name>
-			<url>https://repo1.maven.org/maven2</url>
-			<layout>default</layout>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<updatePolicy>never</updatePolicy>
-			</releases>
-		</pluginRepository>
-	</pluginRepositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>central</id>
+            <name>Maven Plugin Repository</name>
+            <url>https://repo1.maven.org/maven2</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+        </pluginRepository>
+    </pluginRepositories>
 
-	<dependencies>
-		<dependency>
-			<groupId>com.github.docker-java</groupId>
-			<artifactId>docker-java</artifactId>
-			<version>3.2.0-rc1</version>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java</artifactId>
+            <version>3.2.0-rc1</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.sagebionetworks</groupId>
-			<artifactId>synapseJavaClient</artifactId>
-			<version>${synapseVersion}</version>
-		</dependency>
+        <dependency>
+            <groupId>org.sagebionetworks</groupId>
+            <artifactId>synapseJavaClient</artifactId>
+            <version>${synapseVersion}</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.sagebionetworks</groupId>
-			<artifactId>lib-shared-models</artifactId>
-			<version>${synapseVersion}</version>
-		</dependency>
+        <dependency>
+            <groupId>org.sagebionetworks</groupId>
+            <artifactId>lib-shared-models</artifactId>
+            <version>${synapseVersion}</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.sagebionetworks</groupId>
-			<artifactId>lib-auto-generated</artifactId>
-			<version>${synapseVersion}</version>
-		</dependency>
+        <dependency>
+            <groupId>org.sagebionetworks</groupId>
+            <artifactId>lib-auto-generated</artifactId>
+            <version>${synapseVersion}</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.fuin</groupId>
-			<artifactId>utils4j</artifactId>
-			<version>0.6.9</version>
-		</dependency>
+        <dependency>
+            <groupId>org.fuin</groupId>
+            <artifactId>utils4j</artifactId>
+            <version>0.6.9</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.9</version>
-		</dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.9</version>
+        </dependency>
 
-		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>activation</artifactId>
-			<version>1.1</version>
-		</dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -172,56 +172,56 @@
             <version>4.5.10</version>
         </dependency>
 
-		<!--interface between junit5 and programmatic clients, such as IDEs and
-				build tools, for running tests -->
-		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-launcher</artifactId>
-			<version>${junit.platform.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<!--adds a subset of junit5 functionality to tests currently running under
+        <!--interface between junit5 and programmatic clients, such as IDEs and
+                build tools, for running tests -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>${junit.platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!--adds a subset of junit5 functionality to tests currently running under
             junit4. should be REMOVED once fully converted to junit5 -->
-		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-runner</artifactId>
-			<version>${junit.platform.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<!--junit5 engine -->
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<version>${junit.jupiter.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<version>${junit.jupiter.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<!--junit4 engine for backwards compatibility -->
-		<dependency>
-			<groupId>org.junit.vintage</groupId>
-			<artifactId>junit-vintage-engine</artifactId>
-			<version>${junit.vintage.version}</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-runner</artifactId>
+            <version>${junit.platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!--junit5 engine -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!--junit4 engine for backwards compatibility -->
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junit.vintage.version}</version>
+            <scope>test</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>${mockito.version}</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-junit-jupiter</artifactId>
-			<version>${mockito.version}</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 </project>

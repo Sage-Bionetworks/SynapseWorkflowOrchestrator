@@ -41,7 +41,7 @@ requirements:
           result = {'entityId':sub.entity.id,'entityVersion':sub.entity.versionNumber}
           with open(args.results, 'w') as o:
             o.write(json.dumps(result))
-     
+
 outputs:
   - id: filePath
     type: File
@@ -63,4 +63,3 @@ outputs:
           glob: results.json
           loadContents: true
           outputEval: $(JSON.parse(self[0].contents)['entityVersion'])
-

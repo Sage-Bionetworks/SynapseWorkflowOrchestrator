@@ -28,62 +28,62 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class WorkflowManagerDockerTest {
 
-	@Mock
-	private DockerUtils mockDockerUtils;
+    @Mock
+    private DockerUtils mockDockerUtils;
 
-	@Mock
-	private WorkflowParameters mockWorkflowParameters;
+    @Mock
+    private WorkflowParameters mockWorkflowParameters;
 
-	@Mock
-	private WorkflowURLDownloader mockWorkflowURLDownloarder;
+    @Mock
+    private WorkflowURLDownloader mockWorkflowURLDownloarder;
 
-	@InjectMocks
-	private WorkflowManagerDocker workflowManagerDocker;
-
-
-	private String workflowUrlString = "https://dockstore.org/api/api/ga4gh/v2/tools/%23workflow%2Fgithub.com%2FBarski-lab%2Fga4gh_challenge/versions/v0.0.4/CWL";
-	private String entryPoint = "biowardrobe_chipseq_se.cwl";
+    @InjectMocks
+    private WorkflowManagerDocker workflowManagerDocker;
 
 
-	@BeforeEach
-	public void setUp() throws Exception {
-		System.setProperty(DOCKER_ENGINE_URL_PROPERTY_NAME, "unix:///var/run/docker.sock");
-		System.setProperty(COMPOSE_PROJECT_NAME_ENV_VAR, "project");
-		System.setProperty(AGENT_SHARED_DIR_PROPERTY_NAME, System.getProperty("java.io.tmpdir"));
-	}
+    private String workflowUrlString = "https://dockstore.org/api/api/ga4gh/v2/tools/%23workflow%2Fgithub.com%2FBarski-lab%2Fga4gh_challenge/versions/v0.0.4/CWL";
+    private String entryPoint = "biowardrobe_chipseq_se.cwl";
 
-	@AfterEach
-	public void tearDown() {
-		System.clearProperty("WORKFLOW_OUTPUT_ROOT_ENTITY_ID");
-		System.clearProperty(DOCKER_ENGINE_URL_PROPERTY_NAME);
-		System.clearProperty("EVALUATION_TEMPLATES");
-		System.setProperty(AGENT_SHARED_DIR_PROPERTY_NAME, AGENT_SHARED_DIR_DEFAULT);
-	}
 
-	@Test
-	public void testWorkflowManagerDocker() throws Exception {
+    @BeforeEach
+    public void setUp() throws Exception {
+        System.setProperty(DOCKER_ENGINE_URL_PROPERTY_NAME, "unix:///var/run/docker.sock");
+        System.setProperty(COMPOSE_PROJECT_NAME_ENV_VAR, "project");
+        System.setProperty(AGENT_SHARED_DIR_PROPERTY_NAME, System.getProperty("java.io.tmpdir"));
+    }
 
-		byte[] synapseConfigFileContent = new byte[100];
-		String mountPoint = "mountpoint";
-		String imageReference = "sagebionetworks/synapse-workflow-orchestrator-toil";
+    @AfterEach
+    public void tearDown() {
+        System.clearProperty("WORKFLOW_OUTPUT_ROOT_ENTITY_ID");
+        System.clearProperty(DOCKER_ENGINE_URL_PROPERTY_NAME);
+        System.clearProperty("EVALUATION_TEMPLATES");
+        System.setProperty(AGENT_SHARED_DIR_PROPERTY_NAME, AGENT_SHARED_DIR_DEFAULT);
+    }
+
+    @Test
+    public void testWorkflowManagerDocker() throws Exception {
+
+        byte[] synapseConfigFileContent = new byte[100];
+        String mountPoint = "mountpoint";
+        String imageReference = "sagebionetworks/synapse-workflow-orchestrator-toil";
         Boolean privileged = false;
         String containerId = "123";
 
         when(mockDockerUtils.getVolumeMountPoint(Utils.dockerComposeName(SHARED_VOLUME_NAME))).thenReturn(mountPoint);
-		doNothing().when(mockWorkflowURLDownloarder).downloadWorkflowFromURL(eq(workflowUrlString), eq(entryPoint), Mockito.isNotNull());
-		when(mockDockerUtils.createModelContainer(eq(imageReference), anyString(), eq(new HashMap<File,String>()), anyMap(),
-				anyList(), anyList(), anyString(), eq(privileged))).thenReturn(containerId);
+        doNothing().when(mockWorkflowURLDownloarder).downloadWorkflowFromURL(eq(workflowUrlString), eq(entryPoint), Mockito.isNotNull());
+        when(mockDockerUtils.createModelContainer(eq(imageReference), anyString(), eq(new HashMap<File,String>()), anyMap(),
+                anyList(), anyList(), anyString(), eq(privileged))).thenReturn(containerId);
 
-		// Call under test
-		workflowManagerDocker.createWorkflowJob(workflowUrlString, entryPoint,
-				mockWorkflowParameters, synapseConfigFileContent);
+        // Call under test
+        workflowManagerDocker.createWorkflowJob(workflowUrlString, entryPoint,
+                mockWorkflowParameters, synapseConfigFileContent);
 
-		verify(mockDockerUtils).createModelContainer(eq(imageReference), anyString(), eq(new HashMap<File,String>()), anyMap(),
-				anyList(), anyList(), anyString(), eq(privileged));
-		verify(mockDockerUtils).startContainer(containerId);
-		verify(mockDockerUtils).getVolumeMountPoint(Utils.dockerComposeName(SHARED_VOLUME_NAME));
-		verify(mockWorkflowURLDownloarder).downloadWorkflowFromURL(eq(workflowUrlString), eq(entryPoint), Mockito.isNotNull());
+        verify(mockDockerUtils).createModelContainer(eq(imageReference), anyString(), eq(new HashMap<File,String>()), anyMap(),
+                anyList(), anyList(), anyString(), eq(privileged));
+        verify(mockDockerUtils).startContainer(containerId);
+        verify(mockDockerUtils).getVolumeMountPoint(Utils.dockerComposeName(SHARED_VOLUME_NAME));
+        verify(mockWorkflowURLDownloarder).downloadWorkflowFromURL(eq(workflowUrlString), eq(entryPoint), Mockito.isNotNull());
 
-	}
+    }
 
 }

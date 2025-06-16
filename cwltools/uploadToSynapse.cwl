@@ -14,7 +14,7 @@ inputs:
   - id: parentId
     type: string
   - id: usedEntity
-    type: 
+    type:
       type: record
       fields:
       - name: id
@@ -65,7 +65,7 @@ requirements:
             results = {'uploadedFileId':file.id,'uploadedFileVersion':file.versionNumber}
             with open(args.results, 'w') as o:
               o.write(json.dumps(results))
-     
+
 outputs:
   - id: uploadedFileId
     type: string
@@ -79,5 +79,3 @@ outputs:
       glob: results.json
       loadContents: true
       outputEval: $(JSON.parse(self[0].contents)['uploadedFileVersion'])
-
-
