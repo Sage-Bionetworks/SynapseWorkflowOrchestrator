@@ -62,6 +62,5 @@ requirements:
             if not foundIt:
               status.annotations['stringAnnos'].append(annot)
             status = syn.store(status)
-     
-outputs: []
 
+outputs: []

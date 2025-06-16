@@ -6,9 +6,9 @@ import org.junit.Test;
 
 public class SynapseClientFactoryTest {
 
-	@Test
-	public void testCreateRetryingProxy() {
-		assertEquals(2, SynapseClientFactory.createRetryingProxy(new IncrementerImpl(), Incrementer.class).increment(1));
-	}
+    @Test
+    public void testCreateRetryingProxy() {
+        assertEquals(2, SynapseClientFactory.createRetryingProxy(new IncrementerImpl(), Incrementer.class).increment(1));
+    }
 
 }

@@ -13,7 +13,7 @@ inputs:
     type: File
     inputBinding:
       loadContents: true
-      
+
 outputs:
   - id: content
     type: string?

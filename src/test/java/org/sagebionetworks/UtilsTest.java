@@ -17,39 +17,39 @@ import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
 
 
 public class UtilsTest {
-	
-	@Before
-	public void setUp() throws Exception {
-	}
-	
-	@After
-	public void tearDown() throws Exception {
-		System.clearProperty(SUBMITTER_NOTIFICATION_MASK_PARAM_NAME);
-	}
-	
-	@Test
-	public void testGetDockerRepositoryNameFromEntityBundle() throws Exception {
-		String repoName = "docker.synapse.org/syn1234/foo";
-		EntityBundle bundle = new EntityBundle();
-		DockerRepository repoEntity = new DockerRepository();
-		repoEntity.setRepositoryName(repoName);
-		bundle.setEntity(repoEntity);
-		JSONObjectAdapter joa = new JSONObjectAdapterImpl();
-		bundle.writeToJSONObject(joa);
-		assertEquals(repoName, Utils.getDockerRepositoryNameFromEntityBundle(joa.toJSONString()));
-	}
 
-	@Test
-	public void testGetProgressFromString() {
-		assertEquals(92.85D, Utils.getProgressPercentFromString("STDOUT: 92.85714285714286", 5), 1e-5);
-	}
-	
-	@Test
-	public void testNotificationEnabled() {
-		System.setProperty(SUBMITTER_NOTIFICATION_MASK_PARAM_NAME, "28");
-		assertFalse(Utils.notificationEnabled(SUBMISSION_STARTED));
-		assertFalse(Utils.notificationEnabled(SUBMISSION_STARTED));
-		assertTrue(Utils.notificationEnabled(SUBMISSION_FAILED));
-	}
+    @Before
+    public void setUp() throws Exception {
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        System.clearProperty(SUBMITTER_NOTIFICATION_MASK_PARAM_NAME);
+    }
+
+    @Test
+    public void testGetDockerRepositoryNameFromEntityBundle() throws Exception {
+        String repoName = "docker.synapse.org/syn1234/foo";
+        EntityBundle bundle = new EntityBundle();
+        DockerRepository repoEntity = new DockerRepository();
+        repoEntity.setRepositoryName(repoName);
+        bundle.setEntity(repoEntity);
+        JSONObjectAdapter joa = new JSONObjectAdapterImpl();
+        bundle.writeToJSONObject(joa);
+        assertEquals(repoName, Utils.getDockerRepositoryNameFromEntityBundle(joa.toJSONString()));
+    }
+
+    @Test
+    public void testGetProgressFromString() {
+        assertEquals(92.85D, Utils.getProgressPercentFromString("STDOUT: 92.85714285714286", 5), 1e-5);
+    }
+
+    @Test
+    public void testNotificationEnabled() {
+        System.setProperty(SUBMITTER_NOTIFICATION_MASK_PARAM_NAME, "28");
+        assertFalse(Utils.notificationEnabled(SUBMISSION_STARTED));
+        assertFalse(Utils.notificationEnabled(SUBMISSION_STARTED));
+        assertTrue(Utils.notificationEnabled(SUBMISSION_FAILED));
+    }
 
 }

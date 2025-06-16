@@ -5,9 +5,9 @@ package org.sagebionetworks;
  */
 public abstract class NoRefreshExecutableAdapter<T,V>  implements Executable<T, V> {
 
-	@Override
-	public V refreshArgs(V args) throws Throwable {
-		return args;
-	}
+    @Override
+    public V refreshArgs(V args) throws Throwable {
+        return args;
+    }
 
 }

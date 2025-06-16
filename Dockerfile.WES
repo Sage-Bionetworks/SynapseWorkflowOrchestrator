@@ -11,7 +11,7 @@ RUN pip install synapseclient
 
 # Put the below exports in a .bash_profile/rc
 # export WES_API_HOST=localhost:8082
-# export WES_API_AUTH='Header: value'  
+# export WES_API_AUTH='Header: value'
 # export WES_API_PROTO=http
 RUN echo -e "\nWES_API_HOST=localhost:8082\nWES_API_AUTH='Header: value'\nWES_API_PROTO=http\n" >> ~/.profile
 

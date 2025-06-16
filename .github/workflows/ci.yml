@@ -11,29 +11,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - uses: actions/setup-java@v3
-      with:
-        distribution: temurin
-        java-version: 8
-        cache: maven
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 8
+          cache: maven
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
 
-    - name: Archive artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: SynapseWorkflowOrchestrator
-        path: |
-          target/*.jar
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: SynapseWorkflowOrchestrator
+          path: |
+            target/*.jar
 
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        files: target/*.jar
-        draft: true
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: target/*.jar
+          draft: true
 
   docker:
     runs-on: ubuntu-latest

@@ -16,13 +16,13 @@ Links one or more Synapse Evaluation queues to a workflow engine. Each Evaluatio
 - Notifies submitter about invalid submissions, notifies queue administrator about problems with the queue itself.
 - Uploads logs to Synapse periodically and when done.
 - Populates a status dashboard in Synapse with the following fields:
-	- job status
-	- start timestamp
-	- last updated timestamp
-	- location where log file is uploaded
-	- failure reason (if workflow job failed to complete)
-	- progress (0->100%), if provided by the Workflow engine
-	
+    - job status
+    - start timestamp
+    - last updated timestamp
+    - location where log file is uploaded
+    - failure reason (if workflow job failed to complete)
+    - progress (0->100%), if provided by the Workflow engine
+
 ## Setting up Amazon linux environment
 
 1. Install docker `sudo yum install docker`
@@ -73,13 +73,13 @@ This method is convenient if your environment supports Docker and you are author
 
 * `DOCKER_ENGINE_URL` - address of the Docker engine. Along with `DOCKER_CERT_PATH_HOST` this is needed since the Workflow Orchestrator will manage containers. Examples:
 
-	```
-	DOCKER_ENGINE_URL=unix:///var/run/docker.sock
-	```
-	or
-	```
-	DOCKER_ENGINE_URL=tcp://192.168.0.1:2376
-	```
+    ```
+    DOCKER_ENGINE_URL=unix:///var/run/docker.sock
+    ```
+    or
+    ```
+    DOCKER_ENGINE_URL=tcp://192.168.0.1:2376
+    ```
 
 * `DOCKER_CERT_PATH_HOST` - (optional) path to credentials files allowing networked access to Docker engine. Required if connecting over the network (`DOCKER_ENGINE_URL` starts with `http`, `https` or `tcp`, but not with `unix`). Example:
 
@@ -100,32 +100,32 @@ This method is convenient if your environment supports Docker and you are author
 * `WORKFLOW_OUTPUT_ROOT_ENTITY_ID` - root (Project or Folder) for uploaded doc's, like log files. Hierarchy is root/submitterId/submissionId/files. May be the ID of the project generated in the set-up step, above.
 * `EVALUATION_TEMPLATES` - JSON mapping evaluation ID(s) to URL(s) for workflow template archive. Returned by the set up step, above. Example:
 
-	```
-	{"9614045":"syn16799953"}
-	```
+    ```
+    {"9614045":"syn16799953"}
+    ```
 
 * `TOIL_CLI_OPTIONS` - (optional, but highly recommended) Used when `DOCKER_ENGINE_URL` is selected. Space separated list of options. (Without the toil parameters, you may run into errors when a new workflow job is started). See https://toil.readthedocs.io/en/3.15.0/running/cliOptions.html. Example:
 
-	```
-	TOIL_CLI_OPTIONS=--defaultMemory 100M --retryCount 0 --defaultDisk 1000000
-	```
+    ```
+    TOIL_CLI_OPTIONS=--defaultMemory 100M --retryCount 0 --defaultDisk 1000000
+    ```
 * `NOTIFICATION_PRINCIPAL_ID` - (optional) Synapse ID of user or team to be notified of system issues. If omitted then notification are sent to the Synapse account under which the workflow pipeline is run.
 * `SUBMITTER_NOTIFICATION_MASK` - controls for which events notifications are sent to the submitter. The integer value is a union of these masks:
-	```
-	1: send message when job has started;
-	2: send message when job has completed;
-	4: send message when job has failed;
-	8: send message when job has been stopped by user;
-	16: send message when job has timed out;
-	```
-	Default is 31, i.e. send notifications for every event.
+    ```
+    1: send message when job has started;
+    2: send message when job has completed;
+    4: send message when job has failed;
+    8: send message when job has been stopped by user;
+    16: send message when job has timed out;
+    ```
+    Default is 31, i.e. send notifications for every event.
 * `SHARE_RESULTS_IMMEDIATELY` - (optional) if omitted or set to 'true', uploaded results are immediately accessible by submitter. If false then a separate process must 'unlock' files. This is useful when workflows run on sensitive data and administration needs to control the volume of results returned to the workflow submitter.
 * `DATA_UNLOCK_SYNAPSE_PRINCIPAL_ID` - (optional) Synapse ID of user authorized to share (unlock) workflow output files (only required if `SHARE_RESULTS_IMMEDIATELY` is false).
 * `WORKFLOW_ENGINE_DOCKER_IMAGE` - (optional) Used when `DOCKER_ENGINE_URL` is selected. Defaults to sagebionetworks/synapse-workflow-orchestrator-toil:1.0 , produced from [this Dockerfile](Dockerfile.Toil). When overriding the default, you must ensure that the existing dependencies are preserved. One way to do this is to start your own Dockerfile with
-	```
-	FROM sagebionetworks/synapse-workflow-orchestrator-toil
-	```
-	and then to add additional dependencies.
+    ```
+    FROM sagebionetworks/synapse-workflow-orchestrator-toil
+    ```
+    and then to add additional dependencies.
 * `MAX_CONCURRENT_WORKFLOWS` - (optional) the maximum number of workflows that will be allowed to run at any time. Default is 10.
 * `RUN_WORKFLOW_CONTAINER_IN_PRIVILEGED_MODE` - (optional) Used when `DOCKER_ENGINE_URL` is selected. If `true` then when the containerized workflow is initiated, the container it's running in will be run in 'privileged mode'. In some environments this is required for workflows which themselves run containers.
 * `ACCEPT_NEW_SUBMISSIONS` - (optional) if omitted then new submissions will be started. If present, then should be boolean (`true` or `false`). If `false` then no new submissions will be started, only existing ones will be finished up. This is an important feature for smoothly decommissioning one machine to switch to another.
@@ -223,14 +223,14 @@ See [this example](https://github.com/Sage-Bionetworks/SynapseWorkflowExample) f
 The workflow orchestrator uses this folder hierarchy for uploading results:
 
 ```
-< WORKFLOW_OUTPUT_ROOT_ENTITY_ID> / <SUBMITTER_ID> / <SUBMISSION_ID> / 
+< WORKFLOW_OUTPUT_ROOT_ENTITY_ID> / <SUBMITTER_ID> / <SUBMISSION_ID> /
 ```
 and
 
 ```
-< WORKFLOW_OUTPUT_ROOT_ENTITY_ID> / <SUBMITTER_ID>_LOCKED / <SUBMISSION_ID> / 
+< WORKFLOW_OUTPUT_ROOT_ENTITY_ID> / <SUBMITTER_ID>_LOCKED / <SUBMISSION_ID> /
 ```
-where 
+where
 
 * `<WORKFLOW_OUTPUT_ROOT_ENTITY_ID>` is a parameter passed to the orchestrator at startup;
 * `<SUBMITTER_ID>` is the user or team responsible for the submission;
